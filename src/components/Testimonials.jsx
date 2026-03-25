@@ -1,29 +1,26 @@
 import React, { useEffect, useState } from "react";
+import { FaStar, FaUserCircle } from "react-icons/fa";
 
 const Testimonials = () => {
   const testimonials = [
     {
       name: "Rahul Sharma",
       role: "Software Engineer",
-      image: "",
       text: "This helped me get a job quickly! The UI is amazing.",
     },
     {
       name: "Ananya Das",
       role: "UI Designer",
-      image: "",
       text: "Super easy to use and beautiful templates.",
     },
     {
       name: "Amit Verma",
       role: "Backend Developer",
-      image: "",
       text: "Best free resume builder I have ever used.",
     },
     {
       name: "Priya Singh",
       role: "HR Manager",
-      image: "",
       text: "Very fast and professional experience.",
     },
   ];
@@ -34,12 +31,11 @@ const Testimonials = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % testimonials.length);
-    }, 3500);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Controls
   const prevSlide = () => {
     setIndex((prev) =>
       prev === 0 ? testimonials.length - 1 : prev - 1
@@ -51,10 +47,10 @@ const Testimonials = () => {
   };
 
   return (
-    <section className="py-20 px-6 md:px-20 bg-gradient-to-b from-white via-gray-50 to-white text-center">
+    <section className="py-20 px-6 md:px-20 bg-gradient-to-b from-gray-950 via-purple-950 to-gray-950 text-center">
 
       {/* Heading */}
-      <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12">
+      <h2 className="text-3xl md:text-4xl font-bold text-white mb-12">
         Loved by Thousands of Users ❤️
       </h2>
 
@@ -62,36 +58,39 @@ const Testimonials = () => {
       <div className="relative max-w-3xl mx-auto">
 
         {/* Card */}
-        <div className="bg-white p-8 md:p-10 rounded-3xl shadow-xl transition-all duration-500">
+        <div className="bg-white/10 backdrop-blur-lg border border-white/10 p-8 md:p-10 rounded-3xl shadow-xl transition-all duration-500">
 
-          {/* User Image */}
-          <div className="flex justify-center mb-4">
-            <img
-              src={testimonials[index].image}
-              alt="user"
-              className="w-16 h-16 rounded-full border-4 border-blue-100 shadow-md"
-            />
+          {/* User Icon */}
+          <div className="flex justify-center mb-4 text-purple-400 text-5xl">
+            <FaUserCircle />
           </div>
 
           {/* Stars */}
-          <div className="text-yellow-400 text-xl mb-4">
-            ★★★★★
+          <div className="flex justify-center gap-1 text-yellow-400 mb-4">
+            {[...Array(5)].map((_, i) => (
+              <FaStar key={i} />
+            ))}
           </div>
 
           {/* Text */}
-          <p className="text-gray-600 text-lg italic leading-relaxed">
+          <p className="text-gray-300 text-lg italic leading-relaxed">
             "{testimonials[index].text}"
           </p>
 
           {/* User Info */}
-          <h4 className="mt-6 font-semibold text-gray-900 text-lg">
+          <h4 className="mt-6 font-semibold text-white text-lg">
             {testimonials[index].name}
           </h4>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-400">
             {testimonials[index].role}
           </p>
         </div>
-    </div>
+
+       
+
+        
+
+      </div>
     </section>
   );
 };

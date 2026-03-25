@@ -1,26 +1,27 @@
 import React from "react";
+import { FaPaintBrush, FaPenFancy, FaFileDownload } from "react-icons/fa";
 
 const HowItWorks = () => {
   const steps = [
     {
-      icon: "🎨",
+      icon: <FaPaintBrush />,
       title: "Choose Template",
       desc: "Select from modern, professional resume designs.",
     },
     {
-      icon: "✍️",
+      icon: <FaPenFancy />,
       title: "Add Information",
       desc: "Fill in your details, experience, and skills.",
     },
     {
-      icon: "📄",
+      icon: <FaFileDownload />,
       title: "Download Resume",
       desc: "Export your resume instantly as PDF.",
     },
   ];
 
   return (
-    <section className="py-20 px-6 md:px-20 bg-gradient-to-b from-white to-gray-50">
+    <section className="py-20 px-6 md:px-20 bg-gradient-to-b from-gray-50 via-indigo-50 to-purple-50">
 
       {/* Heading */}
       <div className="text-center max-w-2xl mx-auto">
@@ -33,25 +34,25 @@ const HowItWorks = () => {
       </div>
 
       {/* Steps */}
-      <div className="relative mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
 
         {steps.map((step, i) => (
           <div
             key={i}
-            className="relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition text-center"
+            className="relative bg-white/70 backdrop-blur-md border border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-xl hover:shadow-purple-200 transition text-center group"
           >
             {/* Step Number */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm px-3 py-1 rounded-full shadow">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs px-4 py-1 rounded-full shadow">
               Step {i + 1}
             </div>
 
             {/* Icon */}
-            <div className="w-16 h-16 mx-auto flex items-center justify-center rounded-full bg-blue-100 text-3xl mb-6">
+            <div className="w-16 h-16 mx-auto flex items-center justify-center rounded-full bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-600 text-2xl mb-6 group-hover:scale-110 transition">
               {step.icon}
             </div>
 
             {/* Title */}
-            <h3 className="text-xl font-semibold text-gray-800">
+            <h3 className="text-lg font-semibold text-gray-800">
               {step.title}
             </h3>
 
@@ -63,7 +64,6 @@ const HowItWorks = () => {
         ))}
 
       </div>
-
     </section>
   );
 };

@@ -58,22 +58,6 @@ const Register = () => {
             Create your account
           </h2>
 
-          {/* Google Signup */}
-          <button
-            onClick={handleGoogleSignup}
-            className="w-full flex items-center justify-center gap-2 border py-3 rounded-md hover:bg-gray-100 transition mb-4"
-          >
-            <FaGoogle className="text-red-500" />
-            Continue with Google
-          </button>
-
-          {/* Divider */}
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex-1 h-px bg-gray-300"></div>
-            <span className="text-sm text-gray-400">OR</span>
-            <div className="flex-1 h-px bg-gray-300"></div>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
 
             <input

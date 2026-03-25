@@ -1,31 +1,37 @@
 import React from "react";
+import {
+  FaBolt,
+  FaPaintBrush,
+  FaFilePdf,
+  FaSave,
+} from "react-icons/fa";
 
 const Features = () => {
   const features = [
     {
-      icon: "⚡",
+      icon: <FaBolt />,
       title: "Easy Editor",
       desc: "Drag & drop builder with real-time preview.",
     },
     {
-      icon: "🎨",
+      icon: <FaPaintBrush />,
       title: "Modern Templates",
       desc: "Beautiful, job-ready resume designs.",
     },
     {
-      icon: "📄",
+      icon: <FaFilePdf />,
       title: "PDF Export",
       desc: "Download your resume instantly as PDF.",
     },
     {
-      icon: "💾",
+      icon: <FaSave />,
       title: "Auto Save",
       desc: "Your data is saved automatically.",
     },
   ];
 
   return (
-    <section className="py-20 px-6 md:px-20 bg-gradient-to-b from-white to-gray-50">
+    <section className="py-20 px-6 md:px-20 bg-gradient-to-b from-gray-50 via-indigo-50 to-purple-50">
 
       {/* Heading */}
       <div className="text-center max-w-2xl mx-auto">
@@ -43,10 +49,10 @@ const Features = () => {
         {features.map((f, i) => (
           <div
             key={i}
-            className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition duration-300 text-center group"
+            className="bg-white/70 backdrop-blur-md border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:shadow-purple-200 transition duration-300 text-center group"
           >
             {/* Icon */}
-            <div className="w-14 h-14 mx-auto flex items-center justify-center rounded-full bg-blue-100 text-2xl group-hover:bg-blue-600 group-hover:text-white transition">
+            <div className="w-14 h-14 mx-auto flex items-center justify-center rounded-full bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-600 text-xl group-hover:scale-110 transition">
               {f.icon}
             </div>
 

@@ -41,15 +41,6 @@ const Stats = () => {
             </p>
           </div>
 
-          {/* Card 4 */}
-          <div className="bg-white rounded-xl shadow-md p-8 hover:shadow-xl transition">
-            <div className="text-4xl mb-3">🌟</div>
-            <h3 className="text-3xl font-bold text-blue-600">4.9</h3>
-            <p className="text-gray-500 mt-2 text-sm md:text-base">
-              Resume Rating
-            </p>
-          </div>
-
         </div>
 
       </div>
