@@ -19,74 +19,103 @@ const Contact = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen px-6 md:px-16 py-12">
+    <div className="bg-gray-50 min-h-screen px-6 md:px-16 py-14">
 
       {/* Header */}
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold mb-2">Contact Us</h1>
-        <p className="text-gray-600">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold mb-3 text-gray-900">
+          Contact Us
+        </h1>
+        <p className="text-gray-600 text-sm md:text-base">
           Have questions? We'd love to hear from you.
         </p>
       </div>
 
       {/* Main Section */}
-      <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+      <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
 
         {/* Contact Form */}
-        <div className="bg-white p-8 rounded-xl shadow">
-          <h2 className="text-xl font-semibold mb-6">Send us a message</h2>
+        <div className="bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-100">
+          <h2 className="text-xl font-semibold mb-6 text-gray-800">
+            Send us a message
+          </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
 
-            <input
-              type="text"
-              name="name"
-              placeholder="Full Name"
-              className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
-              onChange={handleChange}
-              required
-            />
-
-            <input
-              type="email"
-              name="email"
-              placeholder="Email Address"
-              className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
-              onChange={handleChange}
-              required
-            />
-
-            {/* Phone with STD Code */}
-            <div className="flex">
-              <select
-                name="code"
-                className="border rounded-l-md px-3 bg-gray-100"
-              >
-                <option value="+91">+91</option>
-                <option value="+1">+1</option>
-                <option value="+44">+44</option>
-              </select>
-
+            {/* Name */}
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Full Name
+              </label>
               <input
-                type="tel"
-                name="phone"
-                placeholder="Phone Number"
-                className="w-full p-3 border-t border-b border-r rounded-r-md focus:ring-2 focus:ring-blue-500 outline-none"
+                type="text"
+                name="name"
+                placeholder="Enter your name"
+                className="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
                 onChange={handleChange}
                 required
               />
             </div>
 
-            <textarea
-              name="message"
-              rows="4"
-              placeholder="Your Message"
-              className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
-              onChange={handleChange}
-              required
-            />
+            {/* Email */}
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Email Address
+              </label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                className="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-            <button className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition">
+            {/* Phone */}
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Phone Number
+              </label>
+
+              <div className="flex mt-1">
+                <select
+                  name="code"
+                  className="border rounded-l-lg px-3 bg-gray-100 focus:outline-none"
+                >
+                  <option value="+91">+91</option>
+                  <option value="+1">+1</option>
+                  <option value="+44">+44</option>
+                </select>
+
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="Enter phone number"
+                  className="w-full p-3 border-t border-b border-r rounded-r-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Message */}
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Message
+              </label>
+              <textarea
+                name="message"
+                rows="4"
+                placeholder="Write your message..."
+                className="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* Button */}
+            <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition shadow-sm">
               Send Message
             </button>
 
@@ -96,27 +125,32 @@ const Contact = () => {
         {/* Contact Info */}
         <div className="flex flex-col justify-center space-y-6">
 
-          <div className="flex items-start gap-4">
+          {/* Phone */}
+          <div className="flex items-start gap-4 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
             <FaPhoneAlt className="text-blue-600 mt-1" />
             <div>
-              <h4 className="font-semibold">Phone</h4>
-              <p className="text-gray-600">+91 98765 43210</p>
+              <h4 className="font-semibold text-gray-800">Phone</h4>
+              <p className="text-gray-600 text-sm">+91 98765 43210</p>
             </div>
           </div>
 
-          <div className="flex items-start gap-4">
+          {/* Email */}
+          <div className="flex items-start gap-4 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
             <FaEnvelope className="text-blue-600 mt-1" />
             <div>
-              <h4 className="font-semibold">Email</h4>
-              <p className="text-gray-600">support@touchsimply.com</p>
+              <h4 className="font-semibold text-gray-800">Email</h4>
+              <p className="text-gray-600 text-sm">
+                support@touchsimply.com
+              </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-4">
+          {/* Address */}
+          <div className="flex items-start gap-4 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
             <FaMapMarkerAlt className="text-blue-600 mt-1" />
             <div>
-              <h4 className="font-semibold">Address</h4>
-              <p className="text-gray-600">
+              <h4 className="font-semibold text-gray-800">Address</h4>
+              <p className="text-gray-600 text-sm">
                 Bhubaneswar, Odisha, India
               </p>
             </div>

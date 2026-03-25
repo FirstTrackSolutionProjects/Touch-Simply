@@ -1,121 +1,76 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import TemplateSection from "../components/TemplateSection";
 
 const Templates = () => {
   const navigate = useNavigate();
 
-  const templates = [
-    {
-      name: "Minimal",
-      key: "minimal",
-      image: "/templates/template1.png",
-      tag: "Popular",
-    },
-    {
-      name: "Modern",
-      key: "modern",
-      image: "/templates/template2.png",
-      tag: "Recommended",
-    },
-    {
-      name: "Professional",
-      key: "professional",
-      image: "/templates/template3.png",
-    },
-    {
-      name: "Creative",
-      key: "creative",
-      image: "/templates/template4.png",
-    },
+  // Resume Templates
+  const resumeTemplates = [
+    { name: "Minimal", key: "minimal", image: "/templates/template1.png" },
+    { name: "Modern", key: "modern", image: "/templates/template2.png" },
+    { name: "Professional", key: "professional", image: "/templates/template3.png" },
+    { name: "Creative", key: "creative", image: "/templates/template4.png" },
   ];
 
-  const handleUseTemplate = (key) => {
-    // ✅ temporary storage (later connect context/backend)
+  // Logo Templates
+  const logoTemplates = [
+    { name: "Modern Logo", key: "logo-modern", image: "/templates/logo1.png" },
+    { name: "Minimal Logo", key: "logo-minimal", image: "/templates/logo2.png" },
+    { name: "Creative Logo", key: "logo-creative", image: "/templates/logo1.png" },
+    { name: "Bold Logo", key: "logo-bold", image: "/templates/logo2.png" },
+  ];
+
+  // Portfolio Templates
+  const portfolioTemplates = [
+    { name: "Modern Portfolio", key: "portfolio-modern", image: "/templates/portfolio1.png" },
+    { name: "Clean Portfolio", key: "portfolio-minimal", image: "/templates/portfolio2.png" },
+    { name: "Creative Portfolio", key: "portfolio-creative", image: "/templates/portfolio1.png" },
+    { name: "Professional Portfolio", key: "portfolio-pro", image: "/templates/portfolio2.png" },
+  ];
+
+  const handleUseTemplate = (key, type) => {
     localStorage.setItem("selectedTemplate", key);
-    navigate("/editor");
+
+    if (type === "resume") navigate("/editor");
+    if (type === "logo") navigate("/logo");
+    if (type === "portfolio") navigate("/portfolio");
   };
 
   return (
-    <section className="py-16 px-6 md:px-16 bg-gradient-to-b from-gray-50 to-white min-h-screen">
+    <section className="py-16 px-6 md:px-16 bg-gradient-to-b from-gray-900 via-purple-950 to-gray-900 min-h-screen">
 
       {/* Heading */}
       <div className="text-center mb-14">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-          Choose Your Resume Template
+        <h1 className="text-3xl md:text-4xl font-bold text-white">
+          Choose Your Template
         </h1>
-        <p className="text-gray-500 mt-3">
-          Pick a design that fits your style and start building instantly
+        <p className="text-gray-400 mt-3">
+          Resume, Logo & Portfolio — all in one place
         </p>
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+      {/* Sections */}
+      <TemplateSection
+        title="Resume Templates"
+        data={resumeTemplates}
+        type="resume"
+        onUse={handleUseTemplate}
+      />
 
-        {templates.map((t) => (
-          <div
-            key={t.key}
-            className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition overflow-hidden"
-          >
-            {/* Image */}
-            <div className="relative overflow-hidden">
+      <TemplateSection
+        title="Logo Templates"
+        data={logoTemplates}
+        type="logo"
+        onUse={handleUseTemplate}
+      />
 
-              {/* Badge */}
-              {t.tag && (
-                <span className="absolute top-3 left-3 bg-blue-600 text-white text-xs px-3 py-1 rounded-full z-10">
-                  {t.tag}
-                </span>
-              )}
-
-              <img
-                src={t.image}
-                alt={t.name}
-                className="w-full h-72 object-cover group-hover:scale-105 transition duration-300"
-              />
-
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-3 transition">
-
-                <button
-                  onClick={() => handleUseTemplate(t.key)}
-                  className="bg-white text-gray-900 px-5 py-2 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition"
-                >
-                  Use Template
-                </button>
-
-                <button
-                  className="border border-white text-white px-5 py-2 rounded-lg hover:bg-white hover:text-gray-900 transition"
-                >
-                  Preview
-                </button>
-
-              </div>
-            </div>
-
-            {/* Info */}
-            <div className="p-4 text-center">
-              <h2 className="text-lg font-semibold text-gray-800">
-                {t.name}
-              </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                Clean & professional design
-              </p>
-            </div>
-          </div>
-        ))}
-
-      </div>
-
-      {/* Bottom CTA */}
-      <div className="text-center mt-16">
-        <p className="text-gray-600 mb-4">
-          Not sure which to choose?
-        </p>
-        <button
-          onClick={() => handleUseTemplate("modern")}
-          className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition shadow-md"
-        >
-          Start with Recommended Template 🚀
-        </button>
-      </div>
+      <TemplateSection
+        title="Portfolio Templates"
+        data={portfolioTemplates}
+        type="portfolio"
+        onUse={handleUseTemplate}
+      />
 
     </section>
   );
