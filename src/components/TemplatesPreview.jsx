@@ -15,24 +15,24 @@ const TemplatesPreview = () => {
   }, []);
 
   const resumeTemplates = [
-    { id: 1, name: "Modern Resume", image: "/templates/template1.png" },
-    { id: 2, name: "Creative Resume", image: "/templates/template2.png" },
-    { id: 3, name: "Professional Resume", image: "/templates/template3.png" },
-    { id: 4, name: "Minimal Resume", image: "/templates/template4.png" },
+    { id: 1, name: "Modern Resume", image: "/images/modern-resume.jpg" },
+    { id: 2, name: "Creative Resume", image: "/images/creative-resume.jpg" },
+    { id: 3, name: "Professional Resume", image: "/images/professional-resume.jpg" },
+    { id: 4, name: "Minimal Resume", image: "/images/minimal-resume.jpg" },
   ];
 
   const logoTemplates = [
-    { id: 1, name: "Minimal Logo", image: "/templates/logo1.png" },
-    { id: 2, name: "Modern Logo", image: "/templates/logo2.png" },
-    { id: 3, name: "Creative Logo", image: "/templates/logo1.png" },
-    { id: 4, name: "Bold Logo", image: "/templates/logo2.png" },
+    { id: 1, name: "Minimal Logo", image: "/images/minimal-logo.jpg" },
+    { id: 2, name: "Modern Logo", image: "/images/modern-logo.jpg" },
+    { id: 3, name: "Creative Logo", image: "/images/creative-logo.jpg" },
+    { id: 4, name: "Bold Logo", image: "/images/bold-logo.jpg" },
   ];
 
   const portfolioTemplates = [
-    { id: 1, name: "Modern Portfolio", image: "/templates/portfolio1.png" },
-    { id: 2, name: "Clean Portfolio", image: "/templates/portfolio2.png" },
-    { id: 3, name: "Creative Portfolio", image: "/templates/portfolio1.png" },
-    { id: 4, name: "Professional Portfolio", image: "/templates/portfolio2.png" },
+    { id: 1, name: "Modern Portfolio", image: "/images/modern-portfolio.jpg" },
+    { id: 2, name: "Clean Portfolio", image: "/images/clean-portfolio.jpg" },
+    { id: 3, name: "Creative Portfolio", image: "/images/creative-portfolio.jpg" },
+    { id: 4, name: "Professional Portfolio", image: "/images/professional-portfolio.jpg" },
   ];
 
   const renderSection = (title, data, link) => {

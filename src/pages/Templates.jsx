@@ -7,26 +7,26 @@ const Templates = () => {
 
   // Resume Templates
   const resumeTemplates = [
-    { name: "Minimal", key: "minimal", image: "/templates/template1.png" },
-    { name: "Modern", key: "modern", image: "/templates/template2.png" },
-    { name: "Professional", key: "professional", image: "/templates/template3.png" },
-    { name: "Creative", key: "creative", image: "/templates/template4.png" },
+    { name: "Minimal", key: "minimal", image: "/images/minimal-resume.jpg" },
+    { name: "Modern", key: "modern", image: "/images/modern-resume.jpg" },
+    { name: "Professional", key: "professional", image: "/images/professional-resume.jpg" },
+    { name: "Creative", key: "creative", image: "/images/creative-resume.jpg" },
   ];
 
   // Logo Templates
   const logoTemplates = [
-    { name: "Modern Logo", key: "logo-modern", image: "/templates/logo1.png" },
-    { name: "Minimal Logo", key: "logo-minimal", image: "/templates/logo2.png" },
-    { name: "Creative Logo", key: "logo-creative", image: "/templates/logo1.png" },
-    { name: "Bold Logo", key: "logo-bold", image: "/templates/logo2.png" },
+    { name: "Modern Logo", key: "logo-modern", image: "/images/modern-logo.jpg" },
+    { name: "Minimal Logo", key: "logo-minimal", image: "/images/minimal-logo.jpg" },
+    { name: "Creative Logo", key: "logo-creative", image: "/images/creative-logo.jpg" },
+    { name: "Bold Logo", key: "logo-bold", image: "/images/bold-logo.jpg" },
   ];
 
   // Portfolio Templates
   const portfolioTemplates = [
-    { name: "Modern Portfolio", key: "portfolio-modern", image: "/templates/portfolio1.png" },
-    { name: "Clean Portfolio", key: "portfolio-minimal", image: "/templates/portfolio2.png" },
-    { name: "Creative Portfolio", key: "portfolio-creative", image: "/templates/portfolio1.png" },
-    { name: "Professional Portfolio", key: "portfolio-pro", image: "/templates/portfolio2.png" },
+    { name: "Modern Portfolio", key: "portfolio-modern", image: "/images/modern-portfolio.jpg" },
+    { name: "Clean Portfolio", key: "portfolio-minimal", image: "/images/clean-portfolio.jpg" },
+    { name: "Creative Portfolio", key: "portfolio-creative", image: "/images/creative-portfolio.jpg" },
+    { name: "Professional Portfolio", key: "portfolio-pro", image: "/images/professional-portfolio.jpg" },
   ];
 
   const handleUseTemplate = (key, type) => {
