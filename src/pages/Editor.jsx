@@ -22,10 +22,13 @@ const Editor = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-purple-950 via-indigo-950 to-gray-950 mt-3">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-gray-950 via-purple-950/70 to-gray-950">
+
+      {/* 🔥 Background Glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.15),transparent_60%)] pointer-events-none"></div>
 
       {/* ================= Sidebar ================= */}
-      <div className="md:w-64 bg-white/5 backdrop-blur-md border-r border-white/10 px-4 py-5 flex md:flex-col gap-3 overflow-x-auto md:overflow-visible">
+      <div className="md:w-64 bg-white/5 backdrop-blur-lg border-r border-white/10 px-4 py-6 flex md:flex-col gap-3 overflow-x-auto md:overflow-visible z-10">
 
         <h2 className="hidden md:block text-lg font-bold mb-4 text-white">
           Sections
@@ -35,24 +38,30 @@ const Editor = () => {
           <button
             key={item.key}
             onClick={() => setActive(item.key)}
-            className={`px-4 py-2 rounded-lg text-sm text-left whitespace-nowrap transition ${
+            className={`relative px-4 py-2 rounded-lg text-sm text-left whitespace-nowrap transition-all duration-300 ${
               active === item.key
-                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg"
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md"
                 : "bg-white/10 text-gray-300 hover:bg-white/20"
             }`}
           >
             {item.label}
+
+            {/* Active Indicator */}
+            {active === item.key && (
+              <span className="absolute left-0 top-0 h-full w-1 bg-purple-400 rounded-r"></span>
+            )}
           </button>
         ))}
       </div>
 
       {/* ================= Mobile Toggle ================= */}
-      <div className="md:hidden flex justify-center gap-4 p-4 bg-white/5 backdrop-blur border-b border-white/10">
+      <div className="md:hidden flex justify-center gap-3 p-4 bg-white/5 backdrop-blur border-b border-white/10 z-10">
+
         <button
           onClick={() => setMobileView("form")}
-          className={`px-4 py-2 rounded-lg text-sm ${
+          className={`px-5 py-2 rounded-full text-sm transition ${
             mobileView === "form"
-              ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+              ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow"
               : "bg-white/10 text-gray-300"
           }`}
         >
@@ -61,9 +70,9 @@ const Editor = () => {
 
         <button
           onClick={() => setMobileView("preview")}
-          className={`px-4 py-2 rounded-lg text-sm ${
+          className={`px-5 py-2 rounded-full text-sm transition ${
             mobileView === "preview"
-              ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+              ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow"
               : "bg-white/10 text-gray-300"
           }`}
         >
@@ -73,11 +82,11 @@ const Editor = () => {
 
       {/* ================= Form Section ================= */}
       {(mobileView === "form" || window.innerWidth >= 768) && (
-        <div className="flex-1 flex items-center justify-center p-4 md:p-6">
+        <div className="flex-1 flex items-center justify-center p-4 md:p-8 z-10">
 
-          <div className="w-full max-w-xl bg-white/95 backdrop-blur rounded-2xl p-6 shadow-2xl border border-gray-200">
+          <div className="w-full max-w-xl bg-white/90 backdrop-blur-lg rounded-2xl p-6 md:p-8 shadow-[0_10px_40px_rgba(0,0,0,0.4)] border border-gray-200">
 
-            <h2 className="text-lg md:text-xl font-semibold mb-4 capitalize text-gray-800">
+            <h2 className="text-lg md:text-xl font-semibold mb-6 capitalize text-gray-800">
               {active} Details
             </h2>
 
@@ -87,16 +96,15 @@ const Editor = () => {
             {active === "projects" && <ProjectsForm />}
             {active === "skills" && <SkillsForm />}
             {active === "languages" && <LanguageForm />}
-
           </div>
         </div>
       )}
 
       {/* ================= Preview Section ================= */}
       {(mobileView === "preview" || window.innerWidth >= 768) && (
-        <div className="md:w-1/2 flex items-center justify-center bg-white/5 backdrop-blur-md p-4 md:p-6 border-l border-white/10">
+        <div className="md:w-1/2 flex items-center justify-center p-4 md:p-8 bg-white/5 backdrop-blur-lg border-l border-white/10 z-10">
 
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-5">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] p-5 md:p-6">
 
             {/* Header */}
             <div className="flex justify-between items-center mb-4">
@@ -104,7 +112,7 @@ const Editor = () => {
                 Live Preview
               </h2>
 
-              <button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1 rounded text-xs hover:scale-105 transition">
+              <button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-1.5 rounded-md text-xs hover:scale-105 transition">
                 Download
               </button>
             </div>

@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaCheckCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const TemplateSection = ({ title, data, type, onUse }) => {
+  const navigate = useNavigate();
 
-  // Detect mobile
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-  // Visible cards
   const [visible, setVisible] = useState(isMobile ? 2 : 4);
 
-  // Handle resize
+  // Resize detect
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
@@ -20,14 +19,22 @@ const TemplateSection = ({ title, data, type, onUse }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Update visible when screen changes
   useEffect(() => {
     setVisible(isMobile ? 2 : 4);
   }, [isMobile]);
 
+  // 🔥 PREVIEW FUNCTION
+  const handlePreview = (key, type) => {
+    localStorage.setItem("selectedTemplate", key);
+
+    if (type === "resume") navigate("/editor?preview=true");
+    if (type === "logo") navigate("/logo?preview=true");
+    if (type === "portfolio") navigate("/portfolio?preview=true");
+  };
+
   return (
     <div className="mb-16">
-      
+
       {/* Heading */}
       <h2 className="text-2xl font-bold text-white mb-6">
         {title}
@@ -51,7 +58,8 @@ const TemplateSection = ({ title, data, type, onUse }) => {
 
               {/* Overlay */}
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-3 transition">
-                
+
+                {/* USE */}
                 <button
                   onClick={() => onUse(t.key, type)}
                   className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:scale-105 transition"
@@ -59,7 +67,11 @@ const TemplateSection = ({ title, data, type, onUse }) => {
                   <FaCheckCircle /> Use
                 </button>
 
-                <button className="flex items-center gap-2 border border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-black transition">
+                {/* 🔥 PREVIEW */}
+                <button
+                  onClick={() => handlePreview(t.key, type)}
+                  className="flex items-center gap-2 border border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-black transition"
+                >
                   <FaEye /> Preview
                 </button>
 
@@ -77,7 +89,7 @@ const TemplateSection = ({ title, data, type, onUse }) => {
         ))}
       </div>
 
-      {/* Mobile Only Buttons */}
+      {/* Mobile Buttons */}
       {isMobile && (
         visible < data.length ? (
           <div className="text-center mt-6">

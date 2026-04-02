@@ -1,159 +1,209 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Register = () => {
-  const navigate = useNavigate();
-
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
-    code: "+91",
     password: "",
     confirmPassword: "",
   });
 
+  // ✅ Handle Input
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (name === "phone") {
+      if (/^\d{0,10}$/.test(value)) {
+        setForm({ ...form, phone: value });
+      }
+      return;
+    }
+
+    setForm({ ...form, [name]: value });
   };
 
+  // 🔥 Password Checks
+  const checks = {
+    length: form.password.length >= 6,
+    uppercase: /[A-Z]/.test(form.password),
+    number: /[0-9]/.test(form.password),
+    special: /[^A-Za-z0-9]/.test(form.password),
+  };
+
+  const getStrength = () => {
+    const passed = Object.values(checks).filter(Boolean).length;
+
+    if (passed <= 1) return "Weak";
+    if (passed <= 3) return "Medium";
+    return "Strong";
+  };
+
+  // ✅ Submit
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!checks.length) {
+      alert("Password must be at least 6 characters");
+      return;
+    }
+
+    if (!checks.uppercase || !checks.number) {
+      alert("Add uppercase & number");
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       alert("Passwords do not match");
       return;
     }
 
-    console.log("Register Data:", form);
-
-    navigate("/login");
+    alert("Registered Successfully 🚀");
   };
 
-  const handleGoogleSignup = () => {
-    alert("Google Signup Clicked");
-  };
+  // 🔥 Dynamic Rule UI
+  const Rule = ({ ok, text }) => (
+    <p className={`flex items-center gap-2 text-sm ${ok ? "text-green-600" : "text-gray-400"}`}>
+      <span>{ok ? "✔" : "•"}</span> {text}
+    </p>
+  );
 
   return (
-    <div className="min-h-screen grid md:grid-cols-2">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
 
-      {/* LEFT SIDE */}
-      <div className="hidden md:flex items-center justify-center bg-gradient-to-br from-green-600 to-blue-600 text-white p-10">
-        <div>
-          <h1 className="text-4xl font-bold mb-4">Join Touch Simply 🚀</h1>
-          <p className="text-gray-200">
-            Create your account and start building professional resumes in minutes.
-          </p>
-        </div>
-      </div>
+      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl">
 
-      {/* RIGHT SIDE */}
-      <div className="flex items-center justify-center bg-gray-50 px-6">
-        <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-lg">
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Create Account
+        </h2>
 
-          <h2 className="text-2xl font-bold text-center mb-6">
-            Create your account
-          </h2>
+        <form onSubmit={handleSubmit} className="space-y-5">
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* NAME */}
+          <input
+            type="text"
+            name="name"
+            placeholder="Full Name"
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
+            onChange={handleChange}
+            required
+          />
+
+          {/* EMAIL */}
+          <input
+            type="email"
+            name="email"
+            placeholder="Email Address"
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
+            onChange={handleChange}
+            required
+          />
+
+          {/* PHONE */}
+          <div className="flex border rounded-lg overflow-hidden">
+            <div className="flex items-center gap-2 px-3 bg-gray-100 border-r">
+              <img
+                src="https://flagcdn.com/w40/in.png"
+                alt="India"
+                className="w-5"
+              />
+              <span className="text-sm font-medium">+91</span>
+            </div>
 
             <input
-              type="text"
-              name="name"
-              placeholder="Full Name"
-              className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+              type="tel"
+              name="phone"
+              value={form.phone}
+              onChange={handleChange}
+              placeholder="Phone Number"
+              className="w-full p-3 outline-none"
+              required
+            />
+          </div>
+
+          {/* PASSWORD */}
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Create Password"
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
               onChange={handleChange}
               required
             />
+            <span
+              className="absolute right-3 top-3 cursor-pointer text-gray-500"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
 
-            <input
-              type="email"
-              name="email"
-              placeholder="Email address"
-              className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
-              onChange={handleChange}
-              required
-            />
+          {/* 🔥 SHOW ONLY WHEN USER TYPES */}
+          {form.password && (
+            <div className="bg-gray-50 p-3 rounded-lg space-y-1">
 
-            {/* Phone with STD */}
-            <div className="flex">
-              <select
-                name="code"
-                value={form.code}
-                onChange={handleChange}
-                className="border rounded-l-md px-3 bg-gray-100"
-              >
-                <option value="+91">+91</option>
-                <option value="+1">+1</option>
-                <option value="+44">+44</option>
-              </select>
+              <p className="text-sm font-semibold">
+                Password Strength:{" "}
+                <span
+                  className={
+                    getStrength() === "Strong"
+                      ? "text-green-600"
+                      : getStrength() === "Medium"
+                      ? "text-yellow-500"
+                      : "text-red-500"
+                  }
+                >
+                  {getStrength()}
+                </span>
+              </p>
 
-              <input
-                type="tel"
-                name="phone"
-                placeholder="Phone Number"
-                className="w-full p-3 border-t border-b border-r rounded-r-md focus:ring-2 focus:ring-blue-500 outline-none"
-                onChange={handleChange}
-                required
-              />
+              <Rule ok={checks.length} text="Minimum 6 characters" />
+              <Rule ok={checks.uppercase} text="One uppercase letter" />
+              <Rule ok={checks.number} text="One number" />
+              <Rule ok={checks.special} text="One special character" />
+
             </div>
+          )}
 
-            {/* Password */}
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-                className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
-                onChange={handleChange}
-                required
-              />
-              <span
-                className="absolute right-3 top-3 cursor-pointer text-gray-500"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </span>
-            </div>
-
-            {/* Confirm Password */}
+          {/* CONFIRM PASSWORD */}
+          <div className="relative">
             <input
-              type="password"
+              type={showConfirm ? "text" : "password"}
               name="confirmPassword"
               placeholder="Confirm Password"
-              className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
               onChange={handleChange}
               required
             />
+            <span
+              className="absolute right-3 top-3 cursor-pointer text-gray-500"
+              onClick={() => setShowConfirm(!showConfirm)}
+            >
+              {showConfirm ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
 
-            {/* Terms */}
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" required />
-              I agree to the{" "}
-              <Link to="/terms" className="text-blue-600 hover:underline">
-                Terms & Conditions
-              </Link>
-            </label>
+          {/* BUTTON */}
+          <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:scale-105 transition">
+            Register
+          </button>
 
-            <button className="w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 transition">
-              Register
-            </button>
+        </form>
 
-          </form>
+        <p className="text-sm text-center mt-5">
+          Already have an account?{" "}
+          <Link to="/login" className="text-purple-600 font-medium">
+            Login
+          </Link>
+        </p>
 
-          <p className="text-sm text-center mt-4">
-            Already have an account?{" "}
-            <Link to="/login" className="text-blue-600 hover:underline">
-              Login
-            </Link>
-          </p>
-
-        </div>
       </div>
-
     </div>
   );
 };

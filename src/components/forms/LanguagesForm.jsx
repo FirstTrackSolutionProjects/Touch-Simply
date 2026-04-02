@@ -23,38 +23,51 @@ const LanguagesForm = () => {
   };
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">
+    <div className="space-y-6">
+
+      <h2 className="text-2xl font-bold text-gray-800">
         Languages
       </h2>
 
-      {/* Input Section */}
+      {/* Input */}
       <div className="flex gap-3">
+
         <input
-          placeholder="Add language (e.g. English)"
+          placeholder="Type language & press Enter..."
           value={lang}
           onChange={(e) => setLang(e.target.value)}
-          className="border px-4 py-2.5 rounded-lg flex-1 focus:ring-2 focus:ring-blue-500 outline-none transition"
+          onKeyDown={(e) => e.key === "Enter" && addLang()}
+          className="flex-1 px-4 py-2.5 rounded-xl border bg-white/70 backdrop-blur focus:ring-2 focus:ring-purple-500 outline-none transition"
         />
 
         <button
           onClick={addLang}
-          className="bg-blue-600 text-white px-5 rounded-lg hover:bg-blue-700 transition shadow-sm"
+          className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 rounded-xl font-medium shadow hover:scale-105 transition"
         >
           Add
         </button>
+
       </div>
 
-      {/* Languages List */}
-      <div className="mt-6 flex flex-wrap gap-3">
+      {/* List */}
+      <div className="flex flex-wrap gap-3">
+
+        {resumeData.languages.length === 0 && (
+          <p className="text-sm text-gray-400">
+            No languages added yet
+          </p>
+        )}
+
         {resumeData.languages.map((l, i) => (
           <div
             key={i}
-            className="flex items-center gap-2 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm hover:bg-gray-200 transition"
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm 
+            bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 
+            shadow-sm hover:shadow-md transition"
           >
-            <FaGlobe className="text-gray-500" />
+            <FaGlobe className="text-indigo-500" />
 
-            <span>{l}</span>
+            <span className="font-medium">{l}</span>
 
             <button
               onClick={() => removeLang(i)}
@@ -64,7 +77,9 @@ const LanguagesForm = () => {
             </button>
           </div>
         ))}
+
       </div>
+
     </div>
   );
 };

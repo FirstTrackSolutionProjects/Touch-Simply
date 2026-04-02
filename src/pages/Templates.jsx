@@ -5,7 +5,6 @@ import TemplateSection from "../components/TemplateSection";
 const Templates = () => {
   const navigate = useNavigate();
 
-  // Resume Templates
   const resumeTemplates = [
     { name: "Minimal", key: "minimal", image: "/images/minimal-resume.jpg" },
     { name: "Modern", key: "modern", image: "/images/modern-resume.jpg" },
@@ -13,7 +12,6 @@ const Templates = () => {
     { name: "Creative", key: "creative", image: "/images/creative-resume.jpg" },
   ];
 
-  // Logo Templates
   const logoTemplates = [
     { name: "Modern Logo", key: "logo-modern", image: "/images/modern-logo.jpg" },
     { name: "Minimal Logo", key: "logo-minimal", image: "/images/minimal-logo.jpg" },
@@ -21,7 +19,6 @@ const Templates = () => {
     { name: "Bold Logo", key: "logo-bold", image: "/images/bold-logo.jpg" },
   ];
 
-  // Portfolio Templates
   const portfolioTemplates = [
     { name: "Modern Portfolio", key: "portfolio-modern", image: "/images/modern-portfolio.jpg" },
     { name: "Clean Portfolio", key: "portfolio-minimal", image: "/images/clean-portfolio.jpg" },
@@ -38,40 +35,53 @@ const Templates = () => {
   };
 
   return (
-    <section className="py-16 px-6 md:px-16 bg-gradient-to-b from-gray-900 via-purple-950 to-gray-900 min-h-screen">
+    <section className="relative py-20 px-6 md:px-16 min-h-screen bg-gradient-to-b from-gray-900 via-purple-900/40 to-gray-900">
+
+      {/* Glow Background */}
+      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.15),transparent_60%)] pointer-events-none"></div>
 
       {/* Heading */}
-      <div className="text-center mb-14">
-        <h1 className="text-3xl md:text-4xl font-bold text-white">
+      <div className="text-center mb-16 relative z-10">
+        <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
           Choose Your Template
         </h1>
-        <p className="text-gray-400 mt-3">
-          Resume, Logo & Portfolio — all in one place
+
+        <p className="text-gray-300 mt-4 text-sm md:text-base">
+          Build Resume, Logo & Portfolio in minutes 🚀
         </p>
       </div>
 
-      {/* Sections */}
-      <TemplateSection
-        title="Resume Templates"
-        data={resumeTemplates}
-        type="resume"
-        onUse={handleUseTemplate}
-      />
+      {/* Sections Wrapper */}
+      <div className="space-y-16 relative z-10">
 
-      <TemplateSection
-        title="Logo Templates"
-        data={logoTemplates}
-        type="logo"
-        onUse={handleUseTemplate}
-      />
+        <div className="bg-gradient-to-br from-gray-800/70 via-purple-900/40 to-gray-900/80 backdrop-blur-lg border border-purple-500/20 p-6 md:p-10 rounded-2xl  transition duration-300">
+          <TemplateSection
+            title="Resume Templates"
+            data={resumeTemplates}
+            type="resume"
+            onUse={handleUseTemplate}
+          />
+        </div>
 
-      <TemplateSection
-        title="Portfolio Templates"
-        data={portfolioTemplates}
-        type="portfolio"
-        onUse={handleUseTemplate}
-      />
+        <div className="bg-gradient-to-br from-gray-800/70 via-purple-900/40 to-gray-900/80 backdrop-blur-lg border border-purple-500/20 p-6 md:p-10 rounded-2xl  transition duration-300">
+          <TemplateSection
+            title="Logo Templates"
+            data={logoTemplates}
+            type="logo"
+            onUse={handleUseTemplate}
+          />
+        </div>
 
+       <div className="bg-gradient-to-br from-gray-800/70 via-purple-900/40 to-gray-900/80 backdrop-blur-lg border border-purple-500/20 p-6 md:p-10 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-purple-500/20 transition duration-300">
+          <TemplateSection
+            title="Portfolio Templates"
+            data={portfolioTemplates}
+            type="portfolio"
+            onUse={handleUseTemplate}
+          />
+        </div>
+
+      </div>
     </section>
   );
 };
