@@ -61,6 +61,11 @@ const Footer = () => {
           <h4 className="font-semibold mb-4 text-white">Legal</h4>
           <ul className="space-y-2 text-sm">
             <li>
+              <Link to="/faq" className="hover:text-white transition">
+                FAQ
+              </Link>
+            </li>
+            <li>
               <Link to="/privacy-policy" className="hover:text-white transition">
                 Privacy Policy
               </Link>
@@ -73,6 +78,16 @@ const Footer = () => {
             <li>
               <Link to="/refund" className="hover:text-white transition">
                 Refund Policy
+              </Link>
+            </li>
+            <li>
+              <Link to="/data-security" className="hover:text-white transition">
+                Data Security
+              </Link>
+            </li>
+            <li>
+              <Link to="/legal-policy" className="hover:text-white transition">
+                Legal Policy
               </Link>
             </li>
           </ul>

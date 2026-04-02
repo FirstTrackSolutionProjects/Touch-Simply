@@ -4,7 +4,6 @@ import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
 
 const Login = () => {
   const navigate = useNavigate();
-
   const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
@@ -18,40 +17,28 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    console.log("Login Data:", form);
-
-    navigate("/dashboard");
-  };
-
-  const handleGoogleLogin = () => {
-    // 👉 Connect Google Auth here
-    alert("Google Login Clicked");
+    localStorage.setItem("user", JSON.stringify(form)); // demo login
+    navigate("/");
   };
 
   return (
-    <div className="min-h-screen grid md:grid-cols-2">
+    <div className="min-h-screen grid md:grid-cols-2 bg-gray-100">
 
-      {/* LEFT SIDE (IMAGE / BRANDING) */}
-      <div className="hidden md:flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-600 text-white p-10">
-        <div>
-          <h1 className="text-4xl font-bold mb-4">Welcome Back 👋</h1>
-          <p className="text-gray-200">
-            Login to continue building your professional resume and land your dream job.
-          </p>
-        </div>
+      {/* LEFT */}
+      <div className="hidden md:flex flex-col justify-center px-16 bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-900 text-white">
+        <h1 className="text-4xl font-bold mb-4">Welcome Back 👋</h1>
+        <p className="text-gray-200 text-lg">
+          Continue building and managing your professional designs effortlessly.
+        </p>
       </div>
 
-      {/* RIGHT SIDE (FORM) */}
-      <div className="flex items-center justify-center bg-gray-50 px-6">
-        <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-lg">
+      {/* RIGHT */}
+      <div className="flex items-center justify-center px-6 py-10">
+        <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl">
 
           <h2 className="text-2xl font-bold text-center mb-6">
             Login to your account
           </h2>
-
-        
-        
 
           <form onSubmit={handleSubmit} className="space-y-4">
 
@@ -59,18 +46,17 @@ const Login = () => {
               type="email"
               name="email"
               placeholder="Email address"
-              className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
               onChange={handleChange}
               required
             />
 
-            {/* Password with toggle */}
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="Password"
-                className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
                 onChange={handleChange}
                 required
               />
@@ -82,53 +68,47 @@ const Login = () => {
               </span>
             </div>
 
-            {/* Remember + Forgot */}
-            <div className="flex justify-between items-center text-sm">
+            <div className="flex justify-between text-sm">
               <label className="flex items-center gap-2">
                 <input type="checkbox" />
                 Remember me
               </label>
 
-              <Link to="/forgot-password" className="text-blue-600 hover:underline">
-                Forgot Password?
+              <Link to="/forgot-password" className="text-purple-600">
+                Forgot?
               </Link>
             </div>
 
-              {/* Divider */}
-          <div className="flex items-center gap-2 mb-4">
+            <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:scale-105 transition">
+              Login
+            </button>
+          </form>
+
+            {/* Divider */}
+          <div className="flex items-center gap-2 mt-5">
             <div className="flex-1 h-px bg-gray-300"></div>
             <span className="text-sm text-gray-400">OR</span>
             <div className="flex-1 h-px bg-gray-300"></div>
           </div>
 
-            {/* Google Login */}
-          <button
-            onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-2 border py-3 rounded-md hover:bg-gray-100 transition mb-4"
-          >
+            {/* Google */}
+          <button className="w-full flex items-center justify-center gap-2 border py-3 rounded-lg hover:bg-gray-100 transition mt-5">
             <FaGoogle className="text-red-500" />
             Continue with Google
           </button>
 
-
-            <button className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition">
-              Login
-            </button>
-
-          </form>
-
-          <p className="text-sm text-center mt-4">
+          <p className="text-sm text-center mt-5">
             Don’t have an account?{" "}
-            <Link to="/register" className="text-blue-600 hover:underline">
+            <Link to="/register" className="text-purple-600 font-medium">
               Register
             </Link>
           </p>
 
         </div>
       </div>
-
     </div>
   );
 };
 
 export default Login;
+

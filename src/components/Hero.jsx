@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
-    <section className="relative w-full overflow-hidden bg-gradient-to-br from-gray-950 via-purple-900/40 to-gray-950 py-16 md:py-24">
+    <section className="relative w-full overflow-hidden bg-gradient-to-br from-gray-950 via-purple-900/40 to-gray-950 py-15 md:py-24 mt-4">
 
       {/* Glow Effect */}
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.2),transparent_40%)] pointer-events-none"></div>

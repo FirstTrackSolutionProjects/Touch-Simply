@@ -86,3 +86,4 @@ const MinimalTemplate = () => {
 };
 
 export default MinimalTemplate;
+
