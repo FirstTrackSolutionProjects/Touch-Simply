@@ -1,29 +1,67 @@
 import React from "react";
+import { icons } from "../utils/iconMap";
 
 const ModernLogo = ({ data }) => {
+  const Icon = icons[data.icon];
+
+  const colorStyle = data.gradient
+    ? {
+        background: `linear-gradient(45deg, ${data.color}, #4f46e5)`,
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+      }
+    : { color: data.color };
+
   return (
-    <div className="flex items-center justify-center h-full bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <div className="flex items-center justify-center">
 
-      <div className="px-10 py-6 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+      {/* Horizontal */}
+      {data.layout === "horizontal" && (
+        <div className="flex items-center gap-3">
+          <div
+            style={{ backgroundColor: data.color }}
+            className="p-3 rounded-xl text-white text-xl"
+          >
+            <Icon />
+          </div>
 
-        <h1
-          style={{
-            color: data.color,
-            fontFamily: data.font,
-          }}
-          className="text-4xl md:text-5xl font-bold tracking-widest"
-        >
-          {data.name || "BRAND"}
-        </h1>
+          <h1
+            style={{ ...colorStyle, fontFamily: data.font }}
+            className="text-3xl font-bold"
+          >
+            {data.name || "Brand"}
+          </h1>
+        </div>
+      )}
 
-        {/* Glow line */}
+      {/* Stacked */}
+      {data.layout === "stacked" && (
+        <div className="text-center">
+          <div
+            style={{ backgroundColor: data.color }}
+            className="inline-flex p-3 rounded-xl text-white text-xl mb-2"
+          >
+            <Icon />
+          </div>
+
+          <h1
+            style={{ ...colorStyle, fontFamily: data.font }}
+            className="text-3xl font-bold"
+          >
+            {data.name || "Brand"}
+          </h1>
+        </div>
+      )}
+
+      {/* Icon Only */}
+      {data.layout === "icon" && (
         <div
           style={{ backgroundColor: data.color }}
-          className="h-[3px] w-20 mt-3 rounded-full"
-        ></div>
-
-      </div>
-
+          className="p-5 rounded-xl text-white text-3xl"
+        >
+          <Icon />
+        </div>
+      )}
     </div>
   );
 };

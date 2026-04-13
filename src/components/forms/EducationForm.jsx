@@ -5,174 +5,202 @@ const EducationForm = () => {
   const { resumeData, setResumeData } = useResume();
 
   const [edu, setEdu] = useState({
-    degree: "",
+    level: "",
+    specialization: "",
     school: "",
-    year: "",
-    location: "",
+    startYear: "",
+    endYear: "",
     cgpa: "",
+    location: "",
   });
 
   const [error, setError] = useState("");
+  const [editIndex, setEditIndex] = useState(null);
 
-  const addEducation = () => {
-    if (!edu.degree || !edu.school) {
-      setError("Degree and School are required");
+  const orderMap = {
+    "10th": 1,
+    "12th": 2,
+    Diploma: 3,
+    "B.Tech": 4,
+    "B.Sc": 4,
+    "B.Com": 4,
+    BA: 4,
+    "M.Tech": 5,
+    MBA: 5,
+    MCA: 5,
+    "M.Sc": 5,
+  };
+
+  const degreeOptions = Object.keys(orderMap);
+
+  const saveEducation = () => {
+    if (!edu.level || !edu.school) {
+      setError("Education level and school are required");
       return;
     }
 
-    setResumeData({
-      ...resumeData,
-      education: [...resumeData.education, edu],
-    });
+    const exists = resumeData.education.some(
+      (e, i) =>
+        e.level === edu.level &&
+        e.school === edu.school &&
+        i !== editIndex
+    );
+
+    if (exists) {
+      setError("This education already exists");
+      return;
+    }
+
+    if (
+      edu.startYear &&
+      edu.endYear &&
+      Number(edu.startYear) > Number(edu.endYear)
+    ) {
+      setError("Start year cannot be greater than end year");
+      return;
+    }
+
+    let updated = [...resumeData.education];
+
+    if (editIndex !== null) {
+      updated[editIndex] = edu;
+    } else {
+      updated.push(edu);
+    }
+
+    updated.sort((a, b) => orderMap[a.level] - orderMap[b.level]);
+
+    setResumeData({ ...resumeData, education: updated });
 
     setEdu({
-      degree: "",
+      level: "",
+      specialization: "",
       school: "",
-      year: "",
-      location: "",
+      startYear: "",
+      endYear: "",
       cgpa: "",
+      location: "",
     });
 
+    setEditIndex(null);
     setError("");
   };
 
-  const removeEducation = (index) => {
-    const updated = resumeData.education.filter((_, i) => i !== index);
+  const removeEducation = (i) => {
+    const updated = resumeData.education.filter((_, idx) => idx !== i);
     setResumeData({ ...resumeData, education: updated });
+  };
+
+  const editEducation = (i) => {
+    setEdu(resumeData.education[i]);
+    setEditIndex(i);
   };
 
   return (
     <div>
-      {/* Heading */}
-      <h2 className="text-2xl font-bold mb-6">
-        Education
-      </h2>
+      <h2 className="text-2xl font-bold mb-6">Education</h2>
 
-      {/* Form */}
-      <div className="grid gap-5">
+      <div className="grid gap-4 bg-white p-5 rounded-xl shadow">
 
-        {/* Degree */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">
-            Degree *
-          </label>
+        <select
+          value={edu.level}
+          onChange={(e) => setEdu({ ...edu, level: e.target.value })}
+          className="border px-3 py-2 rounded-lg"
+        >
+          <option value="">Select Education</option>
+          {degreeOptions.map((d) => (
+            <option key={d}>{d}</option>
+          ))}
+        </select>
+
+        {edu.level && !["10th", "12th"].includes(edu.level) && (
           <input
-            placeholder="e.g. B.Tech in Computer Science"
-            value={edu.degree}
+            placeholder="Specialization"
+            value={edu.specialization}
             onChange={(e) =>
-              setEdu({ ...edu, degree: e.target.value })
+              setEdu({ ...edu, specialization: e.target.value })
             }
-            className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            className="border px-3 py-2 rounded-lg"
           />
-        </div>
-
-        {/* School */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">
-            School / University *
-          </label>
-          <input
-            placeholder="Enter college or school name"
-            value={edu.school}
-            onChange={(e) =>
-              setEdu({ ...edu, school: e.target.value })
-            }
-            className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-        </div>
-
-        {/* Year + CGPA */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">
-              Year
-            </label>
-            <input
-              placeholder="e.g. 2024"
-              value={edu.year}
-              onChange={(e) =>
-                setEdu({ ...edu, year: e.target.value })
-              }
-              className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">
-              CGPA / %
-            </label>
-            <input
-              placeholder="e.g. 8.5 CGPA"
-              value={edu.cgpa}
-              onChange={(e) =>
-                setEdu({ ...edu, cgpa: e.target.value })
-              }
-              className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-            />
-          </div>
-        </div>
-
-        {/* Location */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">
-            Location
-          </label>
-          <input
-            placeholder="e.g. Bhubaneswar"
-            value={edu.location}
-            onChange={(e) =>
-              setEdu({ ...edu, location: e.target.value })
-            }
-            className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-        </div>
-
-        {/* Error */}
-        {error && (
-          <p className="text-sm text-red-500">{error}</p>
         )}
 
-        {/* Button */}
+        <input
+          placeholder="School / College"
+          value={edu.school}
+          onChange={(e) => setEdu({ ...edu, school: e.target.value })}
+          className="border px-3 py-2 rounded-lg"
+        />
+
+        <div className="grid grid-cols-2 gap-3">
+          <input
+            placeholder="Start Year"
+            value={edu.startYear}
+            onChange={(e) =>
+              setEdu({ ...edu, startYear: e.target.value })
+            }
+            className="border px-3 py-2 rounded-lg"
+          />
+          <input
+            placeholder="End Year"
+            value={edu.endYear}
+            onChange={(e) =>
+              setEdu({ ...edu, endYear: e.target.value })
+            }
+            className="border px-3 py-2 rounded-lg"
+          />
+        </div>
+
+        <input
+          placeholder="CGPA / %"
+          value={edu.cgpa}
+          onChange={(e) => setEdu({ ...edu, cgpa: e.target.value })}
+          className="border px-3 py-2 rounded-lg"
+        />
+
+        <input
+          placeholder="Location"
+          value={edu.location}
+          onChange={(e) =>
+            setEdu({ ...edu, location: e.target.value })
+          }
+          className="border px-3 py-2 rounded-lg"
+        />
+
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
         <button
-          onClick={addEducation}
-          className="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+          onClick={saveEducation}
+          className="bg-purple-600 text-white py-2 rounded-lg"
         >
-          + Add Education
+          {editIndex !== null ? "Update" : "Save"}
         </button>
 
+        {editIndex !== null && (
+          <button
+            onClick={() => {
+              setEditIndex(null);
+              setEdu({});
+            }}
+            className="bg-gray-400 text-white py-2 rounded-lg"
+          >
+            Cancel
+          </button>
+        )}
       </div>
 
-      {/* Preview List */}
-      <div className="mt-6 space-y-4">
+      <div className="mt-6 space-y-3">
         {resumeData.education.map((e, i) => (
-          <div
-            key={i}
-            className="p-4 bg-gray-100 rounded-lg text-sm flex justify-between items-start"
-          >
+          <div key={i} className="p-3 bg-gray-100 rounded flex justify-between">
             <div>
-              <p className="font-semibold">
-                🎓 {e.degree}
-              </p>
-              <p>{e.school}</p>
-
-              <div className="text-xs text-gray-500 mt-1">
-                {e.year && <span>{e.year} • </span>}
-                {e.location && <span>{e.location} • </span>}
-                {e.cgpa && <span>{e.cgpa}</span>}
-              </div>
+              🎓 {e.level} - {e.school}
             </div>
-
-            {/* Remove Button */}
-            <button
-              onClick={() => removeEducation(i)}
-              className="text-red-500 text-xs hover:underline"
-            >
-              Remove
-            </button>
+            <div className="flex gap-2 text-sm">
+              <button onClick={() => editEducation(i)}>Edit</button>
+              <button onClick={() => removeEducation(i)}>Remove</button>
+            </div>
           </div>
         ))}
       </div>
-
     </div>
   );
 };

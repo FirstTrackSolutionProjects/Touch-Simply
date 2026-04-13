@@ -82,7 +82,7 @@ const Editor = () => {
 
       {/* ================= Form Section ================= */}
       {(mobileView === "form" || window.innerWidth >= 768) && (
-        <div className="flex-1 flex items-center justify-center p-4 md:p-8 z-10">
+        <div className="flex-1 flex items-start justify-center pt-10 md:pt-12 px-4 z-10">
 
           <div className="w-full max-w-xl bg-white/90 backdrop-blur-lg rounded-2xl p-6 md:p-8 shadow-[0_10px_40px_rgba(0,0,0,0.4)] border border-gray-200">
 
@@ -102,7 +102,7 @@ const Editor = () => {
 
       {/* ================= Preview Section ================= */}
       {(mobileView === "preview" || window.innerWidth >= 768) && (
-        <div className="md:w-1/2 flex items-center justify-center p-4 md:p-8 bg-white/5 backdrop-blur-lg border-l border-white/10 z-10">
+        <div className="md:w-1/2 flex items-start justify-center p-4 md:p-8 bg-white/5 backdrop-blur-lg border-l border-white/10 z-10">
 
           <div className="w-full max-w-lg bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] p-5 md:p-6">
 

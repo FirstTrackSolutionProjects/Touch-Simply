@@ -1,10 +1,11 @@
 import React from "react";
 import { useResume } from "../context/ResumeContext";
+import EditField from "../components/EditField";
 
 const ModernTemplate = () => {
   const { resumeData } = useResume();
 
-  const { personal, education, experience, skills, projects } = resumeData;
+  const { education, experience, skills, projects } = resumeData;
 
   return (
     <div className="font-sans text-gray-800 bg-white p-8">
@@ -13,24 +14,26 @@ const ModernTemplate = () => {
       <div className="flex justify-between items-center border-b pb-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold">
-            {personal?.name || "Your Name"}
+            <EditField section="personal" field="name" placeholder="Your Name" />
           </h1>
+
           <p className="text-sm text-gray-600">
-            {personal?.email}
+            <EditField section="personal" field="email" placeholder="Email" />
           </p>
+
           <p className="text-sm text-gray-600">
-            {personal?.phone}
+            <EditField section="personal" field="phone" placeholder="Phone" />
           </p>
         </div>
 
-        {/* Right Accent */}
+        {/* Accent */}
         <div className="w-16 h-16 bg-blue-500 rounded-full"></div>
       </div>
 
-      {/* Grid Layout */}
+      {/* Grid */}
       <div className="grid md:grid-cols-2 gap-6">
 
-        {/* Left Column */}
+        {/* LEFT */}
         <div>
 
           {/* Experience */}
@@ -41,10 +44,40 @@ const ModernTemplate = () => {
           {experience?.length > 0 ? (
             experience.map((exp, i) => (
               <div key={i} className="mb-3">
-                <p className="font-medium">{exp.role}</p>
-                <p className="text-sm text-gray-600">
-                  {exp.company}
+
+                <p className="font-medium">
+                  💼{" "}
+                  <EditField
+                    section="experience"
+                    field="role"
+                    index={i}
+                    placeholder="Role"
+                  />
                 </p>
+
+                <p className="text-sm text-gray-600">
+                  <EditField
+                    section="experience"
+                    field="company"
+                    index={i}
+                    placeholder="Company"
+                  />
+                </p>
+
+                <p className="text-xs text-gray-500">
+                  {exp.startYear} - {exp.isCurrent ? "Present" : exp.endYear}
+                </p>
+
+                <p className="text-sm">
+                  <EditField
+                    section="experience"
+                    field="description"
+                    index={i}
+                    type="textarea"
+                    placeholder="Work Description"
+                  />
+                </p>
+
               </div>
             ))
           ) : (
@@ -59,12 +92,31 @@ const ModernTemplate = () => {
           {projects?.length > 0 ? (
             projects.map((p, i) => (
               <div key={i} className="mb-3">
+
                 <p className="font-medium text-blue-600">
-                  {p.name}
+                  📁{" "}
+                  <EditField
+                    section="projects"
+                    field="title"   // ✅ FIXED
+                    index={i}
+                    placeholder="Project Title"
+                  />
                 </p>
+
+                <p className="text-xs text-gray-500">
+                  {p.tech}
+                </p>
+
                 <p className="text-sm text-gray-700">
-                  {p.description}
+                  <EditField
+                    section="projects"
+                    field="description"
+                    index={i}
+                    type="textarea"
+                    placeholder="Project Description"
+                  />
                 </p>
+
               </div>
             ))
           ) : (
@@ -73,7 +125,7 @@ const ModernTemplate = () => {
 
         </div>
 
-        {/* Right Column */}
+        {/* RIGHT */}
         <div>
 
           {/* Education */}
@@ -84,10 +136,36 @@ const ModernTemplate = () => {
           {education?.length > 0 ? (
             education.map((edu, i) => (
               <div key={i} className="mb-3">
-                <p className="font-medium">{edu.degree}</p>
-                <p className="text-sm text-gray-600">
-                  {edu.school}
+
+                <p className="font-medium">
+                  🎓{" "}
+                  <EditField
+                    section="education"
+                    field="level"   // ✅ FIXED
+                    index={i}
+                    placeholder="Degree"
+                  />{" "}
+                  <EditField
+                    section="education"
+                    field="specialization"
+                    index={i}
+                    placeholder="Specialization"
+                  />
                 </p>
+
+                <p className="text-sm text-gray-600">
+                  <EditField
+                    section="education"
+                    field="school"
+                    index={i}
+                    placeholder="School / College"
+                  />
+                </p>
+
+                <p className="text-xs text-gray-500">
+                  {edu.startYear} - {edu.endYear}
+                </p>
+
               </div>
             ))
           ) : (
@@ -101,12 +179,12 @@ const ModernTemplate = () => {
 
           {skills?.length > 0 ? (
             <div className="flex flex-wrap gap-2">
-              {skills.map((skill, i) => (
+              {skills.map((s, i) => (
                 <span
                   key={i}
                   className="bg-blue-100 text-blue-700 px-3 py-1 text-sm rounded-full"
                 >
-                  {skill}
+                  {s.name} {/* ✅ FIXED */}
                 </span>
               ))}
             </div>
@@ -122,4 +200,3 @@ const ModernTemplate = () => {
 };
 
 export default ModernTemplate;
-

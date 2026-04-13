@@ -1,6 +1,7 @@
 import { useResume } from "../../context/ResumeContext";
 import { useState } from "react";
 import { FaTimes } from "react-icons/fa";
+import { suggestSkills } from "../../utils/aiMock";
 
 const SkillsForm = () => {
   const { resumeData, setResumeData } = useResume();
@@ -8,94 +9,104 @@ const SkillsForm = () => {
   const [skill, setSkill] = useState("");
   const [category, setCategory] = useState("General");
 
+  // ✅ Add Skill
   const addSkill = () => {
     if (!skill.trim()) return;
 
-    const newSkill = { name: skill, category };
+    const exists = resumeData.skills.some(
+      (s) => s.name === skill
+    );
+    if (exists) return;
 
     setResumeData({
       ...resumeData,
-      skills: [...resumeData.skills, newSkill],
+      skills: [...resumeData.skills, { name: skill, category }],
     });
 
     setSkill("");
   };
 
-  const removeSkill = (index) => {
-    const updated = resumeData.skills.filter((_, i) => i !== index);
+  // ❌ Remove
+  const removeSkill = (i) => {
+    const updated = resumeData.skills.filter((_, idx) => idx !== i);
     setResumeData({ ...resumeData, skills: updated });
+  };
+
+  // 🤖 AI Suggest Skills
+  const handleSuggest = () => {
+    const list = suggestSkills(resumeData.personal?.role);
+
+    const newSkills = list.map((s) => ({
+      name: s,
+      category: "Suggested",
+    }));
+
+    setResumeData({
+      ...resumeData,
+      skills: [...resumeData.skills, ...newSkills],
+    });
   };
 
   return (
     <div className="space-y-6">
 
-      <h2 className="text-2xl font-bold text-gray-800">
-        Skills
-      </h2>
+      <h2 className="text-2xl font-bold">Skills</h2>
 
       {/* Input */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex gap-3">
 
         <input
-          placeholder="Type skill & press Enter..."
           value={skill}
           onChange={(e) => setSkill(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && addSkill()}
-          className="flex-1 px-4 py-2.5 rounded-xl border bg-white/70 backdrop-blur focus:ring-2 focus:ring-purple-500 outline-none transition"
+          className="flex-1 border px-3 py-2 rounded"
+          placeholder="Add skill"
         />
 
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="px-4 py-2.5 rounded-xl border bg-white/70 backdrop-blur focus:ring-2 focus:ring-purple-500 outline-none"
+          className="border px-2"
         >
           <option>General</option>
           <option>Frontend</option>
           <option>Backend</option>
-          <option>Database</option>
           <option>Tools</option>
         </select>
 
         <button
           onClick={addSkill}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 rounded-xl font-medium shadow hover:scale-105 transition"
+          className="bg-blue-600 text-white px-4"
         >
           Add
         </button>
-
       </div>
 
-      {/* Skills List */}
+      {/* 🤖 AI */}
+      <button
+        onClick={handleSuggest}
+        className="bg-purple-600 text-white px-4 py-1 rounded"
+      >
+        ✨ Suggest Skills
+      </button>
+
+      {/* List */}
       <div className="flex flex-wrap gap-3">
-
-        {resumeData.skills.length === 0 && (
-          <p className="text-sm text-gray-400">
-            No skills added yet
-          </p>
-        )}
-
         {resumeData.skills.map((s, i) => (
           <div
             key={i}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm 
-            bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 
-            shadow-sm hover:shadow-md transition"
+            className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded"
           >
-            <span className="font-medium">{s.name}</span>
-
-            <span className="text-xs opacity-70">
+            <span>{s.name}</span>
+            <span className="text-xs text-gray-500">
               ({s.category})
             </span>
 
-            <button
-              onClick={() => removeSkill(i)}
-              className="text-gray-400 hover:text-red-500 transition"
-            >
-              <FaTimes size={12} />
+            <button onClick={() => removeSkill(i)}>
+              <FaTimes size={10} />
             </button>
           </div>
         ))}
-
       </div>
     </div>
   );

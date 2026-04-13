@@ -1,81 +1,93 @@
 import React from "react";
 import { useResume } from "../context/ResumeContext";
+import EditField from "../components/EditField";
 
 const CreativeTemplate = () => {
   const { resumeData } = useResume();
-
-  const { personal, projects, skills, education } = resumeData;
+  const { projects, skills, education, experience } = resumeData;
 
   return (
     <div className="bg-gray-100 p-6 font-sans">
-      
+
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white p-6 rounded-2xl shadow-lg mb-6">
-        <h1 className="text-3xl font-bold">{personal?.name || "Your Name"}</h1>
-        <p className="text-sm mt-1">{personal?.email}</p>
-        <p className="text-sm">{personal?.phone}</p>
+      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white p-6 rounded-2xl mb-6">
+        <h1 className="text-3xl font-bold">
+          <EditField section="personal" field="name" />
+        </h1>
+
+        <p className="text-sm">
+          <EditField section="personal" field="email" />
+        </p>
+
+        <p className="text-sm">
+          <EditField section="personal" field="phone" />
+        </p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
 
-        {/* Left Sidebar */}
-        <div className="bg-white p-4 rounded-xl shadow-md">
-          
+        {/* LEFT */}
+        <div className="bg-white p-4 rounded-xl">
+
           {/* Skills */}
-          <h2 className="text-lg font-semibold mb-3 border-b pb-1">Skills</h2>
+          <h2 className="font-semibold mb-2">Skills</h2>
           <div className="flex flex-wrap gap-2">
-            {skills?.length > 0 ? (
-              skills.map((skill, i) => (
-                <span
-                  key={i}
-                  className="bg-purple-100 text-purple-700 px-3 py-1 text-sm rounded-full"
-                >
-                  {skill}
-                </span>
-              ))
-            ) : (
-              <p className="text-gray-400 text-sm">No skills added</p>
-            )}
+            {skills?.map((s, i) => (
+              <span key={i} className="bg-purple-100 px-3 py-1 rounded">
+                {s.name} ✅
+              </span>
+            ))}
           </div>
 
           {/* Education */}
-          <h2 className="text-lg font-semibold mt-6 mb-3 border-b pb-1">
-            Education
-          </h2>
-          {education?.length > 0 ? (
-            education.map((edu, i) => (
-              <div key={i} className="mb-2">
-                <p className="font-medium">{edu.degree}</p>
-                <p className="text-sm text-gray-600">{edu.school}</p>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400 text-sm">No education added</p>
-          )}
+          <h2 className="mt-4 font-semibold">Education</h2>
+          {education?.map((e, i) => (
+            <div key={i}>
+              <p>
+                🎓 <EditField section="education" field="level" index={i} />{" "}
+                <EditField section="education" field="specialization" index={i} />
+              </p>
+              <p className="text-sm">
+                <EditField section="education" field="school" index={i} />
+              </p>
+            </div>
+          ))}
+
         </div>
 
-        {/* Right Content */}
-        <div className="md:col-span-2 bg-white p-5 rounded-xl shadow-md">
+        {/* RIGHT */}
+        <div className="md:col-span-2 bg-white p-5 rounded-xl">
+
+          {/* Experience */}
+          <h2 className="font-semibold mb-2">Experience</h2>
+          {experience?.map((exp, i) => (
+            <div key={i}>
+              <p>
+                💼 <EditField section="experience" field="role" index={i} />
+              </p>
+              <p className="text-sm">
+                <EditField section="experience" field="company" index={i} />
+              </p>
+            </div>
+          ))}
 
           {/* Projects */}
-          <h2 className="text-xl font-semibold mb-4 border-b pb-2">
-            Projects
-          </h2>
-
-          {projects?.length > 0 ? (
-            projects.map((p, i) => (
-              <div key={i} className="mb-4">
-                <h3 className="font-semibold text-lg text-indigo-600">
-                  {p.name}
-                </h3>
-                <p className="text-gray-700 text-sm">
-                  {p.description}
-                </p>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400 text-sm">No projects added</p>
-          )}
+          <h2 className="mt-4 font-semibold">Projects</h2>
+          {projects?.map((p, i) => (
+            <div key={i}>
+              <p>
+                📁 <EditField section="projects" field="title" index={i} />
+              </p>
+              <p className="text-sm">
+                <EditField
+                  section="projects"
+                  field="description"
+                  index={i}
+                  type="textarea"
+                />
+              </p>
+            </div>
+          ))}
 
         </div>
       </div>
@@ -84,4 +96,3 @@ const CreativeTemplate = () => {
 };
 
 export default CreativeTemplate;
-

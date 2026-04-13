@@ -2,26 +2,24 @@ import React from "react";
 
 const MinimalLogo = ({ data }) => {
   return (
-    <div className="flex items-center justify-center h-full bg-white">
+    <div className="text-center">
 
-      <div className="text-center">
+      <h1
+        style={{
+          color: data.color,
+          fontFamily: data.font,
+          letterSpacing: "2px",
+        }}
+        className="text-4xl font-light"
+      >
+        {data.name || "Your Brand"}
+      </h1>
 
-        <h1
-          style={{
-            color: data.color,
-            fontFamily: data.font,
-          }}
-          className="text-4xl md:text-5xl font-light tracking-wide"
-        >
-          {data.name || "Your Brand"}
-        </h1>
-
-        {/* Elegant underline */}
+      <div className="flex justify-center mt-2">
         <div
           style={{ backgroundColor: data.color }}
-          className="h-[2px] w-16 mx-auto mt-2 rounded-full"
+          className="h-[2px] w-10 rounded-full"
         ></div>
-
       </div>
 
     </div>

@@ -1,92 +1,97 @@
 import { useResume } from "../../context/ResumeContext";
 import { useState } from "react";
+import { generateExperienceDesc } from "../../utils/aiMock";
 
 const ProjectsForm = () => {
   const { resumeData, setResumeData } = useResume();
 
-  const [project, setProject] = useState({
+  const emptyProject = {
     title: "",
     description: "",
     tech: "",
     live: "",
     github: "",
-  });
+  };
 
+  const [project, setProject] = useState(emptyProject);
   const [error, setError] = useState("");
+  const [editIndex, setEditIndex] = useState(null);
 
+  // ✅ Save / Update
   const addProject = () => {
     if (!project.title) {
       setError("Project title is required");
       return;
     }
 
+    let updated = [...resumeData.projects];
+
+    if (editIndex !== null) {
+      updated[editIndex] = project;
+    } else {
+      updated.push(project);
+    }
+
     setResumeData({
       ...resumeData,
-      projects: [...resumeData.projects, project],
+      projects: updated,
     });
 
-    setProject({
-      title: "",
-      description: "",
-      tech: "",
-      live: "",
-      github: "",
-    });
-
+    setProject(emptyProject);
+    setEditIndex(null);
     setError("");
   };
 
-  const removeProject = (index) => {
-    const updated = resumeData.projects.filter((_, i) => i !== index);
+  // ✅ Remove
+  const removeProject = (i) => {
+    const updated = resumeData.projects.filter((_, idx) => idx !== i);
     setResumeData({ ...resumeData, projects: updated });
+  };
+
+  // ✅ Edit
+  const editProject = (i) => {
+    setProject(resumeData.projects[i]);
+    setEditIndex(i);
+  };
+
+  // 🤖 AI Description
+  const handleAI = () => {
+    const text = generateExperienceDesc(project.title);
+    setProject({ ...project, description: text });
   };
 
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6">Projects</h2>
 
-      {/* Form */}
       <div className="grid gap-5">
 
-        {/* Title */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">
-            Project Title *
-          </label>
-          <input
-            placeholder="e.g. Resume Builder App"
-            value={project.title}
-            onChange={(e) =>
-              setProject({ ...project, title: e.target.value })
-            }
-            className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-        </div>
+        <input
+          placeholder="Project Title *"
+          value={project.title}
+          onChange={(e) =>
+            setProject({ ...project, title: e.target.value })
+          }
+          className="border px-3 py-2 rounded-lg"
+        />
 
-        {/* Tech */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">
-            Tech Stack
-          </label>
-          <input
-            placeholder="React, Node, MongoDB"
-            value={project.tech}
-            onChange={(e) =>
-              setProject({ ...project, tech: e.target.value })
-            }
-            className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-        </div>
+        <input
+          placeholder="Tech Stack (React, Node...)"
+          value={project.tech}
+          onChange={(e) =>
+            setProject({ ...project, tech: e.target.value })
+          }
+          className="border px-3 py-2 rounded-lg"
+        />
 
-        {/* Links */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <input
             placeholder="Live Link"
             value={project.live}
             onChange={(e) =>
               setProject({ ...project, live: e.target.value })
             }
-            className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="border px-3 py-2 rounded-lg"
           />
 
           <input
@@ -95,86 +100,55 @@ const ProjectsForm = () => {
             onChange={(e) =>
               setProject({ ...project, github: e.target.value })
             }
-            className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="border px-3 py-2 rounded-lg"
           />
         </div>
 
-        {/* Description */}
         <textarea
           rows="3"
-          placeholder="• Built responsive UI\n• Integrated APIs"
+          placeholder="Description"
           value={project.description}
           onChange={(e) =>
             setProject({ ...project, description: e.target.value })
           }
-          className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+          className="border px-3 py-2 rounded-lg"
         />
 
-        {/* Error */}
-        {error && (
-          <p className="text-sm text-red-500">{error}</p>
-        )}
+        {/* 🤖 AI */}
+        <button
+          onClick={handleAI}
+          className="bg-purple-600 text-white py-1 rounded"
+        >
+          ✨ Generate Description
+        </button>
 
-        {/* Button */}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
         <button
           onClick={addProject}
-          className="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+          className="bg-blue-600 text-white py-2 rounded-lg"
         >
-          + Add Project
+          {editIndex !== null ? "Update Project" : "+ Add Project"}
         </button>
 
       </div>
 
-      {/* Preview */}
+      {/* LIST */}
       <div className="mt-6 space-y-4">
         {resumeData.projects.map((p, i) => (
           <div
             key={i}
-            className="p-4 bg-gray-100 rounded-lg text-sm flex justify-between items-start"
+            className="p-4 bg-gray-100 rounded-lg flex justify-between"
           >
             <div>
               <p className="font-semibold">📁 {p.title}</p>
-
-              {p.tech && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Tech: {p.tech}
-                </p>
-              )}
-
-              {p.description && (
-                <p className="text-xs mt-2 whitespace-pre-line text-gray-600">
-                  {p.description}
-                </p>
-              )}
-
-              <div className="text-xs mt-2 flex gap-3">
-                {p.live && (
-                  <a
-                    href={p.live}
-                    target="_blank"
-                    className="underline"
-                  >
-                    Live
-                  </a>
-                )}
-                {p.github && (
-                  <a
-                    href={p.github}
-                    target="_blank"
-                    className="underline"
-                  >
-                    GitHub
-                  </a>
-                )}
-              </div>
+              <p className="text-xs">{p.tech}</p>
             </div>
 
-            <button
-              onClick={() => removeProject(i)}
-              className="text-red-500 text-xs"
-            >
-              Remove
-            </button>
+            <div className="flex gap-2 text-xs">
+              <button onClick={() => editProject(i)}>Edit</button>
+              <button onClick={() => removeProject(i)}>Remove</button>
+            </div>
           </div>
         ))}
       </div>
