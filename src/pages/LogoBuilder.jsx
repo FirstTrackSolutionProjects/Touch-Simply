@@ -4,10 +4,13 @@ import LogoCanvas from "../components/logo/LogoCanvas";
 
 const LogoBuilder = () => {
   const [data, setData] = useState({
-    name: "",
-    color: "#000000",
-    font: "Arial",
-  });
+  name: "",
+  color: "#7c3aed",
+  font: "Poppins",
+  icon: "FaRocket",
+  layout: "horizontal",
+  gradient: false,
+});
 
   return (
    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-gray-950 via-purple-900/30 to-black relative overflow-hidden">
@@ -45,9 +48,9 @@ const LogoBuilder = () => {
         </button>
       </div>
 
-      <div className="bg-gradient-to-br from-white to-gray-100 rounded-xl shadow-inner p-6 flex items-center justify-center min-h-[280px]">
-        <LogoCanvas data={data} />
-      </div>
+        <div className="bg-white rounded-xl p-6 shadow-lg">
+          <LogoCanvas data={data} />
+        </div>
 
     </div>
   </div>

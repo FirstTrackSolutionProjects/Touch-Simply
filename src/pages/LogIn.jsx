@@ -75,7 +75,7 @@ const Login = () => {
               </label>
 
               <Link to="/forgot-password" className="text-purple-600">
-                Forgot?
+                Forgot Password?
               </Link>
             </div>
 

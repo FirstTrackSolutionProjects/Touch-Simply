@@ -1,10 +1,11 @@
 import React from "react";
 import { useResume } from "../context/ResumeContext";
+import EditField from "../components/EditField";
 
 const ProfessionalTemplate = () => {
   const { resumeData } = useResume();
 
-  const { personal, education, experience, skills, projects } = resumeData;
+  const { education, experience, skills, projects } = resumeData;
 
   return (
     <div className="bg-white text-gray-900 font-serif p-10">
@@ -12,10 +13,12 @@ const ProfessionalTemplate = () => {
       {/* Header */}
       <div className="text-center border-b pb-4 mb-6">
         <h1 className="text-3xl font-bold tracking-wide">
-          {personal?.name || "Your Name"}
+          <EditField section="personal" field="name" />
         </h1>
+
         <p className="text-sm text-gray-600 mt-1">
-          {personal?.email} | {personal?.phone}
+          <EditField section="personal" field="email" /> |{" "}
+          <EditField section="personal" field="phone" />
         </p>
       </div>
 
@@ -28,10 +31,37 @@ const ProfessionalTemplate = () => {
         {experience?.length > 0 ? (
           experience.map((exp, i) => (
             <div key={i} className="mb-3">
-              <p className="font-semibold">{exp.role}</p>
-              <p className="text-sm text-gray-700">
-                {exp.company}
+
+              <p className="font-semibold">
+                💼{" "}
+                <EditField
+                  section="experience"
+                  field="role"
+                  index={i}
+                />
               </p>
+
+              <p className="text-sm">
+                <EditField
+                  section="experience"
+                  field="company"
+                  index={i}
+                />
+              </p>
+
+              <p className="text-xs text-gray-500">
+                {exp.startYear} - {exp.isCurrent ? "Present" : exp.endYear}
+              </p>
+
+              <p className="text-sm">
+                <EditField
+                  section="experience"
+                  field="description"
+                  index={i}
+                  type="textarea"
+                />
+              </p>
+
             </div>
           ))
         ) : (
@@ -48,10 +78,33 @@ const ProfessionalTemplate = () => {
         {education?.length > 0 ? (
           education.map((edu, i) => (
             <div key={i} className="mb-3">
-              <p className="font-semibold">{edu.degree}</p>
-              <p className="text-sm text-gray-700">
-                {edu.school}
+
+              <p className="font-semibold">
+                🎓{" "}
+                <EditField
+                  section="education"
+                  field="level"   // ✅ FIXED
+                  index={i}
+                />{" "}
+                <EditField
+                  section="education"
+                  field="specialization"
+                  index={i}
+                />
               </p>
+
+              <p className="text-sm">
+                <EditField
+                  section="education"
+                  field="school"
+                  index={i}
+                />
+              </p>
+
+              <p className="text-xs text-gray-500">
+                {edu.startYear} - {edu.endYear}
+              </p>
+
             </div>
           ))
         ) : (
@@ -68,10 +121,29 @@ const ProfessionalTemplate = () => {
         {projects?.length > 0 ? (
           projects.map((p, i) => (
             <div key={i} className="mb-3">
-              <p className="font-semibold">{p.name}</p>
-              <p className="text-sm text-gray-700">
-                {p.description}
+
+              <p className="font-semibold">
+                📁{" "}
+                <EditField
+                  section="projects"
+                  field="title"   // ✅ FIXED
+                  index={i}
+                />
               </p>
+
+              <p className="text-xs text-gray-500">
+                {p.tech}
+              </p>
+
+              <p className="text-sm">
+                <EditField
+                  section="projects"
+                  field="description"
+                  index={i}
+                  type="textarea"
+                />
+              </p>
+
             </div>
           ))
         ) : (
@@ -87,8 +159,10 @@ const ProfessionalTemplate = () => {
 
         {skills?.length > 0 ? (
           <ul className="list-disc list-inside text-sm">
-            {skills.map((skill, i) => (
-              <li key={i}>{skill}</li>
+            {skills.map((s, i) => (
+              <li key={i}>
+                {s.name} {/* ✅ FIXED */}
+              </li>
             ))}
           </ul>
         ) : (
@@ -101,4 +175,3 @@ const ProfessionalTemplate = () => {
 };
 
 export default ProfessionalTemplate;
-

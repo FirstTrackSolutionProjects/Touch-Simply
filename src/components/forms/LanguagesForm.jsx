@@ -1,6 +1,5 @@
 import { useResume } from "../../context/ResumeContext";
 import { useState } from "react";
-import { FaGlobe, FaTimes } from "react-icons/fa";
 
 const LanguagesForm = () => {
   const { resumeData, setResumeData } = useResume();
@@ -9,77 +8,71 @@ const LanguagesForm = () => {
   const addLang = () => {
     if (!lang.trim()) return;
 
+    const exists = resumeData.languages.some(
+      (l) => l.name === lang
+    );
+    if (exists) return;
+
     setResumeData({
       ...resumeData,
-      languages: [...resumeData.languages, lang],
+      languages: [
+        ...resumeData.languages,
+        { name: lang, level: "Basic" },
+      ],
     });
 
     setLang("");
   };
 
-  const removeLang = (index) => {
-    const updated = resumeData.languages.filter((_, i) => i !== index);
+  const updateLevel = (i, level) => {
+    const updated = [...resumeData.languages];
+    updated[i].level = level;
+    setResumeData({ ...resumeData, languages: updated });
+  };
+
+  const removeLang = (i) => {
+    const updated = resumeData.languages.filter((_, idx) => idx !== i);
     setResumeData({ ...resumeData, languages: updated });
   };
 
   return (
-    <div className="space-y-6">
+    <div>
+      <h2 className="text-2xl font-bold mb-4">Languages</h2>
 
-      <h2 className="text-2xl font-bold text-gray-800">
-        Languages
-      </h2>
-
-      {/* Input */}
-      <div className="flex gap-3">
-
+      <div className="flex gap-2">
         <input
-          placeholder="Type language & press Enter..."
           value={lang}
           onChange={(e) => setLang(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addLang()}
-          className="flex-1 px-4 py-2.5 rounded-xl border bg-white/70 backdrop-blur focus:ring-2 focus:ring-purple-500 outline-none transition"
+          className="border p-2 flex-1"
+          placeholder="Add language"
         />
-
-        <button
-          onClick={addLang}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 rounded-xl font-medium shadow hover:scale-105 transition"
-        >
+        <button onClick={addLang} className="bg-blue-500 text-white px-4">
           Add
         </button>
-
       </div>
 
-      {/* List */}
-      <div className="flex flex-wrap gap-3">
-
-        {resumeData.languages.length === 0 && (
-          <p className="text-sm text-gray-400">
-            No languages added yet
-          </p>
-        )}
-
+      <div className="mt-4 space-y-2">
         {resumeData.languages.map((l, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm 
-            bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 
-            shadow-sm hover:shadow-md transition"
-          >
-            <FaGlobe className="text-indigo-500" />
+          <div key={i} className="flex gap-3 items-center bg-gray-100 p-2">
+            <span>{l.name}</span>
 
-            <span className="font-medium">{l}</span>
-
-            <button
-              onClick={() => removeLang(i)}
-              className="text-gray-400 hover:text-red-500 transition"
+            <select
+              value={l.level}
+              onChange={(e) => updateLevel(i, e.target.value)}
+              className="border px-2"
             >
-              <FaTimes size={12} />
+              <option>Basic</option>
+              <option>Intermediate</option>
+              <option>Fluent</option>
+              <option>Native</option>
+            </select>
+
+            <button onClick={() => removeLang(i)} className="text-red-500">
+              Remove
             </button>
           </div>
         ))}
-
       </div>
-
     </div>
   );
 };
