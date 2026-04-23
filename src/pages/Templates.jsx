@@ -1,6 +1,21 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import TemplateSection from "../components/TemplateSection";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  show: { opacity: 1, y: 0 },
+};
+
+const stagger = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+};
 
 const Templates = () => {
   const navigate = useNavigate();
@@ -35,53 +50,80 @@ const Templates = () => {
   };
 
   return (
-    <section className="relative py-20 px-6 md:px-16 min-h-screen bg-gradient-to-b from-gray-900 via-purple-900/40 to-gray-900">
+    <section className="relative py-24 px-6 md:px-16 min-h-screen bg-gradient-to-b from-gray-950 via-purple-950/40 to-black overflow-hidden">
 
-      {/* Glow Background */}
-      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.15),transparent_60%)] pointer-events-none"></div>
+      {/* 🔥 BACKGROUND GLOW */}
+      <div className="absolute top-[-150px] left-[-150px] w-[400px] h-[400px] bg-purple-600 opacity-20 blur-3xl rounded-full"></div>
+      <div className="absolute bottom-[-150px] right-[-150px] w-[400px] h-[400px] bg-indigo-600 opacity-20 blur-3xl rounded-full"></div>
 
-      {/* Heading */}
-      <div className="text-center mb-16 relative z-10">
-        <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+      {/* 🔥 HEADER */}
+      <motion.div
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+        className="text-center mb-20 relative z-10"
+      >
+        <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-400 via-indigo-400 to-purple-600 bg-clip-text text-transparent">
           Choose Your Template
         </h1>
 
-        <p className="text-gray-300 mt-4 text-sm md:text-base">
-          Build Resume, Logo & Portfolio in minutes 🚀
+        <p className="text-gray-400 mt-5 text-sm md:text-lg max-w-xl mx-auto">
+          Build Resume, Logo & Portfolio in minutes with modern designs 🚀
         </p>
-      </div>
+      </motion.div>
 
-      {/* Sections Wrapper */}
-      <div className="space-y-16 relative z-10">
+      {/* 🔥 SECTIONS */}
+      <motion.div
+        variants={stagger}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
+        className="space-y-16 relative z-10"
+      >
 
-        <div className="bg-gradient-to-br from-gray-800/70 via-purple-900/40 to-gray-900/80 backdrop-blur-lg border border-purple-500/20 p-6 md:p-10 rounded-2xl  transition duration-300">
+        {/* RESUME */}
+        <motion.div
+          variants={fadeUp}
+          whileHover={{ scale: 1.01 }}
+          className="group bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-xl border border-white/10 p-6 md:p-10 rounded-2xl shadow-xl hover:shadow-purple-500/20 transition duration-500"
+        >
           <TemplateSection
             title="Resume Templates"
             data={resumeTemplates}
             type="resume"
             onUse={handleUseTemplate}
           />
-        </div>
+        </motion.div>
 
-        <div className="bg-gradient-to-br from-gray-800/70 via-purple-900/40 to-gray-900/80 backdrop-blur-lg border border-purple-500/20 p-6 md:p-10 rounded-2xl  transition duration-300">
+        {/* LOGO */}
+        <motion.div
+          variants={fadeUp}
+          whileHover={{ scale: 1.01 }}
+          className="group bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-xl border border-white/10 p-6 md:p-10 rounded-2xl shadow-xl hover:shadow-indigo-500/20 transition duration-500"
+        >
           <TemplateSection
             title="Logo Templates"
             data={logoTemplates}
             type="logo"
             onUse={handleUseTemplate}
           />
-        </div>
+        </motion.div>
 
-       <div className="bg-gradient-to-br from-gray-800/70 via-purple-900/40 to-gray-900/80 backdrop-blur-lg border border-purple-500/20 p-6 md:p-10 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-purple-500/20 transition duration-300">
+        {/* PORTFOLIO */}
+        <motion.div
+          variants={fadeUp}
+          whileHover={{ scale: 1.01 }}
+          className="group bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-xl border border-white/10 p-6 md:p-10 rounded-2xl shadow-xl hover:shadow-purple-400/20 transition duration-500"
+        >
           <TemplateSection
             title="Portfolio Templates"
             data={portfolioTemplates}
             type="portfolio"
             onUse={handleUseTemplate}
           />
-        </div>
+        </motion.div>
 
-      </div>
+      </motion.div>
     </section>
   );
 };

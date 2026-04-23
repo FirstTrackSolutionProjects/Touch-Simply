@@ -27,7 +27,7 @@ const Testimonials = () => {
 
   const [index, setIndex] = useState(0);
 
-  // Auto Slide
+  // 🔥 Auto Slide
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % testimonials.length);
@@ -47,10 +47,14 @@ const Testimonials = () => {
   };
 
   return (
-    <section className="py-20 px-6 md:px-20 bg-gradient-to-b from-gray-950 via-purple-950 to-gray-950 text-center">
+    <section className="py-20 px-6 md:px-20 bg-gradient-to-b from-gray-950 via-purple-950 to-gray-950 text-center relative overflow-hidden">
+
+      {/* 🔥 Glow */}
+      <div className="absolute top-0 left-0 w-72 h-72 bg-purple-600/20 blur-3xl rounded-full"></div>
+      <div className="absolute bottom-0 right-0 w-72 h-72 bg-indigo-600/20 blur-3xl rounded-full"></div>
 
       {/* Heading */}
-      <h2 className="text-3xl md:text-4xl font-bold text-white mb-12">
+      <h2 className="relative text-3xl md:text-4xl font-bold text-white mb-12">
         Loved by Thousands of Users ❤️
       </h2>
 
@@ -58,7 +62,7 @@ const Testimonials = () => {
       <div className="relative max-w-3xl mx-auto">
 
         {/* Card */}
-        <div className="bg-white/10 backdrop-blur-lg border border-white/10 p-8 md:p-10 rounded-3xl shadow-xl transition-all duration-500">
+        <div className="bg-white/10 backdrop-blur-lg border border-white/10 p-8 md:p-10 rounded-3xl shadow-2xl transition-all duration-500 transform hover:scale-[1.02]">
 
           {/* User Icon */}
           <div className="flex justify-center mb-4 text-purple-400 text-5xl">
@@ -73,7 +77,7 @@ const Testimonials = () => {
           </div>
 
           {/* Text */}
-          <p className="text-gray-300 text-lg italic leading-relaxed">
+          <p className="text-gray-300 text-lg italic leading-relaxed transition-all duration-500">
             "{testimonials[index].text}"
           </p>
 
@@ -85,10 +89,6 @@ const Testimonials = () => {
             {testimonials[index].role}
           </p>
         </div>
-
-       
-
-        
 
       </div>
     </section>

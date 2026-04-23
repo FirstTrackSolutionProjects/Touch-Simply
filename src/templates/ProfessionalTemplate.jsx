@@ -4,174 +4,67 @@ import EditField from "../components/EditField";
 
 const ProfessionalTemplate = () => {
   const { resumeData } = useResume();
-
   const { education, experience, skills, projects } = resumeData;
 
   return (
-    <div className="bg-white text-gray-900 font-serif p-10">
+    <div className="bg-white p-6 md:p-10 font-serif text-gray-900">
 
       {/* Header */}
       <div className="text-center border-b pb-4 mb-6">
-        <h1 className="text-3xl font-bold tracking-wide">
+        <h1 className="text-3xl font-bold">
           <EditField section="personal" field="name" />
         </h1>
-
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="text-sm text-gray-600">
           <EditField section="personal" field="email" /> |{" "}
           <EditField section="personal" field="phone" />
         </p>
       </div>
 
-      {/* Experience */}
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold border-b pb-1 mb-3 uppercase">
-          Professional Experience
-        </h2>
+      <Section title="Experience">
+        {experience?.map((e, i) => (
+          <Item key={i}>
+            💼 <EditField section="experience" field="role" index={i} />
+          </Item>
+        ))}
+      </Section>
 
-        {experience?.length > 0 ? (
-          experience.map((exp, i) => (
-            <div key={i} className="mb-3">
+      <Section title="Education">
+        {education?.map((e, i) => (
+          <Item key={i}>
+            🎓 <EditField section="education" field="level" index={i} />
+          </Item>
+        ))}
+      </Section>
 
-              <p className="font-semibold">
-                💼{" "}
-                <EditField
-                  section="experience"
-                  field="role"
-                  index={i}
-                />
-              </p>
+      <Section title="Projects">
+        {projects?.map((p, i) => (
+          <Item key={i}>
+            📁 <EditField section="projects" field="title" index={i} />
+          </Item>
+        ))}
+      </Section>
 
-              <p className="text-sm">
-                <EditField
-                  section="experience"
-                  field="company"
-                  index={i}
-                />
-              </p>
-
-              <p className="text-xs text-gray-500">
-                {exp.startYear} - {exp.isCurrent ? "Present" : exp.endYear}
-              </p>
-
-              <p className="text-sm">
-                <EditField
-                  section="experience"
-                  field="description"
-                  index={i}
-                  type="textarea"
-                />
-              </p>
-
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-400 text-sm">No experience added</p>
-        )}
-      </div>
-
-      {/* Education */}
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold border-b pb-1 mb-3 uppercase">
-          Education
-        </h2>
-
-        {education?.length > 0 ? (
-          education.map((edu, i) => (
-            <div key={i} className="mb-3">
-
-              <p className="font-semibold">
-                🎓{" "}
-                <EditField
-                  section="education"
-                  field="level"   // ✅ FIXED
-                  index={i}
-                />{" "}
-                <EditField
-                  section="education"
-                  field="specialization"
-                  index={i}
-                />
-              </p>
-
-              <p className="text-sm">
-                <EditField
-                  section="education"
-                  field="school"
-                  index={i}
-                />
-              </p>
-
-              <p className="text-xs text-gray-500">
-                {edu.startYear} - {edu.endYear}
-              </p>
-
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-400 text-sm">No education added</p>
-        )}
-      </div>
-
-      {/* Projects */}
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold border-b pb-1 mb-3 uppercase">
-          Projects
-        </h2>
-
-        {projects?.length > 0 ? (
-          projects.map((p, i) => (
-            <div key={i} className="mb-3">
-
-              <p className="font-semibold">
-                📁{" "}
-                <EditField
-                  section="projects"
-                  field="title"   // ✅ FIXED
-                  index={i}
-                />
-              </p>
-
-              <p className="text-xs text-gray-500">
-                {p.tech}
-              </p>
-
-              <p className="text-sm">
-                <EditField
-                  section="projects"
-                  field="description"
-                  index={i}
-                  type="textarea"
-                />
-              </p>
-
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-400 text-sm">No projects added</p>
-        )}
-      </div>
-
-      {/* Skills */}
-      <div>
-        <h2 className="text-lg font-semibold border-b pb-1 mb-3 uppercase">
-          Skills
-        </h2>
-
-        {skills?.length > 0 ? (
-          <ul className="list-disc list-inside text-sm">
-            {skills.map((s, i) => (
-              <li key={i}>
-                {s.name} {/* ✅ FIXED */}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-400 text-sm">No skills added</p>
-        )}
-      </div>
+      <Section title="Skills">
+        <ul className="list-disc ml-5">
+          {skills?.map((s, i) => (
+            <li key={i}>{s.name}</li>
+          ))}
+        </ul>
+      </Section>
 
     </div>
   );
 };
+
+const Section = ({ title, children }) => (
+  <div className="mb-6">
+    <h2 className="font-semibold text-lg border-b pb-1 mb-2 uppercase">
+      {title}
+    </h2>
+    {children}
+  </div>
+);
+
+const Item = ({ children }) => <div className="mb-2">{children}</div>;
 
 export default ProfessionalTemplate;

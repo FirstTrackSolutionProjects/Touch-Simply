@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import PortfolioForm from "../components/portfolio/PortfolioForm";
 import PortfolioCanvas from "../components/portfolio/PortfolioCanvas";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const PortfolioBuilder = () => {
   const [data, setData] = useState({
@@ -9,39 +11,71 @@ const PortfolioBuilder = () => {
     projects: [],
   });
 
+const downloadPDF = async () => {
+  const element = document.getElementById("portfolio-preview");
+
+  try {
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+
+      onclone: (doc) => {
+        // 🔥 REMOVE ALL OKLCH COLORS
+        const all = doc.querySelectorAll("*");
+        all.forEach((el) => {
+          el.style.color = "#000000";
+          el.style.backgroundColor = "#ffffff";
+          el.style.borderColor = "#dddddd";
+        });
+      },
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+    const width = pdf.internal.pageSize.getWidth();
+    const height = (canvas.height * width) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, width, height);
+    pdf.save("portfolio.pdf");
+
+  } catch (err) {
+    console.error("PDF ERROR:", err);
+    alert("Download failed");
+  }
+};
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-purple-950 via-indigo-950 to-gray-950">
 
-      {/* LEFT (FORM) */}
-      <div className="md:w-1/2 flex items-center justify-center p-6">
-        <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl p-6">
+      {/* LEFT */}
+      <div className="md:w-1/2 p-6">
+        <div className="bg-white p-6 rounded-2xl shadow-xl">
           <PortfolioForm data={data} setData={setData} />
         </div>
       </div>
 
-      {/* RIGHT (PREVIEW) */}
-      <div className="md:w-1/2 flex items-center justify-center p-6">
-        <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+      {/* RIGHT */}
+      <div className="md:w-1/2 p-6">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
 
-          {/* Top Bar */}
-          <div className="flex justify-between items-center px-4 py-2 border-b bg-gray-50">
-            <h2 className="text-sm font-semibold text-gray-600">
-              Live Preview
-            </h2>
+          <div className="flex justify-between px-4 py-2 border-b">
+            <h2>Live Preview</h2>
 
-            <button className="text-xs bg-purple-600 text-white px-3 py-1 rounded">
+            <button
+              onClick={downloadPDF}
+              className="bg-purple-600 text-white px-3 py-1 rounded"
+            >
               Download
             </button>
           </div>
 
-          {/* Canvas */}
-          <div className="p-6 min-h-[500px]">
+          <div id="portfolio-preview" className="p-4">
             <PortfolioCanvas data={data} />
           </div>
-
         </div>
       </div>
-
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import PersonalForm from "../components/forms/PersonalForm";
 import EducationForm from "../components/forms/EducationForm";
@@ -11,6 +11,13 @@ import Canvas from "../components/Canvas";
 const Editor = () => {
   const [active, setActive] = useState("personal");
   const [mobileView, setMobileView] = useState("form");
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const resize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, []);
 
   const menu = [
     { key: "personal", label: "👤 Personal" },
@@ -21,16 +28,35 @@ const Editor = () => {
     { key: "languages", label: "🌐 Languages" },
   ];
 
-  return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-gray-950 via-purple-950/70 to-gray-950">
+  const renderForm = () => {
+    switch (active) {
+      case "personal":
+        return <PersonalForm />;
+      case "education":
+        return <EducationForm />;
+      case "experience":
+        return <ExperienceForm />;
+      case "projects":
+        return <ProjectsForm />;
+      case "skills":
+        return <SkillsForm />;
+      case "languages":
+        return <LanguageForm />;
+      default:
+        return <PersonalForm />;
+    }
+  };
 
-      {/* 🔥 Background Glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.15),transparent_60%)] pointer-events-none"></div>
+  return (
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-gray-950 via-purple-950/60 to-black relative">
+
+      {/* Glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.15),transparent_60%)]" />
 
       {/* ================= Sidebar ================= */}
-      <div className="md:w-64 bg-white/5 backdrop-blur-lg border-r border-white/10 px-4 py-6 flex md:flex-col gap-3 overflow-x-auto md:overflow-visible z-10">
+      <div className="md:w-64 sticky top-0 h-auto md:h-screen bg-white/5 backdrop-blur-xl border-r border-white/10 p-4 flex md:flex-col gap-3 overflow-x-auto md:overflow-visible z-10">
 
-        <h2 className="hidden md:block text-lg font-bold mb-4 text-white">
+        <h2 className="hidden md:block text-lg font-bold text-white mb-4">
           Sections
         </h2>
 
@@ -38,94 +64,77 @@ const Editor = () => {
           <button
             key={item.key}
             onClick={() => setActive(item.key)}
-            className={`relative px-4 py-2 rounded-lg text-sm text-left whitespace-nowrap transition-all duration-300 ${
+            className={`px-4 py-2 rounded-lg text-sm transition ${
               active === item.key
-                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md"
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg scale-105"
                 : "bg-white/10 text-gray-300 hover:bg-white/20"
             }`}
           >
             {item.label}
-
-            {/* Active Indicator */}
-            {active === item.key && (
-              <span className="absolute left-0 top-0 h-full w-1 bg-purple-400 rounded-r"></span>
-            )}
           </button>
         ))}
       </div>
 
       {/* ================= Mobile Toggle ================= */}
-      <div className="md:hidden flex justify-center gap-3 p-4 bg-white/5 backdrop-blur border-b border-white/10 z-10">
+      {isMobile && (
+        <div className="flex justify-center gap-3 p-3 bg-white/5 border-b border-white/10 z-10">
+          <button
+            onClick={() => setMobileView("form")}
+            className={`px-4 py-2 rounded-full ${
+              mobileView === "form"
+                ? "bg-purple-600 text-white"
+                : "bg-white/10 text-gray-300"
+            }`}
+          >
+            Form
+          </button>
 
-        <button
-          onClick={() => setMobileView("form")}
-          className={`px-5 py-2 rounded-full text-sm transition ${
-            mobileView === "form"
-              ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow"
-              : "bg-white/10 text-gray-300"
-          }`}
-        >
-          Form
-        </button>
-
-        <button
-          onClick={() => setMobileView("preview")}
-          className={`px-5 py-2 rounded-full text-sm transition ${
-            mobileView === "preview"
-              ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow"
-              : "bg-white/10 text-gray-300"
-          }`}
-        >
-          Preview
-        </button>
-      </div>
+          <button
+            onClick={() => setMobileView("preview")}
+            className={`px-4 py-2 rounded-full ${
+              mobileView === "preview"
+                ? "bg-purple-600 text-white"
+                : "bg-white/10 text-gray-300"
+            }`}
+          >
+            Preview
+          </button>
+        </div>
+      )}
 
       {/* ================= Form Section ================= */}
-      {(mobileView === "form" || window.innerWidth >= 768) && (
-        <div className="flex-1 flex items-start justify-center pt-10 md:pt-12 px-4 z-10">
+      {(!isMobile || mobileView === "form") && (
+        <div className="flex-1 flex justify-center p-6 z-10">
 
-          <div className="w-full max-w-xl bg-white/90 backdrop-blur-lg rounded-2xl p-6 md:p-8 shadow-[0_10px_40px_rgba(0,0,0,0.4)] border border-gray-200">
+          <div className="w-full max-w-xl bg-white/95 backdrop-blur-xl rounded-2xl p-6 shadow-xl border">
 
-            <h2 className="text-lg md:text-xl font-semibold mb-6 capitalize text-gray-800">
+            <h2 className="text-xl font-semibold mb-5 capitalize">
               {active} Details
             </h2>
 
-            {active === "personal" && <PersonalForm />}
-            {active === "education" && <EducationForm />}
-            {active === "experience" && <ExperienceForm />}
-            {active === "projects" && <ProjectsForm />}
-            {active === "skills" && <SkillsForm />}
-            {active === "languages" && <LanguageForm />}
+            <div className="transition-all duration-300">
+              {renderForm()}
+            </div>
+
           </div>
         </div>
       )}
 
       {/* ================= Preview Section ================= */}
-      {(mobileView === "preview" || window.innerWidth >= 768) && (
-        <div className="md:w-1/2 flex items-start justify-center p-4 md:p-8 bg-white/5 backdrop-blur-lg border-l border-white/10 z-10">
+      {(!isMobile || mobileView === "preview") && (
+        <div className="md:w-1/2 flex justify-center p-6 bg-white/5 border-l border-white/10 z-10">
 
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] p-5 md:p-6">
+          <div className="w-full max-w-xl bg-white/10 backdrop-blur-xl rounded-2xl p-4 shadow-xl">
 
             {/* Header */}
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-sm font-semibold text-gray-600">
-                Live Preview
-              </h2>
-
-              <button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-1.5 rounded-md text-xs hover:scale-105 transition">
-                Download
-              </button>
+              <h2 className="text-md font-semibold text-white">Live Preview</h2>
             </div>
-
-            {/* Resume Preview */}
-            <div className="scale-[0.85] md:scale-90 origin-top">
-              <Canvas />
-            </div>
+          <Canvas />
 
           </div>
         </div>
       )}
-
     </div>
   );
 };

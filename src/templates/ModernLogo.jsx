@@ -4,48 +4,54 @@ import { icons } from "../utils/iconMap";
 const ModernLogo = ({ data }) => {
   const Icon = icons[data.icon];
 
-  const colorStyle = data.gradient
+  const gradient = `linear-gradient(135deg, ${data.color}, #4f46e5)`;
+
+  const textStyle = data.gradient
     ? {
-        background: `linear-gradient(45deg, ${data.color}, #4f46e5)`,
+        background: gradient,
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
       }
     : { color: data.color };
 
-  return (
-    <div className="flex items-center justify-center">
+  const iconBg = data.gradient ? gradient : data.color;
 
-      {/* Horizontal */}
+  return (
+    <div className="flex items-center justify-center select-none">
+
+      {/* HORIZONTAL */}
       {data.layout === "horizontal" && (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
+
           <div
-            style={{ backgroundColor: data.color }}
-            className="p-3 rounded-xl text-white text-xl"
+            style={{ background: iconBg }}
+            className="p-3 rounded-2xl text-white text-xl shadow-lg"
           >
             <Icon />
           </div>
 
           <h1
-            style={{ ...colorStyle, fontFamily: data.font }}
-            className="text-3xl font-bold"
+            style={{ ...textStyle, fontFamily: data.font }}
+            className="text-3xl md:text-4xl font-bold tracking-tight"
           >
             {data.name || "Brand"}
           </h1>
         </div>
       )}
 
-      {/* Stacked */}
+      {/* STACKED */}
       {data.layout === "stacked" && (
         <div className="text-center">
+
           <div
-            style={{ backgroundColor: data.color }}
-            className="inline-flex p-3 rounded-xl text-white text-xl mb-2"
+            style={{ background: iconBg }}
+            className="inline-flex p-3 rounded-2xl text-white text-xl mb-3 shadow-lg"
           >
             <Icon />
           </div>
 
           <h1
-            style={{ ...colorStyle, fontFamily: data.font }}
+            style={{ ...textStyle, fontFamily: data.font }}
             className="text-3xl font-bold"
           >
             {data.name || "Brand"}
@@ -53,11 +59,11 @@ const ModernLogo = ({ data }) => {
         </div>
       )}
 
-      {/* Icon Only */}
+      {/* ICON ONLY */}
       {data.layout === "icon" && (
         <div
-          style={{ backgroundColor: data.color }}
-          className="p-5 rounded-xl text-white text-3xl"
+          style={{ background: iconBg }}
+          className="p-5 rounded-2xl text-white text-3xl shadow-lg"
         >
           <Icon />
         </div>

@@ -1,5 +1,20 @@
 import React, { useState } from "react";
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
+import { motion } from "framer-motion";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  show: { opacity: 1, y: 0 },
+};
+
+const stagger = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
 
 const Contact = () => {
   const [form, setForm] = useState({
@@ -19,147 +34,140 @@ const Contact = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen px-6 md:px-16 py-14">
+    <div className="relative min-h-screen bg-white overflow-hidden">
 
-      {/* Header */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-3 text-gray-900">
-          Contact Us
-        </h1>
-        <p className="text-gray-600 text-sm md:text-base">
-          Have questions? We'd love to hear from you.
-        </p>
-      </div>
+      {/* 🔥 BACKGROUND GRADIENT BLOBS */}
+      <div className="absolute top-[-120px] left-[-120px] w-[300px] h-[300px] bg-purple-400 opacity-20 blur-3xl rounded-full"></div>
+      <div className="absolute bottom-[-120px] right-[-120px] w-[300px] h-[300px] bg-indigo-400 opacity-20 blur-3xl rounded-full"></div>
 
-      {/* Main Section */}
-      <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
+      <div className="relative px-6 md:px-16 py-20 max-w-6xl mx-auto">
 
-        {/* Contact Form */}
-        <div className="bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-xl font-semibold mb-6 text-gray-800">
-            Send us a message
-          </h2>
+        {/* 🔥 HEADER */}
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
+          className="text-center mb-16"
+        >
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
+            Get in touch
+          </h1>
+          <p className="mt-4 text-gray-600 max-w-xl mx-auto">
+            Have questions or ideas? We’d love to hear from you. Fill out the form and we’ll get back to you.
+          </p>
+        </motion.div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+        {/* 🔥 MAIN GRID */}
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="grid md:grid-cols-2 gap-12"
+        >
 
-            {/* Name */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Full Name
-              </label>
+          {/* 🔥 FORM */}
+          <motion.div
+            variants={fadeUp}
+            className="backdrop-blur-xl bg-white/70 p-8 rounded-2xl shadow-xl border border-gray-100"
+          >
+            <h2 className="text-xl font-semibold mb-6 text-gray-800">
+              Send a message
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+
               <input
                 type="text"
                 name="name"
-                placeholder="Enter your name"
-                className="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                placeholder="Full Name"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition"
                 onChange={handleChange}
                 required
               />
-            </div>
 
-            {/* Email */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Email Address
-              </label>
               <input
                 type="email"
                 name="email"
-                placeholder="Enter your email"
-                className="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                placeholder="Email Address"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition"
                 onChange={handleChange}
                 required
               />
-            </div>
 
-            {/* Phone */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Phone Number
-              </label>
+              <input
+                type="tel"
+                name="phone"
+                placeholder="Phone Number"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition"
+                onChange={handleChange}
+                required
+              />
 
-              <div className="flex mt-1">
-                <select
-                  name="code"
-                  className="border rounded-l-lg px-3 bg-gray-100 focus:outline-none"
-                >
-                  <option value="+91">+91</option>
-                  <option value="+1">+1</option>
-                  <option value="+44">+44</option>
-                </select>
-
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="Enter phone number"
-                  className="w-full p-3 border-t border-b border-r rounded-r-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Message */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Message
-              </label>
               <textarea
                 name="message"
                 rows="4"
-                placeholder="Write your message..."
-                className="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                placeholder="Your Message"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none resize-none"
                 onChange={handleChange}
                 required
               />
-            </div>
 
-            {/* Button */}
-            <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition shadow-sm">
-              Send Message
-            </button>
+              <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:scale-[1.02] transition shadow-lg">
+                Send Message
+              </button>
+            </form>
+          </motion.div>
 
-          </form>
-        </div>
+          {/* 🔥 CONTACT INFO */}
+          <motion.div
+            variants={stagger}
+            className="flex flex-col justify-center gap-6"
+          >
 
-        {/* Contact Info */}
-        <div className="flex flex-col justify-center space-y-6">
+            {[ 
+              {
+                icon: <FaPhoneAlt />,
+                title: "Phone",
+                value: "+91 98765 43210",
+              },
+              {
+                icon: <FaEnvelope />,
+                title: "Email",
+                value: "support@touchsimply.com",
+              },
+              {
+                icon: <FaMapMarkerAlt />,
+                title: "Address",
+                value: "Bhubaneswar, Odisha, India",
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                variants={fadeUp}
+                whileHover={{ scale: 1.04 }}
+                className="flex items-start gap-4 p-6 rounded-xl border bg-white shadow-md hover:shadow-xl transition"
+              >
+                <div className="text-purple-600 text-lg mt-1">
+                  {item.icon}
+                </div>
 
-          {/* Phone */}
-          <div className="flex items-start gap-4 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <FaPhoneAlt className="text-blue-600 mt-1" />
-            <div>
-              <h4 className="font-semibold text-gray-800">Phone</h4>
-              <p className="text-gray-600 text-sm">+91 98765 43210</p>
-            </div>
-          </div>
+                <div>
+                  <h4 className="font-semibold text-gray-800">
+                    {item.title}
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    {item.value}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
 
-          {/* Email */}
-          <div className="flex items-start gap-4 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <FaEnvelope className="text-blue-600 mt-1" />
-            <div>
-              <h4 className="font-semibold text-gray-800">Email</h4>
-              <p className="text-gray-600 text-sm">
-                support@touchsimply.com
-              </p>
-            </div>
-          </div>
+          </motion.div>
 
-          {/* Address */}
-          <div className="flex items-start gap-4 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <FaMapMarkerAlt className="text-blue-600 mt-1" />
-            <div>
-              <h4 className="font-semibold text-gray-800">Address</h4>
-              <p className="text-gray-600 text-sm">
-                Bhubaneswar, Odisha, India
-              </p>
-            </div>
-          </div>
-
-        </div>
+        </motion.div>
 
       </div>
-
     </div>
   );
 };

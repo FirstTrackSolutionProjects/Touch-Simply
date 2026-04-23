@@ -4,57 +4,58 @@ import LogoCanvas from "../components/logo/LogoCanvas";
 
 const LogoBuilder = () => {
   const [data, setData] = useState({
-  name: "",
-  color: "#7c3aed",
-  font: "Poppins",
-  icon: "FaRocket",
-  layout: "horizontal",
-  gradient: false,
-});
+    name: "Your Brand",
+    color: "#7c3aed",
+    font: "Poppins",
+    icon: "FaRocket",
+    layout: "horizontal",
+    gradient: true,
+  });
 
   return (
-   <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-gray-950 via-purple-900/30 to-black relative overflow-hidden">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-gray-950 via-purple-900/30 to-black">
 
-  {/* Glow Effects */}
-  <div className="absolute top-[-120px] left-[-120px] w-[300px] h-[300px] bg-purple-600/20 blur-3xl rounded-full"></div>
-  <div className="absolute bottom-[-120px] right-[-120px] w-[300px] h-[300px] bg-indigo-600/20 blur-3xl rounded-full"></div>
+      {/* LEFT PANEL */}
+      <div className="md:w-1/3 w-full p-5 border-r border-white/10 bg-white/5 backdrop-blur-xl">
 
-  {/* LEFT SIDE */}
-  <div className="md:w-1/3 w-full p-4 md:p-6 bg-white/5 backdrop-blur-md border-r border-white/10">
+        <div className="bg-white/95 rounded-2xl p-6 shadow-xl">
 
-    <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] p-6 md:p-7 border border-white/40">
+          <h2 className="text-xl font-bold mb-4">
+            Customize Logo
+          </h2>
 
-      <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-5">
-        Customize Your Logo
-      </h2>
+          <LogoForm data={data} setData={setData} />
 
-      <LogoForm data={data} setData={setData} />
+          {/* 🔥 AI SUGGEST */}
+          <button
+            onClick={() =>
+              setData({
+                ...data,
+                name: "NovaTech",
+                color: "#6366f1",
+                icon: "FaCode",
+                font: "Montserrat",
+              })
+            }
+            className="mt-5 w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 rounded-lg hover:scale-105 transition"
+          >
+            ✨ Generate AI Logo
+          </button>
 
-    </div>
-  </div>
-
-  {/* RIGHT SIDE */}
-  <div className="flex-1 flex items-center justify-center p-4 md:p-8">
-
-    <div className="w-full max-w-xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-5 md:p-6 shadow-[0_10px_50px_rgba(0,0,0,0.5)]">
-
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-sm font-semibold text-white">
-          Live Preview
-        </h3>
-
-        <button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-1.5 rounded-lg text-xs hover:scale-105 transition">
-          Download
-        </button>
+        </div>
       </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-lg">
-          <LogoCanvas data={data} />
-        </div>
+      {/* RIGHT PANEL */}
+      <div className="flex-1 p-6 md:p-10">
 
+        <h2 className="text-white text-lg mb-4 font-semibold">
+          Live Preview (Light + Dark)
+        </h2>
+
+        <LogoCanvas data={data} />
+
+      </div>
     </div>
-  </div>
-</div>
   );
 };
 
