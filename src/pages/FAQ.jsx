@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
 const FAQ = () => {
-  const [activeIndex, setActiveIndex] = useState(0); // first open
+  const [activeIndex, setActiveIndex] = useState(null);
 
   const faqs = [
     {
@@ -23,67 +24,80 @@ const FAQ = () => {
     },
   ];
 
-  return (
-    <div className="bg-gray-50 min-h-screen">
+  const toggleFAQ = (index) => {
+    setActiveIndex(activeIndex === index ? null : index);
+  };
 
-      {/* Hero */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-14 md:py-20 text-center px-4">
-        <h1 className="text-3xl md:text-5xl font-bold">
-          Frequently Asked Questions
+  return (
+    <div className="relative min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black text-white overflow-hidden">
+
+      {/* 🔥 BACKGROUND GLOW */}
+      <div className="absolute top-[-120px] left-[-120px] w-[300px] h-[300px] bg-purple-600 opacity-20 blur-3xl rounded-full"></div>
+      <div className="absolute bottom-[-120px] right-[-120px] w-[300px] h-[300px] bg-indigo-600 opacity-20 blur-3xl rounded-full"></div>
+
+      {/* HERO */}
+      <div className="relative text-center py-20 px-6">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+          FAQs
         </h1>
-        <p className="text-gray-200 mt-3 max-w-xl mx-auto text-sm md:text-base">
-          Everything you need to know about our platform
+        <p className="text-gray-400 mt-4 max-w-xl mx-auto">
+          Everything you need to know about Touch Simply
         </p>
       </div>
 
-      {/* Content */}
-      <div className="max-w-3xl mx-auto px-4 md:px-6 py-10 md:py-14">
+      {/* FAQ LIST */}
+      <div className="relative max-w-3xl mx-auto px-4 pb-20 space-y-4">
 
-        <div className="space-y-4">
+        {faqs.map((faq, index) => {
+          const isOpen = activeIndex === index;
 
-          {faqs.map((faq, index) => {
-            const isOpen = activeIndex === index;
-
-            return (
-              <div
-                key={index}
-                className="bg-white border rounded-xl shadow-sm transition"
+          return (
+            <motion.div
+              key={index}
+              layout
+              className={`rounded-2xl border backdrop-blur-xl transition ${
+                isOpen
+                  ? "bg-white/10 border-purple-500 shadow-lg shadow-purple-500/20"
+                  : "bg-white/5 border-white/10 hover:bg-white/10"
+              }`}
+            >
+              {/* QUESTION */}
+              <button
+                onClick={() => toggleFAQ(index)}
+                className="w-full flex justify-between items-center p-5 text-left"
               >
+                <span className="font-medium text-sm md:text-base">
+                  {faq.question}
+                </span>
 
-                {/* Question */}
-                <button
-                  onClick={() =>
-                    setActiveIndex(isOpen ? null : index)
-                  }
-                  className="w-full flex justify-between items-center p-4 md:p-5 text-left"
+                <motion.div
+                  animate={{ rotate: isOpen ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <span className="font-medium text-gray-900 text-sm md:text-base">
-                    {faq.question}
-                  </span>
+                  <FaChevronDown className="text-purple-400" />
+                </motion.div>
+              </button>
 
-                  <FaChevronDown
-                    className={`transition-transform duration-300 ${
-                      isOpen ? "rotate-180 text-purple-600" : ""
-                    }`}
-                  />
-                </button>
-
-                {/* Answer */}
-                <div
-                  className={`transition-all duration-300 overflow-hidden ${
-                    isOpen ? "max-h-40 px-4 md:px-5 pb-4" : "max-h-0"
-                  }`}
-                >
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {faq.answer}
-                  </p>
-                </div>
-
-              </div>
-            );
-          })}
-
-        </div>
+              {/* ANSWER */}
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    key="content"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.35 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-5 pb-5 text-gray-300 text-sm leading-relaxed">
+                      {faq.answer}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

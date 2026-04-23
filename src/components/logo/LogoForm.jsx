@@ -1,72 +1,79 @@
 import React from "react";
+import * as Icons from "react-icons/fa";
+
+const iconList = ["FaRocket", "FaCode", "FaCrown", "FaShoppingCart"];
+
+const colors = ["#7c3aed", "#6366f1", "#ec4899", "#22c55e", "#f59e0b"];
 
 const LogoForm = ({ data, setData }) => {
   return (
     <div className="space-y-5">
 
-      <h2 className="text-xl font-bold text-gray-800">
-        Logo Settings
-      </h2>
-
-      {/* Brand Name */}
+      {/* NAME */}
       <input
-        placeholder="Brand Name"
         value={data.name}
         onChange={(e) => setData({ ...data, name: e.target.value })}
-        className="border px-3 py-2 rounded-lg w-full"
+        placeholder="Brand Name"
+        className="w-full p-3 border rounded-lg"
       />
 
-      {/* Color */}
-      <div className="flex gap-3 items-center">
-        <input
-          type="color"
-          value={data.color}
-          onChange={(e) => setData({ ...data, color: e.target.value })}
-        />
-        <label className="text-sm">Primary Color</label>
+      {/* COLOR PICKER */}
+      <div>
+        <p className="text-sm mb-2">Choose Color</p>
+        <div className="flex gap-2">
+          {colors.map((c) => (
+            <div
+              key={c}
+              onClick={() => setData({ ...data, color: c })}
+              className="w-8 h-8 rounded-full cursor-pointer border-2"
+              style={{
+                background: c,
+                borderColor: data.color === c ? "black" : "transparent",
+              }}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Gradient Toggle */}
-      <label className="flex gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={data.gradient}
-          onChange={(e) =>
-            setData({ ...data, gradient: e.target.checked })
-          }
-        />
-        Enable Gradient
-      </label>
+      {/* ICON PICKER */}
+      <div>
+        <p className="text-sm mb-2">Select Icon</p>
+        <div className="grid grid-cols-4 gap-3">
+          {iconList.map((icon) => {
+            const Icon = Icons[icon];
+            return (
+              <div
+                key={icon}
+                onClick={() => setData({ ...data, icon })}
+                className={`p-3 rounded-lg cursor-pointer border flex justify-center ${
+                  data.icon === icon
+                    ? "bg-purple-600 text-white"
+                    : "bg-gray-100"
+                }`}
+              >
+                <Icon />
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
-      {/* Font */}
+      {/* FONT */}
       <select
         value={data.font}
         onChange={(e) => setData({ ...data, font: e.target.value })}
-        className="border px-3 py-2 rounded-lg w-full"
+        className="w-full p-3 border rounded-lg"
       >
         <option>Poppins</option>
         <option>Montserrat</option>
         <option>Playfair Display</option>
-        <option>Roboto</option>
       </select>
 
-      {/* Icon */}
-      <select
-        value={data.icon}
-        onChange={(e) => setData({ ...data, icon: e.target.value })}
-        className="border px-3 py-2 rounded-lg w-full"
-      >
-        <option value="FaRocket">🚀 Startup</option>
-        <option value="FaShoppingCart">🛒 Ecommerce</option>
-        <option value="FaCode">💻 Tech</option>
-        <option value="FaCrown">👑 Premium</option>
-      </select>
-
-      {/* Layout */}
+      {/* LAYOUT */}
       <select
         value={data.layout}
         onChange={(e) => setData({ ...data, layout: e.target.value })}
-        className="border px-3 py-2 rounded-lg w-full"
+        className="w-full p-3 border rounded-lg"
       >
         <option value="horizontal">Horizontal</option>
         <option value="stacked">Stacked</option>

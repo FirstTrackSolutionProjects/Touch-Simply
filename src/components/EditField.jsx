@@ -10,7 +10,6 @@ const EditField = ({
   type = "text",
 }) => {
   const { resumeData, setResumeData } = useResume();
-
   const [editing, setEditing] = useState(false);
 
   let value = "";
@@ -40,7 +39,17 @@ const EditField = ({
     }
   };
 
-  // 🔥 TEXTAREA support
+  // 🔥 Handle keyboard
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && type !== "textarea") {
+      setEditing(false);
+    }
+    if (e.key === "Escape") {
+      setEditing(false);
+    }
+  };
+
+  // 🔥 TEXTAREA
   if (editing && type === "textarea") {
     return (
       <textarea
@@ -48,23 +57,39 @@ const EditField = ({
         onChange={handleChange}
         onBlur={() => setEditing(false)}
         autoFocus
-        className="w-full border outline-none bg-yellow-50 p-1 rounded"
+        rows={3}
+        className="w-full border border-purple-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none bg-yellow-50 px-2 py-1 rounded-md text-sm transition"
       />
     );
   }
 
-  return editing ? (
-    <input
-      value={value}
-      onChange={handleChange}
-      onBlur={() => setEditing(false)}
-      autoFocus
-      className="border-b outline-none bg-yellow-50 px-1"
-    />
-  ) : (
+  // 🔥 INPUT
+  if (editing) {
+    return (
+      <input
+        value={value}
+        onChange={handleChange}
+        onBlur={() => setEditing(false)}
+        onKeyDown={handleKeyDown}
+        autoFocus
+        className="border-b border-purple-400 focus:border-purple-600 outline-none bg-yellow-50 px-1 py-[2px] text-sm transition"
+      />
+    );
+  }
+
+  // 🔥 DISPLAY MODE
+  return (
     <span
       onClick={() => setEditing(true)}
-      className={`cursor-pointer hover:bg-yellow-100 px-1 rounded ${className}`}
+      className={`
+        cursor-pointer 
+        px-1 rounded 
+        transition-all duration-200
+        hover:bg-yellow-100 
+        hover:shadow-sm
+        ${!value ? "text-gray-400 italic" : ""}
+        ${className}
+      `}
     >
       {value || placeholder || "Click to edit"}
     </span>

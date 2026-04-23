@@ -1,14 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaCheckCircle } from "react-icons/fa";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  show: { opacity: 1, y: 0 },
+};
+
+const stagger = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
 
 const TemplateSection = ({ title, data, type, onUse }) => {
   const navigate = useNavigate();
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [visible, setVisible] = useState(isMobile ? 2 : 4);
+  const [selected, setSelected] = useState(null);
 
-  // Resize detect
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
@@ -23,7 +38,6 @@ const TemplateSection = ({ title, data, type, onUse }) => {
     setVisible(isMobile ? 2 : 4);
   }, [isMobile]);
 
-  // 🔥 PREVIEW FUNCTION
   const handlePreview = (key, type) => {
     localStorage.setItem("selectedTemplate", key);
 
@@ -35,81 +49,102 @@ const TemplateSection = ({ title, data, type, onUse }) => {
   return (
     <div className="mb-16">
 
-      {/* Heading */}
-      <h2 className="text-2xl font-bold text-white mb-6">
+      {/* 🔥 HEADING */}
+      <h2 className="text-2xl font-semibold text-white mb-8 tracking-tight">
         {title}
       </h2>
 
-      {/* Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* 🔥 GRID */}
+      <motion.div
+        variants={stagger}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
+        className="grid grid-cols-2 lg:grid-cols-4 gap-6"
+      >
         {data.slice(0, visible).map((t) => (
-          <div
+          <motion.div
             key={t.key}
-            className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden hover:shadow-lg transition"
+            variants={fadeUp}
+            whileHover={{ y: -8 }}
+            className={`relative group rounded-2xl overflow-hidden border transition duration-300
+              ${
+                selected === t.key
+                  ? "border-purple-500 shadow-purple-500/30 shadow-lg"
+                  : "border-white/10"
+              }`}
           >
 
-            {/* Image */}
-            <div className="relative">
+            {/* 🔥 IMAGE */}
+            <div className="relative overflow-hidden">
               <img
                 src={t.image}
                 alt={t.name}
-                className="w-full h-52 object-cover group-hover:scale-105 transition"
+                className="w-full h-52 object-cover transition duration-500 group-hover:scale-110"
               />
 
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-3 transition">
+              {/* 🔥 SHINE EFFECT */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
 
-                {/* USE */}
+              {/* 🔥 OVERLAY */}
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-3 transition">
+
                 <button
-                  onClick={() => onUse(t.key, type)}
-                  className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:scale-105 transition"
+                  onClick={() => {
+                    setSelected(t.key);
+                    onUse(t.key, type);
+                  }}
+                  className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:scale-105 transition shadow-lg"
                 >
-                  <FaCheckCircle /> Use
+                  <FaCheckCircle /> Use Template
                 </button>
 
-                {/* 🔥 PREVIEW */}
                 <button
                   onClick={() => handlePreview(t.key, type)}
                   className="flex items-center gap-2 border border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-black transition"
                 >
                   <FaEye /> Preview
                 </button>
-
               </div>
             </div>
 
-            {/* Info */}
-            <div className="p-3 text-center">
+            {/* 🔥 INFO */}
+            <div className="p-3 text-center bg-white/5 backdrop-blur-sm">
               <h3 className="text-white text-sm font-medium">
                 {t.name}
               </h3>
             </div>
 
-          </div>
-        ))}
-      </div>
+            {/* 🔥 SELECTED BADGE */}
+            {selected === t.key && (
+              <div className="absolute top-2 right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded">
+                Selected
+              </div>
+            )}
 
-      {/* Mobile Buttons */}
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* 🔥 MOBILE BUTTONS */}
       {isMobile && (
-        visible < data.length ? (
-          <div className="text-center mt-6">
+        <div className="text-center mt-8">
+          {visible < data.length ? (
             <button
               onClick={() => setVisible((prev) => prev + 2)}
               className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 rounded-lg shadow hover:scale-105 transition"
             >
               Explore More →
             </button>
-          </div>
-        ) : (
-          <div className="text-center mt-6">
+          ) : (
             <button
               onClick={() => setVisible(2)}
               className="border border-white text-white px-6 py-2 rounded-lg hover:bg-white hover:text-black transition"
             >
               Show Less ↑
             </button>
-          </div>
-        )
+          )}
+        </div>
       )}
 
     </div>

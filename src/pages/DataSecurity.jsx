@@ -1,58 +1,56 @@
 import React from "react";
+import { motion } from "framer-motion";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  show: { opacity: 1, y: 0 },
+};
 
 const DataSecurity = () => {
+  const items = [
+    { title: "Data Protection", desc: "We use industry-standard encryption to protect your data." },
+    { title: "Secure Storage", desc: "Your information is stored securely with restricted access." },
+    { title: "No Data Selling", desc: "We never sell or share your personal information." },
+    { title: "User Control", desc: "You can update or delete your data anytime." },
+    { title: "Regular Audits", desc: "We perform regular audits to ensure data security." },
+    { title: "Compliance", desc: "We comply with all applicable laws and regulations." },
+  ];
+
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="relative min-h-screen bg-gray-950 text-white overflow-hidden">
+
+      {/* Glow Background */}
+      <div className="absolute top-[-100px] left-[-100px] w-[300px] h-[300px] bg-green-500/30 blur-3xl rounded-full"></div>
+      <div className="absolute bottom-[-100px] right-[-100px] w-[300px] h-[300px] bg-emerald-500/30 blur-3xl rounded-full"></div>
 
       {/* Hero */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white py-14 md:py-20 text-center px-4">
-        <h1 className="text-3xl md:text-5xl font-bold">Data Security</h1>
-        <p className="text-gray-200 mt-3 max-w-xl mx-auto text-sm md:text-base">
-          Your data privacy and protection is our priority.
+      <div className="text-center py-20 relative z-10">
+        <h1 className="text-4xl md:text-6xl font-bold">Data Security</h1>
+        <p className="text-gray-400 mt-4">
+          Built with privacy-first architecture 🔐
         </p>
       </div>
 
-      {/* Content */}
-      <div className="max-w-3xl mx-auto px-4 md:px-6 py-10 md:py-14">
-        <div className="bg-white p-6 md:p-10 rounded-2xl shadow-sm border space-y-8">
-
-          {[
-            {
-              title: "Data Protection",
-              desc: "We use industry-standard encryption to protect your data.",
-            },
-            {
-              title: "Secure Storage",
-              desc: "Your information is stored securely with restricted access.",
-            },
-            {
-              title: "No Data Selling",
-              desc: "We never sell or share your personal information.",
-            },
-            {
-              title: "User Control",
-              desc: "You can update or delete your data anytime.",
-            },
-            {
-                title: "Regular Audits",
-                desc: "We perform regular audits to ensure data security.",
-            },
-            {
-                title: "Compliance with Laws",
-                desc: "We comply with all applicable laws and regulations.",
-            },
-          ].map((item, i) => (
-            <div key={i} className="border-l-4 border-green-500 pl-4">
-              <h2 className="font-semibold text-gray-900 text-sm md:text-base">
-                {i + 1}. {item.title}
-              </h2>
-              <p className="text-gray-600 text-sm mt-1">
-                {item.desc}
-              </p>
-            </div>
-          ))}
-
-        </div>
+      {/* Cards */}
+      <div className="max-w-5xl mx-auto px-6 pb-20 grid md:grid-cols-2 gap-6 relative z-10">
+        {items.map((item, i) => (
+          <motion.div
+            key={i}
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            transition={{ duration: 0.5, delay: i * 0.1 }}
+            whileHover={{ scale: 1.03 }}
+            className="p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg"
+          >
+            <h3 className="text-lg font-semibold text-green-400">
+              {item.title}
+            </h3>
+            <p className="text-gray-400 mt-2 text-sm">
+              {item.desc}
+            </p>
+          </motion.div>
+        ))}
       </div>
     </div>
   );

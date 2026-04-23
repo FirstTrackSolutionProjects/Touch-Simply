@@ -1,140 +1,148 @@
 import React from "react";
+import { motion } from "framer-motion";
+
+const sections = [
+  {
+    id: "info",
+    title: "Information We Collect",
+    content: [
+      "Account details (name, email address)",
+      "Resume data (education, experience, skills)",
+      "Usage data (pages visited, actions performed)",
+    ],
+  },
+  {
+    id: "usage",
+    title: "How We Use Your Information",
+    content: [
+      "To create and manage your resumes",
+      "To improve user experience and features",
+      "To send important updates and notifications",
+    ],
+  },
+  {
+    id: "cookies",
+    title: "Cookies & Tracking",
+    text: "We use cookies and similar technologies to enhance user experience and analyze usage.",
+  },
+  {
+    id: "security",
+    title: "Data Security",
+    text: "We implement strong security measures to protect your data from unauthorized access.",
+  },
+  {
+    id: "thirdparty",
+    title: "Third-Party Services",
+    text: "Some services like analytics and payments may be handled by trusted third-party providers.",
+  },
+  {
+    id: "rights",
+    title: "Your Rights",
+    content: [
+      "Access your personal data",
+      "Update or correct your information",
+      "Request account deletion",
+    ],
+  },
+  {
+    id: "changes",
+    title: "Changes to Policy",
+    text: "We may update this policy anytime. Changes will be reflected on this page.",
+  },
+  {
+    id: "contact",
+    title: "Contact Us",
+    text: "support@touchsimply.com",
+  },
+];
 
 const PrivacyPolicy = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
 
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-16 px-6 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-3">
+      {/* HERO */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-16 text-center px-4">
+        <h1 className="text-4xl md:text-5xl font-bold">
           Privacy Policy
         </h1>
-        <p className="text-gray-200 max-w-2xl mx-auto text-sm md:text-base">
-          Your privacy matters to us. This policy explains how we collect, use, and protect your information.
+        <p className="text-gray-200 mt-3 max-w-xl mx-auto">
+          We respect your privacy and are committed to protecting your data.
         </p>
-       
       </div>
 
-      {/* Content */}
-      <div className="max-w-5xl mx-auto px-6 py-12">
+      {/* MAIN */}
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-12 grid md:grid-cols-4 gap-10">
 
-        <div className="bg-white shadow-sm rounded-2xl p-8 md:p-10 border border-gray-100">
+        {/* 🔥 SIDEBAR */}
+        <div className="hidden md:block sticky top-24 h-fit">
+          <div className="bg-white p-5 rounded-xl shadow border">
+            <h3 className="font-semibold mb-4 text-gray-800">
+              Quick Navigation
+            </h3>
 
-          {/* Intro */}
-          <p className="text-gray-600 leading-relaxed mb-8">
-            At <span className="font-semibold text-gray-800">Touch Simply</span>, we are committed to protecting your personal information and maintaining transparency in how we handle your data. This Privacy Policy outlines how we collect, use, and safeguard your information when you use our platform.
-          </p>
-
-          {/* Sections */}
-          <div className="space-y-8">
-
-            {/* 1 */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                1. Information We Collect
-              </h2>
-              <p className="text-gray-600 mb-3">
-                We may collect personal and usage information to provide a better experience.
-              </p>
-
-              <ul className="list-disc ml-6 text-gray-600 space-y-1 text-sm">
-                <li>Account details (name, email address)</li>
-                <li>Resume data (education, experience, skills)</li>
-                <li>Usage data (pages visited, actions performed)</li>
-              </ul>
-            </div>
-
-            {/* 2 */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                2. How We Use Your Information
-              </h2>
-              <p className="text-gray-600 mb-3">
-                Your information helps us deliver and improve our services.
-              </p>
-
-              <ul className="list-disc ml-6 text-gray-600 space-y-1 text-sm">
-                <li>To create and manage your resumes</li>
-                <li>To improve user experience and features</li>
-                <li>To send important updates and notifications</li>
-              </ul>
-            </div>
-
-            {/* 3 */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                3. Cookies & Tracking Technologies
-              </h2>
-              <p className="text-gray-600 text-sm">
-                We may use cookies and similar technologies to enhance your browsing experience and analyze platform usage.
-              </p>
-            </div>
-
-            {/* 4 */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                4. Data Security
-              </h2>
-              <p className="text-gray-600 text-sm">
-                We implement appropriate security measures to protect your personal data from unauthorized access, alteration, or disclosure.
-              </p>
-            </div>
-
-            {/* 5 */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                5. Third-Party Services
-              </h2>
-              <p className="text-gray-600 text-sm">
-                We may use third-party services such as analytics tools or payment providers. These services operate under their own privacy policies.
-              </p>
-            </div>
-
-            {/* 6 */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                6. Your Rights
-              </h2>
-              <p className="text-gray-600 mb-3 text-sm">
-                You have full control over your personal data:
-              </p>
-
-              <ul className="list-disc ml-6 text-gray-600 space-y-1 text-sm">
-                <li>Access your personal data</li>
-                <li>Update or correct your information</li>
-                <li>Request deletion of your account</li>
-              </ul>
-            </div>
-
-            {/* 7 */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                7. Changes to This Policy
-              </h2>
-              <p className="text-gray-600 text-sm">
-                We may update this Privacy Policy periodically. Any changes will be posted on this page with an updated revision date.
-              </p>
-            </div>
-
-            {/* 8 */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                8. Contact Us
-              </h2>
-              <p className="text-gray-600 text-sm">
-                If you have any questions or concerns about this Privacy Policy, feel free to contact us at:
-              </p>
-
-              <p className="mt-2 font-medium text-gray-800">
-                support@touchsimply.com
-              </p>
-            </div>
-
+            <ul className="space-y-2 text-sm">
+              {sections.map((sec, i) => (
+                <li key={i}>
+                  <a
+                    href={`#${sec.id}`}
+                    className="text-gray-600 hover:text-blue-600 transition"
+                  >
+                    {i + 1}. {sec.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
-
         </div>
 
+        {/* 🔥 CONTENT */}
+        <div className="md:col-span-3 space-y-10">
+
+          {/* INTRO */}
+          <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border">
+            <p className="text-gray-600 leading-relaxed">
+              At <span className="font-semibold text-gray-800">Touch Simply</span>, 
+              we prioritize your privacy and ensure transparency in how your data is handled.
+            </p>
+          </div>
+
+          {/* SECTIONS */}
+          {sections.map((sec, i) => (
+            <motion.div
+              key={i}
+              id={sec.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              viewport={{ once: true }}
+              className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border hover:shadow-md transition"
+            >
+              <h2 className="text-xl font-semibold text-gray-900 mb-3">
+                {i + 1}. {sec.title}
+              </h2>
+
+              {/* LIST */}
+              {sec.content && (
+                <ul className="list-disc ml-6 text-gray-600 space-y-1 text-sm">
+                  {sec.content.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+              )}
+
+              {/* TEXT */}
+              {sec.text && (
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {sec.text}
+                </p>
+              )}
+            </motion.div>
+          ))}
+
+        </div>
       </div>
+
+      
 
     </div>
   );

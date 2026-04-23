@@ -4,199 +4,89 @@ import EditField from "../components/EditField";
 
 const ModernTemplate = () => {
   const { resumeData } = useResume();
-
   const { education, experience, skills, projects } = resumeData;
 
   return (
-    <div className="font-sans text-gray-800 bg-white p-8">
+    <div className="bg-white p-6 md:p-10 font-sans">
 
       {/* Header */}
-      <div className="flex justify-between items-center border-b pb-4 mb-6">
+      <div className="flex flex-col md:flex-row justify-between md:items-center border-b pb-4 mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold">
-            <EditField section="personal" field="name" placeholder="Your Name" />
+            <EditField section="personal" field="name" />
           </h1>
-
-          <p className="text-sm text-gray-600">
-            <EditField section="personal" field="email" placeholder="Email" />
-          </p>
-
-          <p className="text-sm text-gray-600">
-            <EditField section="personal" field="phone" placeholder="Phone" />
+          <p className="text-gray-600 text-sm">
+            <EditField section="personal" field="email" /> |{" "}
+            <EditField section="personal" field="phone" />
           </p>
         </div>
 
-        {/* Accent */}
-        <div className="w-16 h-16 bg-blue-500 rounded-full"></div>
+        <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
       </div>
 
-      {/* Grid */}
       <div className="grid md:grid-cols-2 gap-6">
 
         {/* LEFT */}
         <div>
-
-          {/* Experience */}
-          <h2 className="text-lg font-semibold mb-3 border-b pb-1">
-            Experience
-          </h2>
-
-          {experience?.length > 0 ? (
-            experience.map((exp, i) => (
-              <div key={i} className="mb-3">
-
-                <p className="font-medium">
-                  💼{" "}
-                  <EditField
-                    section="experience"
-                    field="role"
-                    index={i}
-                    placeholder="Role"
-                  />
+          <Section title="Experience">
+            {experience?.map((e, i) => (
+              <Item key={i}>
+                💼 <EditField section="experience" field="role" index={i} />
+                <p className="text-sm text-gray-500">
+                  <EditField section="experience" field="company" index={i} />
                 </p>
+              </Item>
+            ))}
+          </Section>
 
-                <p className="text-sm text-gray-600">
-                  <EditField
-                    section="experience"
-                    field="company"
-                    index={i}
-                    placeholder="Company"
-                  />
-                </p>
-
-                <p className="text-xs text-gray-500">
-                  {exp.startYear} - {exp.isCurrent ? "Present" : exp.endYear}
-                </p>
-
+          <Section title="Projects">
+            {projects?.map((p, i) => (
+              <Item key={i}>
+                📁 <EditField section="projects" field="title" index={i} />
                 <p className="text-sm">
-                  <EditField
-                    section="experience"
-                    field="description"
-                    index={i}
-                    type="textarea"
-                    placeholder="Work Description"
-                  />
+                  <EditField section="projects" field="description" index={i} type="textarea" />
                 </p>
-
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400 text-sm">No experience added</p>
-          )}
-
-          {/* Projects */}
-          <h2 className="text-lg font-semibold mt-6 mb-3 border-b pb-1">
-            Projects
-          </h2>
-
-          {projects?.length > 0 ? (
-            projects.map((p, i) => (
-              <div key={i} className="mb-3">
-
-                <p className="font-medium text-blue-600">
-                  📁{" "}
-                  <EditField
-                    section="projects"
-                    field="title"   // ✅ FIXED
-                    index={i}
-                    placeholder="Project Title"
-                  />
-                </p>
-
-                <p className="text-xs text-gray-500">
-                  {p.tech}
-                </p>
-
-                <p className="text-sm text-gray-700">
-                  <EditField
-                    section="projects"
-                    field="description"
-                    index={i}
-                    type="textarea"
-                    placeholder="Project Description"
-                  />
-                </p>
-
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400 text-sm">No projects added</p>
-          )}
-
+              </Item>
+            ))}
+          </Section>
         </div>
 
         {/* RIGHT */}
         <div>
-
-          {/* Education */}
-          <h2 className="text-lg font-semibold mb-3 border-b pb-1">
-            Education
-          </h2>
-
-          {education?.length > 0 ? (
-            education.map((edu, i) => (
-              <div key={i} className="mb-3">
-
-                <p className="font-medium">
-                  🎓{" "}
-                  <EditField
-                    section="education"
-                    field="level"   // ✅ FIXED
-                    index={i}
-                    placeholder="Degree"
-                  />{" "}
-                  <EditField
-                    section="education"
-                    field="specialization"
-                    index={i}
-                    placeholder="Specialization"
-                  />
+          <Section title="Education">
+            {education?.map((e, i) => (
+              <Item key={i}>
+                🎓 <EditField section="education" field="level" index={i} />
+                <p className="text-sm">
+                  <EditField section="education" field="school" index={i} />
                 </p>
+              </Item>
+            ))}
+          </Section>
 
-                <p className="text-sm text-gray-600">
-                  <EditField
-                    section="education"
-                    field="school"
-                    index={i}
-                    placeholder="School / College"
-                  />
-                </p>
-
-                <p className="text-xs text-gray-500">
-                  {edu.startYear} - {edu.endYear}
-                </p>
-
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400 text-sm">No education added</p>
-          )}
-
-          {/* Skills */}
-          <h2 className="text-lg font-semibold mt-6 mb-3 border-b pb-1">
-            Skills
-          </h2>
-
-          {skills?.length > 0 ? (
+          <Section title="Skills">
             <div className="flex flex-wrap gap-2">
-              {skills.map((s, i) => (
-                <span
-                  key={i}
-                  className="bg-blue-100 text-blue-700 px-3 py-1 text-sm rounded-full"
-                >
-                  {s.name} {/* ✅ FIXED */}
+              {skills?.map((s, i) => (
+                <span key={i} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                  {s.name}
                 </span>
               ))}
             </div>
-          ) : (
-            <p className="text-gray-400 text-sm">No skills added</p>
-          )}
-
+          </Section>
         </div>
-      </div>
 
+      </div>
     </div>
   );
 };
+
+const Section = ({ title, children }) => (
+  <div className="mb-6">
+    <h2 className="font-semibold text-lg border-b pb-1 mb-2">{title}</h2>
+    {children}
+  </div>
+);
+
+const Item = ({ children }) => <div className="mb-3">{children}</div>;
 
 export default ModernTemplate;
