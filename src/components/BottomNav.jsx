@@ -74,7 +74,7 @@ const BottomNav = () => {
 
         {/* CENTER BUTTON (Floating) */}
         <Link
-          to="/editor"
+          to="/library"
           className="absolute -top-7 left-1/2 -translate-x-1/2 
                      bg-gradient-to-r from-purple-600 to-indigo-600 
                      text-white p-4 rounded-full shadow-xl 

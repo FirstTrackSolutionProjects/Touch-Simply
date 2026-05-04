@@ -19,6 +19,9 @@ export const ResumeProvider = ({ children }) => {
     skills: [],
     projects: [],
     languages: [],
+    agreement: {
+      text: "",
+    },
   });
 
   return (

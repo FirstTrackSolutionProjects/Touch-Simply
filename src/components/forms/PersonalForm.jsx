@@ -2,7 +2,7 @@ import { useResume } from "../../context/ResumeContext";
 import { useState } from "react";
 import { generateSummary } from "../../utils/aiMock";
 
-const PersonalForm = () => {
+const PersonalForm = ({ goNext }) => {
   const { resumeData, setResumeData } = useResume();
 
   const [errors, setErrors] = useState({});
@@ -70,7 +70,10 @@ const PersonalForm = () => {
 
     if (Object.keys(newErrors).length === 0) {
       setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      setTimeout(() => {
+        setSaved(false);
+        goNext();
+      }, 2000);
     }
   };
 
@@ -89,14 +92,17 @@ const PersonalForm = () => {
           </label>
 
           <div className="relative group">
+            {resumeData.personal?.image ? (
             <img
-              src={
-                resumeData.personal?.image ||
-                "https://via.placeholder.com/120?text=Upload"
-              }
+              src={resumeData.personal?.image}
               alt="profile"
               className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md"
             />
+            ) : (
+              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-purple-200 to-indigo-200 flex items-center justify-center text-gray-500 text-sm border-4 border-white shadow-md">
+                Upload
+              </div>
+            )}
 
             <label className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition">
               <span className="text-white text-xs">Change</span>
@@ -139,6 +145,15 @@ const PersonalForm = () => {
           error={errors.email}
         />
 
+        {/* DOB (NEW) */}
+        <InputField
+          label="Date of Birth"
+          name="dob"
+          type="date"
+          value={resumeData.personal?.dob}
+          onChange={handleChange}
+        />
+
         {/* Phone */}
         <InputField
           label="Phone Number *"
@@ -148,6 +163,39 @@ const PersonalForm = () => {
           onChange={handleChange}
           error={errors.phone}
         />
+
+        {/* Address Section */}
+        <div className="grid gap-3 md:grid-cols-2">
+          
+
+          <InputField
+            label="Landmark"
+            name="landmark"
+            placeholder="123 Main St"
+            value={resumeData.personal?.landmark}
+            onChange={handleChange}
+          />
+          <InputField
+            label="City"
+            name="city"
+            placeholder="New York"
+            value={resumeData.personal?.city}
+            onChange={handleChange}
+          />
+          <InputField
+            label="State"
+            name="state"
+            value={resumeData.personal?.state}
+            onChange={handleChange}
+          />
+          <InputField
+            label="Pincode"
+            name="pincode"
+            value={resumeData.personal?.pincode}
+            onChange={handleChange}
+          />
+        </div>
+
 
         {/* Role (NEW) */}
         <InputField
@@ -206,6 +254,9 @@ const PersonalForm = () => {
           onChange={handleChange}
         />
 
+        {/* Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3 mt-4"></div>
+
         {/* Save */}
         <button
           onClick={validate}
@@ -215,6 +266,27 @@ const PersonalForm = () => {
           {saved ? "Saved ✅" : "Save Details"}
         </button>
 
+        {/* Next */}
+        <button
+          onClick={() => {
+          let newErrors = {};
+
+          if (!resumeData.personal?.name) newErrors.name = "Name is required";
+          if (!resumeData.personal?.email) newErrors.email = "Email is required";
+          if (!resumeData.personal?.phone) newErrors.phone = "Phone is required";
+
+          setErrors(newErrors);
+
+          if (Object.keys(newErrors).length === 0) {
+            setSaved(true);
+
+            goNext && goNext();
+          }
+        }}
+          className="flex-1 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 transition"
+        >
+          Next
+        </button>
       </div>
     </div>
   );
