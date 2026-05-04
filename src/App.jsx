@@ -14,6 +14,7 @@ import Register from "./pages/Register";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
+import Library from "./pages/Library";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundCancellation from "./pages/RefundCancellation";
 import TermsConditions from "./pages/TermsConditions";
@@ -50,6 +51,7 @@ function App() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/library" element={<Library />} />
           <Route path="/refund" element={<RefundCancellation />} />
           <Route path="/terms" element={<TermsConditions />} />
           <Route path="/faq" element={<FAQ />} />

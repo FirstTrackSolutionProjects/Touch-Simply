@@ -6,6 +6,7 @@ import ProjectsForm from "../components/forms/ProjectsForm";
 import ExperienceForm from "../components/forms/ExperienceForm";
 import LanguageForm from "../components/forms/LanguagesForm";
 import SkillsForm from "../components/forms/SkillsForm";
+import AgreementForm from "../components/forms/AgreementForm";
 import Canvas from "../components/Canvas";
 
 const Editor = () => {
@@ -26,24 +27,38 @@ const Editor = () => {
     { key: "projects", label: "🚀 Projects" },
     { key: "skills", label: "💪 Skills" },
     { key: "languages", label: "🌐 Languages" },
+    { key: "agreement", label: "📄 Agreement" },
   ];
 
   const renderForm = () => {
     switch (active) {
       case "personal":
-        return <PersonalForm />;
+          return <PersonalForm goNext={() => setActive("education")} />;
       case "education":
-        return <EducationForm />;
+        return <EducationForm 
+        goBack={() => setActive("personal")}
+        goNext={() => setActive("experience")} />;
       case "experience":
-        return <ExperienceForm />;
+        return <ExperienceForm
+        goBack={() => setActive("education")}
+        goNext={() => setActive("projects")} />;
       case "projects":
-        return <ProjectsForm />;
+        return <ProjectsForm
+        goBack={() => setActive("experience")}
+        goNext={() => setActive("skills")} />;
       case "skills":
-        return <SkillsForm />;
+        return <SkillsForm
+        goBack={() => setActive("projects")}
+        goNext={() => setActive("languages")} />;
       case "languages":
-        return <LanguageForm />;
+        return <LanguageForm 
+        goBack={() => setActive("skills")}
+        goNext={() => setActive("agreement")} />;
+      case "agreement":
+        return <AgreementForm goBack={() => setActive("languages")} />;
       default:
         return <PersonalForm />;
+      
     }
   };
 
