@@ -1,7 +1,7 @@
 import { useResume } from "../../context/ResumeContext";
 import { useState } from "react";
 
-const AgreementForm = ({ goBack }) => {
+const SignatureForm = ({ goBack }) => {
   const { resumeData, setResumeData } = useResume();
 
   const [signature, setSignature] = useState(
@@ -108,4 +108,4 @@ const AgreementForm = ({ goBack }) => {
   );
 };
 
-export default AgreementForm;
+export default SignatureForm;

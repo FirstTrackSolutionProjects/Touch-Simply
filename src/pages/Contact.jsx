@@ -129,7 +129,7 @@ const Contact = () => {
               {
                 icon: <FaPhoneAlt />,
                 title: "Phone",
-                value: "+91 98765 43210",
+                value: "+91 9040170727",
               },
               {
                 icon: <FaEnvelope />,
@@ -139,7 +139,7 @@ const Contact = () => {
               {
                 icon: <FaMapMarkerAlt />,
                 title: "Address",
-                value: "Bhubaneswar, Odisha, India",
+                value: "Saheed Nagar, Bhubaneswar, Odisha, India",
               },
             ].map((item, i) => (
               <motion.div

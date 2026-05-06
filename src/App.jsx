@@ -8,6 +8,8 @@ import Home from "./pages/Home";
 import Templates from "./pages/Templates";
 import LogoBuilder from "./pages/LogoBuilder";
 import PortfolioBuilder from "./pages/PortfolioBuilder";
+import OneClickPage from "./pages/OneClickPage";
+import Presentation from "./pages/Presentation";
 import Editor from "./pages/Editor";
 import LogIn from "./pages/LogIn";
 import Register from "./pages/Register";
@@ -42,9 +44,9 @@ function App() {
           <Route path="/templates" element={<Templates />} />
           <Route path="/logo" element={<LogoBuilder />} />
           <Route path="/portfolio" element={<PortfolioBuilder />} />
-
+          <Route path="/portfolio/view" element={<OneClickPage />} />
           <Route path="/editor" element={<Editor />} />
-          
+          <Route path="/presentation" element={<Presentation />} />
           <Route path="/login" element={<LogIn />} />
           <Route path="/register" element={<Register />} />
           <Route path="/about" element={<About />} />

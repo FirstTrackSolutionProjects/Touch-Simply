@@ -6,10 +6,40 @@ import jsPDF from "jspdf";
 
 const PortfolioBuilder = () => {
   const [data, setData] = useState({
-    name: "",
-    about: "",
-    projects: [],
-  });
+  name: "",
+  email: "",
+  phone: "",
+  dob: "",
+  city: "",
+  state: "",
+  pincode: "",
+
+  github: "",
+  linkedin: "",
+  instagram: "",
+  facebook: "",
+  twitter: "",
+  youtube: "",
+
+  education: [
+    {
+      degree: "",
+      college: "",
+      startYear: "",
+      endYear: "",
+      isPresent: false,
+    },
+  ],
+
+  projects: [
+    {
+      title: "",
+      desc: "",
+      github: "",
+      image: "",
+    },
+  ],
+});
 
 const downloadPDF = async () => {
   const element = document.getElementById("portfolio-preview");
@@ -47,7 +77,7 @@ const downloadPDF = async () => {
 };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-purple-950 via-indigo-950 to-gray-950">
+    <div className=" flex flex-col md:flex-row bg-gradient-to-br from-purple-950 via-indigo-950 to-gray-950">
 
       {/* LEFT */}
       <div className="md:w-1/2 p-6">
@@ -60,15 +90,21 @@ const downloadPDF = async () => {
       <div className="md:w-1/2 p-6">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
 
-          <div className="flex justify-between px-4 py-2 border-b">
-            <h2>Live Preview</h2>
+        <div className="flex justify-between px-4 py-2 border-b items-center">
+          <h2>Live Preview</h2>
 
-            <button
-              onClick={downloadPDF}
-              className="bg-purple-600 text-white px-3 py-1 rounded"
-            >
-              Download
-            </button>
+            <div className="flex gap-2">
+
+              <button
+                onClick={() => {
+                  localStorage.setItem("portfolioData", JSON.stringify(data));
+                  window.open("/portfolio/view", "_blank");
+                }}
+                className="bg-black text-white px-3 py-1 rounded"
+              >
+                Open Portfolio 🚀
+              </button>
+            </div>
           </div>
 
           <div id="portfolio-preview" className="p-4">
