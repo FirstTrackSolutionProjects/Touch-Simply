@@ -31,11 +31,11 @@ export const generateExperienceDesc = (role) => {
 };
 
 // ✅ Logo Names
-export const generateLogoNames = (business) => {
-  return [
-    `${business}Hub`,
-    `${business}ify`,
-    `${business}Works`,
-    `${business}Craft`,
-  ];
-};
+// export const generateLogoNames = (business) => {
+//   return [
+//     `${business}Hub`,
+//     `${business}ify`,
+//     `${business}Works`,
+//     `${business}Craft`,
+//   ];
+// };

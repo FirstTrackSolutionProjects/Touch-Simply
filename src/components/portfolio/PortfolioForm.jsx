@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { X, Plus } from "lucide-react";
-
-const MAX_TITLE = 50;
-const MAX_DESC = 200;
+import { motion, AnimatePresence } from "framer-motion";
 
 const PortfolioForm = ({ data, setData }) => {
   const [removingIndex, setRemovingIndex] = useState(null);
-  const [errors, setErrors] = useState({});
 
-  // Ensure at least 1 project
+  education: [
+  {
+    degree: "",
+    college: "",
+    startYear: "",
+    endYear: "",
+    isPresent: false,
+  },
+]
+
   useEffect(() => {
     if (!data.projects || data.projects.length === 0) {
       setData({
         ...data,
-        projects: [
-          { title: "", desc: "", github: "", image: "" },
-        ],
+        projects: [{ title: "", desc: "", github: "", image: "" }],
       });
     }
   }, [data.projects]);
@@ -28,13 +32,10 @@ const PortfolioForm = ({ data, setData }) => {
     const updated = [...data.projects];
     updated[index][field] = value;
     setData({ ...data, projects: updated });
-
-    validateField(index, field, value);
   };
 
   const handleImageUpload = (index, file) => {
     if (!file) return;
-
     const reader = new FileReader();
     reader.onloadend = () => {
       handleProjectChange(index, "image", reader.result);
@@ -42,46 +43,7 @@ const PortfolioForm = ({ data, setData }) => {
     reader.readAsDataURL(file);
   };
 
-  // 🔥 VALIDATION
-  const validateField = (index, field, value) => {
-    let newErrors = { ...errors };
-    if (!newErrors[index]) newErrors[index] = {};
-
-    // TITLE
-    if (field === "title") {
-      if (!value.trim()) {
-        newErrors[index].title = "Title is required";
-      } else {
-        delete newErrors[index]?.title;
-      }
-    }
-
-    // GITHUB (STRICT VALIDATION)
-    if (field === "github") {
-      const githubRegex =
-        /^https:\/\/github\.com\/[A-Za-z0-9-]+(\/[A-Za-z0-9._-]+)?\/?$/;
-
-      if (value && !githubRegex.test(value)) {
-        newErrors[index].github = "Enter valid GitHub URL";
-      } else {
-        delete newErrors[index]?.github;
-      }
-    }
-
-    setErrors(newErrors);
-  };
-
-  // ADD PROJECT (with validation check)
   const addProject = () => {
-    const hasErrors = Object.values(errors).some(
-      (err) => Object.keys(err).length > 0
-    );
-
-    if (hasErrors) {
-      alert("Fix errors before adding new project");
-      return;
-    }
-
     setData({
       ...data,
       projects: [
@@ -93,154 +55,304 @@ const PortfolioForm = ({ data, setData }) => {
 
   const removeProject = (index) => {
     if (data.projects.length === 1) return;
+    setRemovingIndex(index);
 
-    if (window.confirm("Delete project?")) {
-      setRemovingIndex(index);
-
-      setTimeout(() => {
-        const updated = data.projects.filter((_, i) => i !== index);
-        setData({ ...data, projects: updated });
-        setRemovingIndex(null);
-      }, 300);
-    }
+    setTimeout(() => {
+      const updated = data.projects.filter((_, i) => i !== index);
+      setData({ ...data, projects: updated });
+      setRemovingIndex(null);
+    }, 250);
   };
+  // INIT EDUCATION
+useEffect(() => {
+  if (!data.education || data.education.length === 0) {
+    setData({
+      ...data,
+      education: [{ degree: "", college: "", startYear: "", endYear: "", isPresent: false}],
+    });
+  }
+}, [data.education]);
 
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Portfolio Details</h2>
+// CHANGE
+const handleEducationChange = (index, field, value) => {
+  const updated = [...data.education];
+  updated[index][field] = value;
+  setData({ ...data, education: updated });
+};
 
-      {/* BASIC INFO */}
-      <input
-        placeholder="Your Name"
-        className="w-full border px-3 py-2 rounded"
-        value={data.name}
-        onChange={(e) => handleChange("name", e.target.value)}
-      />
+// ADD
+const addEducation = () => {
+  setData({
+    ...data,
+    education: [
+      ...data.education,
+      { degree: "", college: "", year: "", desc: "" },
+    ],
+  });
+};
 
-      <textarea
-        placeholder="About You"
-        className="w-full border px-3 py-2 rounded"
-        value={data.about}
-        onChange={(e) => handleChange("about", e.target.value)}
-      />
+// REMOVE
+const removeEducation = (index) => {
+  if (data.education.length === 1) return;
 
-      {/* PROJECTS */}
-      {data.projects.map((proj, i) => (
-        <div
-          key={i}
-          className={`border p-4 rounded-xl space-y-3 relative transition ${
-            removingIndex === i ? "opacity-0 scale-95" : ""
-          }`}
-        >
-          {/* HEADER */}
-          <div className="flex justify-between items-center">
-            <h4 className="font-semibold">Project {i + 1}</h4>
+  const updated = data.education.filter((_, i) => i !== index);
+  setData({ ...data, education: updated });
+};
 
-            {i !== 0 && (
-              <button
-                onClick={() => removeProject(i)}
-                className="text-gray-400 hover:text-red-500"
-              >
-                <X size={18} />
-              </button>
-            )}
-          </div>
+return (
+  <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-900/20 to-black px-3 sm:px-6 py-6">
 
-          {/* TITLE */}
-          <div>
-            <input
-              placeholder="Project Title"
-              maxLength={MAX_TITLE}
-              className="w-full border px-2 py-1 rounded"
-              value={proj.title}
-              onChange={(e) =>
-                handleProjectChange(i, "title", e.target.value)
-              }
-            />
-            <div className="flex justify-between text-xs text-gray-400">
-              <span className="text-red-500">
-                {errors[i]?.title}
-              </span>
-              <span>
-                {proj.title.length}/{MAX_TITLE}
-              </span>
-            </div>
-          </div>
+    <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
 
-          {/* DESCRIPTION */}
-          <div>
-            <textarea
-              placeholder="Description"
-              maxLength={MAX_DESC}
-              className="w-full border px-2 py-1 rounded"
-              value={proj.desc}
-              onChange={(e) =>
-                handleProjectChange(i, "desc", e.target.value)
-              }
-            />
-            <div className="text-xs text-gray-400 text-right">
-              {proj.desc.length}/{MAX_DESC}
-            </div>
-          </div>
+      {/* 👤 PERSONAL INFO */}
+      <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-md border border-gray-200 space-y-4">
 
-          {/* GITHUB */}
-          <div>
-            <input
-              type="url"
-              placeholder="https://github.com/username/repo"
-              className="w-full border px-2 py-1 rounded"
-              value={proj.github}
-              onChange={(e) =>
-                handleProjectChange(i, "github", e.target.value)
-              }
-            />
-            {errors[i]?.github && (
-              <p className="text-xs text-red-500 mt-1">
-                {errors[i].github}
-              </p>
-            )}
-          </div>
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+          👤 Personal Info
+        </h3>
 
-          {/* IMAGE */}
-          <div>
-            <label className="cursor-pointer">
-              <div className="w-24 h-24 border-dashed border-2 flex items-center justify-center rounded overflow-hidden hover:border-purple-500 transition">
-                {proj.image ? (
-                  <img
-                    src={proj.image}
-                    alt="preview"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="text-xs text-gray-400 text-center px-2">
-                    Upload Image
-                  </span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+
+          <input placeholder="Full Name" value={data.name || ""} onChange={(e)=>handleChange("name",e.target.value)}
+            className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+
+          <input placeholder="Email" value={data.email || ""} onChange={(e)=>handleChange("email",e.target.value)}
+               className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+
+          <input placeholder="Phone" value={data.phone || ""} onChange={(e)=>handleChange("phone",e.target.value)}
+            className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+
+          <input type="date" value={data.dob || ""} onChange={(e)=>handleChange("dob",e.target.value)}
+            className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+
+          <input placeholder="City" value={data.city || ""} onChange={(e)=>handleChange("city",e.target.value)} className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+          <input placeholder="State" value={data.state || ""} onChange={(e)=>handleChange("state",e.target.value)} className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+          <input placeholder="Pincode" value={data.pincode || ""} onChange={(e)=>handleChange("pincode",e.target.value)} className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+
+        </div>
+
+      </div>
+
+        {/* 🎓 EDUCATION */}
+      <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-md border border-gray-200 space-y-4">
+
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+          🎓 Education
+        </h3>
+
+        <AnimatePresence>
+          {data.education?.map((edu, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-4"
+            >
+
+              <div className="flex justify-between items-center">
+                <h4 className="text-sm font-semibold text-gray-700">
+                  Education {i + 1}
+                </h4>
+
+                {i !== 0 && (
+                  <button onClick={() => removeEducation(i)}>
+                    <X className="text-gray-400 hover:text-red-500" />
+                  </button>
                 )}
               </div>
 
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) =>
-                  handleImageUpload(i, e.target.files[0])
-                }
-              />
-            </label>
-          </div>
-        </div>
-      ))}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
-      {/* ADD BUTTON */}
-      <button
-        onClick={addProject}
-        className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white py-2 rounded hover:scale-[1.02] transition"
-      >
-        <Plus size={18} />
-        Add Project
-      </button>
+                {/* DEGREE */}
+                <input
+                  placeholder="Degree (B.Tech, MBA...)"
+                  value={edu.degree}
+                  onChange={(e) =>
+                    handleEducationChange(i, "degree", e.target.value)
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-500 outline-none"
+                />
+
+                {/* COLLEGE */}
+                <input
+                  placeholder="College / University"
+                  value={edu.college}
+                  onChange={(e) =>
+                    handleEducationChange(i, "college", e.target.value)
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-500 outline-none"
+                />
+
+                {/* START YEAR */}
+                <div className="font-semibold">Start Year</div>
+                <input
+                  type="month"
+                  value={edu.startYear}
+                  onChange={(e) =>
+                    handleEducationChange(i, "startYear", e.target.value)
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-500 outline-none"
+                />
+
+                {/* END YEAR */}
+                <div className="font-semibold">End Year</div>
+                <input
+                  type="month"
+                  placeholder="End Year"
+                  value={edu.endYear}
+                  disabled={edu.isPresent}
+                  onChange={(e) =>
+                    handleEducationChange(i, "endYear", e.target.value)
+                  }
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg outline-none ${
+                    edu.isPresent
+                      ? "bg-gray-200 cursor-not-allowed"
+                      : "bg-gray-50 focus:ring-2 focus:ring-purple-500"
+                  }`}
+                />
+
+              </div>
+
+              {/* PRESENT CHECKBOX */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={edu.isPresent}
+                  onChange={(e) =>
+                    handleEducationChange(i, "isPresent", e.target.checked)
+                  }
+                />
+                <label className="text-sm text-gray-600">
+                  Currently Studying
+                </label>
+              </div>
+
+             
+
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        <button
+          onClick={addEducation}
+          className="w-full flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-lg font-medium"
+        >
+          <Plus size={12} />
+          Add Education
+        </button>
+
+      </div>
+
+      {/* 🌐 SOCIAL */}
+      <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-md border border-gray-200 space-y-4">
+
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+          🌐 Social Links
+        </h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+
+          <input placeholder="GitHub URL" value={data.github || ""} onChange={(e)=>handleChange("github",e.target.value)} className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+          <input placeholder="LinkedIn URL" value={data.linkedin || ""} onChange={(e)=>handleChange("linkedin",e.target.value)} className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+          <input placeholder="Instagram URL" value={data.instagram || ""} onChange={(e)=>handleChange("instagram",e.target.value)} className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+          <input placeholder="Facebook URL" value={data.facebook || ""} onChange={(e)=>handleChange("facebook",e.target.value)} className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+          <input placeholder="Twitter (X)" value={data.twitter || ""} onChange={(e)=>handleChange("twitter",e.target.value)} className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+          <input placeholder="YouTube URL" value={data.youtube || ""} onChange={(e)=>handleChange("youtube",e.target.value)} className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+
+        </div>
+
+      </div>
+
+      {/* 🚀 PROJECTS */}
+      <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-md border border-gray-200 space-y-4">
+
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+          🚀 Projects
+        </h3>
+
+        <AnimatePresence>
+          {data.projects.map((proj, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className={`border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-4 ${
+                removingIndex === i ? "opacity-0 scale-95" : ""
+              }`}
+            >
+
+              <div className="flex justify-between items-center">
+                <h4 className="text-sm font-semibold text-gray-700">
+                  Project {i + 1}
+                </h4>
+
+                {i !== 0 && (
+                  <button onClick={() => removeProject(i)}>
+                    <X className="text-gray-400 hover:text-red-500" />
+                  </button>
+                )}
+              </div>
+
+              {/* MOBILE = stack, DESKTOP = split */}
+              <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4">
+
+                <div className="space-y-3">
+
+                  <input placeholder="Project Title" value={proj.title}
+                    onChange={(e)=>handleProjectChange(i,"title",e.target.value)}
+                    className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition"/>
+
+                  <textarea placeholder="Description" value={proj.desc}
+                    onChange={(e)=>handleProjectChange(i,"desc",e.target.value)}
+                    className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition min-h-[100px]"/>
+
+                </div>
+
+                <div>
+                  <label className="cursor-pointer block">
+                    <div className="w-full h-[140px] sm:h-[160px] rounded-lg border border-gray-300 bg-gray-100 flex items-center justify-center overflow-hidden hover:border-purple-500 transition">
+
+                      {proj.image ? (
+                        <img src={proj.image} className="w-full h-full object-cover"/>
+                      ) : (
+                        <div className="text-center text-gray-400">
+                          <p className="text-sm">Upload Image</p>
+                          <p className="text-xs">PNG, JPG</p>
+                        </div>
+                      )}
+
+                    </div>
+
+                    <input type="file" className="hidden"
+                      onChange={(e)=>handleImageUpload(i,e.target.files[0])}/>
+                  </label>
+                </div>
+
+              </div>
+
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        <button
+          onClick={addProject}
+          className="w-full flex items-center justify-center  bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-lg font-medium active:scale-95 sm:hover:scale-[1.02] transition"
+        >
+          <Plus size={12} />
+          Add New Project
+        </button>
+
+      </div>
+
     </div>
-  );
+  </div>
+);
 };
 
 export default PortfolioForm;

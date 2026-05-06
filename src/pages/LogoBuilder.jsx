@@ -27,7 +27,7 @@ const LogoBuilder = () => {
           <LogoForm data={data} setData={setData} />
 
           {/* 🔥 AI SUGGEST */}
-          <button
+          {/* <button
             onClick={() =>
               setData({
                 ...data,
@@ -40,7 +40,7 @@ const LogoBuilder = () => {
             className="mt-5 w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 rounded-lg hover:scale-105 transition"
           >
             ✨ Generate AI Logo
-          </button>
+          </button> */}
 
         </div>
       </div>

@@ -41,12 +41,23 @@ const Templates = () => {
     { name: "Professional Portfolio", key: "portfolio-pro", image: "/images/professional-portfolio.jpg" },
   ];
 
+  // ✅ NEW PPT TEMPLATES
+  const presentationTemplates = [
+    { name: "Startup Pitch", key: "ppt-startup", image: "/images/ppt-startup.jpg" },
+    { name: "Business Deck", key: "ppt-business", image: "/images/ppt-business.jpg" },
+    { name: "Creative Slides", key: "ppt-creative", image: "/images/ppt-creative.jpg" },
+    { name: "Minimal Slides", key: "ppt-minimal", image: "/images/ppt-minimal.jpg" },
+  ];
+
   const handleUseTemplate = (key, type) => {
     localStorage.setItem("selectedTemplate", key);
 
     if (type === "resume") navigate("/editor");
     if (type === "logo") navigate("/logo");
     if (type === "portfolio") navigate("/portfolio");
+
+    // ✅ NEW ROUTE
+    if (type === "presentation") navigate("/presentation");
   };
 
   return (
@@ -68,7 +79,7 @@ const Templates = () => {
         </h1>
 
         <p className="text-gray-400 mt-5 text-sm md:text-lg max-w-xl mx-auto">
-          Build Resume, Logo & Portfolio in minutes with modern designs 🚀
+          Build Resume, Logo, Portfolio & Presentations 🚀
         </p>
       </motion.div>
 
@@ -82,11 +93,7 @@ const Templates = () => {
       >
 
         {/* RESUME */}
-        <motion.div
-          variants={fadeUp}
-          whileHover={{ scale: 1.01 }}
-          className="group bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-xl border border-white/10 p-6 md:p-10 rounded-2xl shadow-xl hover:shadow-purple-500/20 transition duration-500"
-        >
+        <motion.div variants={fadeUp} className="group bg-white/5 border border-white/10 p-6 md:p-10 rounded-2xl shadow-xl">
           <TemplateSection
             title="Resume Templates"
             data={resumeTemplates}
@@ -96,11 +103,7 @@ const Templates = () => {
         </motion.div>
 
         {/* LOGO */}
-        <motion.div
-          variants={fadeUp}
-          whileHover={{ scale: 1.01 }}
-          className="group bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-xl border border-white/10 p-6 md:p-10 rounded-2xl shadow-xl hover:shadow-indigo-500/20 transition duration-500"
-        >
+        <motion.div variants={fadeUp} className="group bg-white/5 border border-white/10 p-6 md:p-10 rounded-2xl shadow-xl">
           <TemplateSection
             title="Logo Templates"
             data={logoTemplates}
@@ -110,15 +113,21 @@ const Templates = () => {
         </motion.div>
 
         {/* PORTFOLIO */}
-        <motion.div
-          variants={fadeUp}
-          whileHover={{ scale: 1.01 }}
-          className="group bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-xl border border-white/10 p-6 md:p-10 rounded-2xl shadow-xl hover:shadow-purple-400/20 transition duration-500"
-        >
+        <motion.div variants={fadeUp} className="group bg-white/5 border border-white/10 p-6 md:p-10 rounded-2xl shadow-xl">
           <TemplateSection
             title="Portfolio Templates"
             data={portfolioTemplates}
             type="portfolio"
+            onUse={handleUseTemplate}
+          />
+        </motion.div>
+
+        {/* ✅ NEW PPT SECTION */}
+        <motion.div variants={fadeUp} className="group bg-white/5 border border-white/10 p-6 md:p-10 rounded-2xl shadow-xl hover:shadow-indigo-400/20 transition">
+          <TemplateSection
+            title="Presentation Templates (PPT)"
+            data={presentationTemplates}
+            type="presentation"
             onUse={handleUseTemplate}
           />
         </motion.div>

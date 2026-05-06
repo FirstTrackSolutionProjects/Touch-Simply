@@ -6,7 +6,7 @@ import ProjectsForm from "../components/forms/ProjectsForm";
 import ExperienceForm from "../components/forms/ExperienceForm";
 import LanguageForm from "../components/forms/LanguagesForm";
 import SkillsForm from "../components/forms/SkillsForm";
-import AgreementForm from "../components/forms/AgreementForm";
+import SignatureForm from "../components/forms/SignatureForm";
 import Canvas from "../components/Canvas";
 
 const Editor = () => {
@@ -27,7 +27,7 @@ const Editor = () => {
     { key: "projects", label: "🚀 Projects" },
     { key: "skills", label: "💪 Skills" },
     { key: "languages", label: "🌐 Languages" },
-    { key: "agreement", label: "📄 Agreement" },
+    { key: "signature", label: "📄 Signature" },
   ];
 
   const renderForm = () => {
@@ -53,9 +53,9 @@ const Editor = () => {
       case "languages":
         return <LanguageForm 
         goBack={() => setActive("skills")}
-        goNext={() => setActive("agreement")} />;
-      case "agreement":
-        return <AgreementForm goBack={() => setActive("languages")} />;
+        goNext={() => setActive("signature")} />;
+      case "signature":
+        return <SignatureForm goBack={() => setActive("languages")} />;
       default:
         return <PersonalForm />;
       

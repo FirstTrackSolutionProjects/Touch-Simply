@@ -10,7 +10,7 @@ import {
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-950 text-gray-300 px-6 md:px-16 py-14 mt-10 relative overflow-hidden">
+    <footer className="bg-gray-950 text-gray-300 px-6 md:px-16 py-14 mb-20 relative overflow-hidden">
 
       {/* 🔥 Glow Background */}
       <div className="absolute top-0 left-0 w-72 h-72 bg-purple-700/20 blur-3xl rounded-full"></div>
@@ -38,7 +38,7 @@ const Footer = () => {
                 <FaEnvelope /> support@touchsimply.com
               </p>
               <p className="flex items-center gap-2 hover:text-white transition">
-                <FaPhoneAlt /> +91 98765 43210
+                <FaPhoneAlt /> +91 9040170727
               </p>
             </div>
           </div>
@@ -132,8 +132,8 @@ const Footer = () => {
 
         {/* ================= BOTTOM ================= */}
         <div className="border-t border-gray-800 mt-10 pt-6 text-center text-sm text-gray-500">
-          © 2026{" "}
-          <span className="text-white font-medium">Touch Simply</span>. All
+          Touch Simply, Copyright© 2026{" "}
+          <span className="text-white font-medium">First Track Solution Technologies</span>. All
           rights reserved.
         </div>
 

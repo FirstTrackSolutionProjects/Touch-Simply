@@ -12,6 +12,7 @@ const NavBar = () => {
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
     { name: "Library", path: "/library" },
+    { name: "Slides", path: "/presentation" }
   ];
 
   return (
@@ -69,40 +70,40 @@ const NavBar = () => {
           </div>
 
           {/* ✅ Mobile Menu Button */}
-          {/* <button
+          <button
             onClick={() => setMenuOpen(true)}
             className="md:hidden text-white"
           >
-            <Menu size={26} />
-          </button> */}
+            <Menu size={25} />
+          </button>
         </div>
       </nav>
 
       {/* 🔥 Overlay */}
-      {/* <div
+      <div
         className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition ${
           menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
         }`}
         onClick={() => setMenuOpen(false)}
-      /> */}
+      />
 
       {/* 🔥 Mobile Drawer */}
-      {/* <div
-        className={`fixed top-0 right-0 h-full w-72 bg-gray-900 border-l border-white/10 z-50 shadow-2xl transform transition-all duration-300 ${
+      <div
+        className={`fixed top-0 right-0 h-full w-60 bg-gray-900 border-l border-white/10 z-50 shadow-2xl transform transition-all duration-300 ${
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
-      > */}
+      >
 
         {/* Header */}
-        {/* <div className="flex items-center justify-between p-4 border-b border-white/10">
+        <div className="flex items-center justify-between p-4 border-b border-white/10">
           <h2 className="text-white font-semibold">Menu</h2>
           <button onClick={() => setMenuOpen(false)} className="text-white">
             <X size={22} />
           </button>
-        </div> */}
+        </div>
 
         {/* Links */}
-        {/* <div className="flex flex-col gap-5 p-6 text-gray-300">
+        <div className="flex flex-col gap-5 p-6 text-gray-300">
 
           {navLinks.map((link) => (
             <Link
@@ -127,8 +128,8 @@ const NavBar = () => {
             Login
           </Link>
 
-        </div> */}
-      {/* </div> */}
+        </div>
+      </div>
     </>
   );
 };
