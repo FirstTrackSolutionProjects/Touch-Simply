@@ -19,21 +19,25 @@ const PersonalForm = ({ goNext }) => {
     });
   };
 
-  // ✅ Image Upload
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
+ const handleImage = (e) => {
+  const file = e.target.files[0];
 
-      setResumeData({
-        ...resumeData,
-        personal: {
-          ...resumeData.personal,
-          image: imageUrl,
-        },
-      });
-    }
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onloadend = () => {
+    setResumeData((prev) => ({
+      ...prev,
+      personal: {
+        ...prev.personal,
+        image: reader.result,
+      },
+    }));
   };
+
+  reader.readAsDataURL(file);
+};
 
   // ✅ AI Summary Generator
   const handleGenerateSummary = () => {

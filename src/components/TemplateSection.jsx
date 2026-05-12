@@ -24,19 +24,25 @@ const TemplateSection = ({ title, data, type, onUse }) => {
   const [visible, setVisible] = useState(isMobile ? 2 : 4);
   const [selected, setSelected] = useState(null);
 
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-    };
+useEffect(() => {
+  const handleResize = () => {
+    const mobile = window.innerWidth < 768;
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    setIsMobile(mobile);
+    setVisible(mobile ? 2 : 4);
+  };
 
-  useEffect(() => {
-    setVisible(isMobile ? 2 : 4);
-  }, [isMobile]);
+  window.addEventListener("resize", handleResize);
+
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
+
+ useEffect(() => {
+  const mobile = window.innerWidth < 768;
+
+  setIsMobile(mobile);
+  setVisible(mobile ? 2 : 4);
+}, []);
 
   const handlePreview = (key, type) => {
     localStorage.setItem("selectedTemplate", key);
@@ -47,7 +53,7 @@ const TemplateSection = ({ title, data, type, onUse }) => {
   };
 
   return (
-    <div className="mb-16">
+    <div className="mb-16 overflow-hidden">
 
       {/* 🔥 HEADING */}
       <h2 className="text-2xl font-semibold text-white mb-8 tracking-tight">
@@ -58,9 +64,8 @@ const TemplateSection = ({ title, data, type, onUse }) => {
       <motion.div
         variants={stagger}
         initial="hidden"
-        whileInView="show"
-        viewport={{ once: true }}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-6"
+        animate="show"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
       >
         {data.slice(0, visible).map((t) => (
           <motion.div
@@ -80,7 +85,7 @@ const TemplateSection = ({ title, data, type, onUse }) => {
               <img
                 src={t.image}
                 alt={t.name}
-                className="w-full h-52 object-cover transition duration-500 group-hover:scale-110"
+                className="w-full h-40 sm:h-52 object-cover transition duration-500 group-hover:scale-110"
               />
 
               {/* 🔥 SHINE EFFECT */}
@@ -128,18 +133,18 @@ const TemplateSection = ({ title, data, type, onUse }) => {
 
       {/* 🔥 MOBILE BUTTONS */}
       {isMobile && (
-        <div className="text-center mt-8">
+        <div className="flex justify-center mt-8 pb-2">
           {visible < data.length ? (
             <button
-              onClick={() => setVisible((prev) => prev + 2)}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 rounded-lg shadow hover:scale-105 transition"
+              onClick={() => setVisible((prev) => Math.min(prev + 2, data.length))}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg active:scale-95 hover:scale-105 transition"
             >
               Explore More →
             </button>
           ) : (
             <button
-              onClick={() => setVisible(2)}
-              className="border border-white text-white px-6 py-2 rounded-lg hover:bg-white hover:text-black transition"
+              onClick={() => setVisible(window.innerWidth < 768 ? 2 : 4)}
+              className="border border-white/30 bg-white/10 backdrop-blur-md text-white px-6 py-3 rounded-xl active:scale-95 transition"
             >
               Show Less ↑
             </button>

@@ -1,33 +1,82 @@
-const STORAGE_KEY = "myLibrary";
+// src/utils/library.js
 
+const STORAGE_KEY = "touchsimply-library";
+
+// ================= SAVE =================
+export const saveToLibrary = (item) => {
+  try {
+    const existing =
+      JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+    // Prevent duplicates
+    const alreadyExists = existing.find(
+      (i) =>
+        i.title === item.title &&
+        i.format === item.format &&
+        i.type === item.type
+    );
+
+    if (alreadyExists) return;
+
+    const updated = [item, ...existing];
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(updated)
+    );
+  } catch (error) {
+    console.error(
+      "Error saving to library:",
+      error
+    );
+  }
+};
+
+// ================= GET =================
 export const getLibrary = () => {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  } catch {
+    const items =
+      JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+    // newest first
+    return items.sort(
+      (a, b) =>
+        new Date(b.createdAt) -
+        new Date(a.createdAt)
+    );
+  } catch (error) {
+    console.error(
+      "Error getting library:",
+      error
+    );
+
     return [];
   }
 };
 
-export const saveToLibrary = (item) => {
-  const existing = getLibrary();
+// ================= DELETE =================
+export const deleteFromLibrary = (id) => {
+  try {
+    const existing =
+      JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
-  const newItem = {
-    id: Date.now(),
-    file: item.file,
-    slides: item.slides || null,
-    type: item.type || "unknown",
-    category: item.category || "general",
-    name: item.name || "Untitled",
-    createdAt: new Date().toLocaleString(),
-  };
+    const updated = existing.filter(
+      (item) => item.id !== id
+    );
 
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify([newItem, ...existing])
-  );
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(updated)
+    );
+  } catch (error) {
+    console.error(
+      "Error deleting item:",
+      error
+    );
+  }
 };
 
-export const deleteFromLibrary = (id) => {
-  const updated = getLibrary().filter((i) => i.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+// ================= CLEAR =================
+export const clearLibrary = () => {
+  localStorage.removeItem(STORAGE_KEY);
 };
