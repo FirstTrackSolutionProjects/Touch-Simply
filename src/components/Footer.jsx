@@ -3,14 +3,16 @@ import {
   FaLinkedin,
   FaTwitter,
   FaGithub,
-  FaGlobe,
   FaEnvelope,
   FaPhoneAlt,
+  FaInstagram,
+  FaFacebook,
+  FaYoutube,
 } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-950 text-gray-300 px-6 md:px-16 py-14 mb-20 relative overflow-hidden">
+   <footer className="bg-gray-950 text-gray-300 px-6 md:px-16 py-14 pb-28 md:pb-14 relative overflow-hidden">
 
       {/* 🔥 Glow Background */}
       <div className="absolute top-0 left-0 w-72 h-72 bg-purple-700/20 blur-3xl rounded-full"></div>
@@ -118,7 +120,7 @@ const Footer = () => {
         {/* ================= SOCIAL ================= */}
         <div className="flex justify-center gap-6 mt-12 text-gray-400 text-lg">
 
-          {[FaGlobe, FaLinkedin, FaTwitter, FaGithub].map((Icon, i) => (
+          {[FaLinkedin, FaTwitter, FaGithub, FaInstagram, FaFacebook, FaYoutube].map((Icon, i) => (
             <a
               key={i}
               href="#"

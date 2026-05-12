@@ -23,20 +23,34 @@ import TermsConditions from "./pages/TermsConditions";
 import FAQ from "./pages/FAQ";
 import DataSecurity from "./pages/DataSecurity";
 import LegalPolicy from "./pages/LegalPolicy";
+import ChatBox from "./pages/ChatBox";
 
 function App() {
    const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo({
+
+  // WINDOW SCROLL
+  window.scrollTo(0, 0);
+
+  // MAIN APP SCROLL CONTAINER
+  const scrollContainer = document.getElementById("main-scroll");
+
+  if (scrollContainer) {
+    scrollContainer.scrollTo({
       top: 0,
-      left: 0,
       behavior: "smooth",
     });
-  }, [pathname]);
+  }
+
+}, [pathname]);
+
   
   return (
-  <>
+  <div
+  id="main-scroll"
+  className="h-screen overflow-y-auto"
+  >
       <NavBar />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -59,10 +73,11 @@ function App() {
           <Route path="/faq" element={<FAQ />} />
           <Route path="/data-security" element={<DataSecurity />} />
           <Route path="/legal-policy" element={<LegalPolicy />} />
+          <Route path="/chat" element={<ChatBox />} />
         </Routes>
         <BottomNav />
         <Footer />
-        </>
+        </div>
 
   );
 }

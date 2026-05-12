@@ -31,6 +31,7 @@ const CreativeTemplate = () => {
               <img
                 src={personal.image}
                 alt="Profile"
+                crossOrigin="anonymous"
                 className="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full border-4 border-white mb-3 object-cover"
               />
             )}

@@ -36,7 +36,7 @@ const SignatureForm = ({ goBack }) => {
 
         {/* Heading */}
         <h2 className="text-xl md:text-2xl font-bold">
-          Declaration & Agreement
+          Declaration
         </h2>
 
         {/* Signature */}
