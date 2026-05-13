@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
+import { loginUser } from "../services/authServices";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -15,11 +16,36 @@ const Login = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem("user", JSON.stringify(form)); // demo login
-    navigate("/");
-  };
+
+      try {
+
+    const data = await loginUser(form);
+
+    localStorage.setItem(
+      "token",
+      data.token
+    );
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(data.user)
+    );
+       alert("Login Successful 🚀");
+
+    navigate("/dashboard");
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert(
+      error?.response?.data?.message ||
+      "Login Failed"
+    );
+  }
+};
 
   return (
     <div className="min-h-screen grid md:grid-cols-2 bg-gray-100">
