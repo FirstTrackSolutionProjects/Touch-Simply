@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
 
 const Hero = () => {
+
+  const isLoggedIn =
+    localStorage.getItem("token");
+
   return (
     <section className="relative w-full overflow-hidden bg-gradient-to-br from-gray-950 via-purple-900/40 to-gray-950 py-16 md:py-24 mt-4">
 
@@ -11,7 +15,6 @@ const Hero = () => {
 
         {/* ================= LEFT CONTENT ================= */}
         <div className="max-w-xl text-center md:text-left">
-         
 
           {/* Heading */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
@@ -28,39 +31,51 @@ const Hero = () => {
             real-time preview, and instant downloads.
           </p>
 
-          {/* CTA Buttons */}
+          {/* ================= CTA BUTTONS ================= */}
           <div className="flex flex-col sm:flex-row gap-4 mt-8 justify-center md:justify-start">
 
-            <Link
-              to="/editor"
-              className="group bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg transition transform hover:scale-105 flex items-center justify-center gap-2"
-            >
-              Create Resume
-              <span className="group-hover:translate-x-1 transition">→</span>
-            </Link>
-
+            {/* Browse Templates */}
             <Link
               to="/templates"
-              className="border border-white/30 backdrop-blur-md text-white px-6 py-3 rounded-xl hover:bg-white hover:text-black transition"
+              className="group bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg transition transform hover:scale-105 flex items-center justify-center gap-2"
             >
               Browse Templates
+
+              <span className="group-hover:translate-x-1 transition">
+                →
+              </span>
+            </Link>
+
+            {/* Login / Dashboard */}
+            <Link
+              to={
+                isLoggedIn
+                  ? "/dashboard"
+                  : "/login"
+              }
+              className="border border-white/30 backdrop-blur-md text-white px-6 py-3 rounded-xl hover:bg-white hover:text-black transition text-center"
+            >
+              {isLoggedIn
+                ? "Dashboard"
+                : "Login"}
             </Link>
 
           </div>
 
-          {/* Extra Trust Text */}
+          {/* Trust Text */}
           <p className="mt-4 text-xs text-gray-400">
             No signup required • Free templates • Instant download
           </p>
+
         </div>
 
         {/* ================= RIGHT IMAGE ================= */}
         <div className="relative flex justify-center md:justify-end w-full">
 
-          {/* Glow behind image */}
+          {/* Glow */}
           <div className="absolute w-72 h-72 md:w-96 md:h-96 bg-purple-600/30 blur-3xl rounded-full"></div>
 
-          {/* Floating Card Effect */}
+          {/* Floating Card */}
           <div className="relative group">
 
             <img
@@ -71,7 +86,9 @@ const Hero = () => {
 
             {/* Glass Overlay */}
             <div className="absolute inset-0 rounded-2xl bg-white/5 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition"></div>
+
           </div>
+
         </div>
 
       </div>

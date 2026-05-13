@@ -24,9 +24,21 @@ import FAQ from "./pages/FAQ";
 import DataSecurity from "./pages/DataSecurity";
 import LegalPolicy from "./pages/LegalPolicy";
 import ChatBox from "./pages/ChatBox";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
    const { pathname } = useLocation();
+
+
+const hideLayoutRoutes = [
+  "/login",
+  "/register",
+  "/dashboard",
+];
+
+const hideLayout =
+  hideLayoutRoutes.includes(pathname);
 
   useEffect(() => {
 
@@ -51,7 +63,7 @@ function App() {
   id="main-scroll"
   className="h-screen overflow-y-auto"
   >
-      <NavBar />
+      {!hideLayout && <NavBar />}
         <Routes>
           <Route path="/" element={<Home />} />
 
@@ -74,10 +86,17 @@ function App() {
           <Route path="/data-security" element={<DataSecurity />} />
           <Route path="/legal-policy" element={<LegalPolicy />} />
           <Route path="/chat" element={<ChatBox />} />
+          <Route path="/dashboard"   
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+
         </Routes>
-        <BottomNav />
-        <Footer />
-        </div>
+        {!hideLayout && <BottomNav />}
+        {!hideLayout && <Footer />}
+      </div>
 
   );
 }

@@ -262,13 +262,13 @@ const PersonalForm = ({ goNext }) => {
       <div className="flex flex-col sm:flex-row gap-3 mt-4"></div>
 
         {/* Save */}
-        <button
+        {/* <button
           onClick={validate}
           className={`mt-4 py-2 rounded-lg transition text-white 
             ${saved ? "bg-green-600" : "bg-blue-600 hover:bg-blue-700"}`}
         >
           {saved ? "Saved ✅" : "Save Details"}
-        </button>
+        </button> */}
 
         {/* Next */}
         <button

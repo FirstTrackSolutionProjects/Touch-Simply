@@ -9,6 +9,7 @@ import SkillsForm from "../components/forms/SkillsForm";
 import SignatureForm from "../components/forms/SignatureForm";
 import Canvas from "../components/Canvas";
 
+
 const Editor = () => {
   const [active, setActive] = useState("personal");
   const [mobileView, setMobileView] = useState("form");

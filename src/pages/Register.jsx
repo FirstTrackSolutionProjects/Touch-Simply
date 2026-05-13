@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { registerUser } from "../services/authServices";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -45,7 +47,7 @@ const Register = () => {
   };
 
   // ✅ Submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!checks.length) {
@@ -63,8 +65,36 @@ const Register = () => {
       return;
     }
 
+    try {
+      const userData = {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        phone: form.phone,
+      };
+
+        const data = await registerUser(userData);
+
+    localStorage.setItem(
+      "token",
+      data.token
+    );
+
+
     alert("Registered Successfully 🚀");
-  };
+
+    navigate("/login");
+
+      } catch (error) {
+
+    console.log(error);
+
+    alert(
+      error?.response?.data?.message ||
+      "Registration Failed"
+    );
+  }
+};
 
   // 🔥 Dynamic Rule UI
   const Rule = ({ ok, text }) => (
