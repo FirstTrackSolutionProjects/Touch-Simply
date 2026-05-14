@@ -516,6 +516,7 @@
 
 
 import { useRef, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useResume } from "../context/ResumeContext";
 
 import * as htmlToImage from "html-to-image";
@@ -541,6 +542,7 @@ import CreativeTemplate from "../templates/CreativeTemplate";
 import ProfessionalTemplate from "../templates/ProfessionalTemplate";
 
 const Canvas = () => {
+  const location = useLocation();
 
   const {
     template,
@@ -551,6 +553,20 @@ const Canvas = () => {
   const resumeRef = useRef();
 
   const [scale, setScale] = useState(1);
+
+  // ================= AUTO DOWNLOAD FROM LIBRARY =================
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const downloadType = params.get("download");
+
+    if (downloadType && resumeRef.current) {
+      setTimeout(() => {
+        if (downloadType === "png") downloadPNG();
+        if (downloadType === "pdf") downloadPDF();
+        if (downloadType === "docx") downloadDOCX();
+      }, 1000);
+    }
+  }, [location.search]);
 
   // ================= RESPONSIVE SCALE =================
   useEffect(() => {
@@ -713,22 +729,10 @@ const Canvas = () => {
 
       // SAVE LOCAL LIBRARY
       saveToLibrary({
-        id: Date.now(),
-
-        title:
-          resumeData?.personal?.name ||
-          "Resume",
-
+        title: resumeData?.personal?.name || "Resume",
         type: "resume",
-
-        format: "png",
-
         thumbnail: dataUrl,
-
-        file: dataUrl,
-
-        createdAt:
-          new Date().toISOString(),
+        rawData: resumeData,
       });
 
       // SAVE DATABASE
@@ -817,22 +821,10 @@ const Canvas = () => {
 
       // SAVE LOCAL LIBRARY
       saveToLibrary({
-        id: Date.now(),
-
-        title:
-          resumeData?.personal?.name ||
-          "Resume",
-
+        title: resumeData?.personal?.name || "Resume",
         type: "resume",
-
-        format: "pdf",
-
         thumbnail: dataUrl,
-
-        file: pdfData,
-
-        createdAt:
-          new Date().toISOString(),
+        rawData: resumeData,
       });
 
       // SAVE DATABASE
@@ -1108,25 +1100,10 @@ const Canvas = () => {
         async () => {
 
           saveToLibrary({
-            id: Date.now(),
-
-            title:
-              resumeData?.personal
-                ?.name ||
-              "Resume",
-
+            title: resumeData?.personal?.name || "Resume",
             type: "resume",
-
-            format: "docx",
-
-            thumbnail:
-              previewImage,
-
-            file:
-              reader.result,
-
-            createdAt:
-              new Date().toISOString(),
+            thumbnail: previewImage,
+            rawData: resumeData,
           });
 
           // SAVE DATABASE

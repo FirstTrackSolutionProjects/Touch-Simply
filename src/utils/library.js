@@ -8,17 +8,22 @@ export const saveToLibrary = (item) => {
     const existing =
       JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
-    // Prevent duplicates
-    const alreadyExists = existing.find(
+    // Identify project by title and type (raw project)
+    const index = existing.findIndex(
       (i) =>
         i.title === item.title &&
-        i.format === item.format &&
         i.type === item.type
     );
 
-    if (alreadyExists) return;
-
-    const updated = [item, ...existing];
+    let updated;
+    if (index !== -1) {
+      // Update existing project
+      updated = [...existing];
+      updated[index] = { ...updated[index], ...item, updatedAt: new Date().toISOString() };
+    } else {
+      // Add new project
+      updated = [{ ...item, id: Date.now(), createdAt: new Date().toISOString() }, ...existing];
+    }
 
     localStorage.setItem(
       STORAGE_KEY,

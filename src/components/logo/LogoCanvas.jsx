@@ -1,4 +1,5 @@
-// import React, { useState, useRef } from "react";
+// import React, { useState, useRef, useEffect } from "react";
+// import { useLocation } from "react-router-dom";
 // import { motion, AnimatePresence } from "framer-motion";
 
 // import ModernLogo from "../../templates/ModernLogo";
@@ -428,7 +429,8 @@
 
 // export default LogoCanvas;
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 import ModernLogo from "../../templates/ModernLogo";
@@ -452,11 +454,27 @@ import { saveAs } from "file-saver";
 import { saveToLibrary } from "../../utils/library";
 
 const LogoCanvas = ({ data }) => {
+  const location = useLocation();
   const [template, setTemplate] =
     useState("modern");
 
   const [open, setOpen] =
     useState(false);
+
+  // ================= AUTO DOWNLOAD FROM LIBRARY =================
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const downloadType = params.get("download");
+
+    if (downloadType) {
+      setTimeout(() => {
+        if (downloadType === "png-light") downloadPNG("light");
+        if (downloadType === "png-dark") downloadPNG("dark");
+        if (downloadType === "pdf") downloadPDF("light");
+        if (downloadType === "docx") downloadDOCX("light");
+      }, 1000);
+    }
+  }, [location.search]);
 
   const lightRef = useRef();
   const darkRef = useRef();
@@ -585,23 +603,10 @@ const LogoCanvas = ({ data }) => {
 
       // SAVE LIBRARY
       saveToLibrary({
-        id: Date.now(),
-
-        title: `${
-          data?.name || "Logo"
-        } ${type}`,
-
+        title: data?.name || "Logo",
         type: "logo",
-
-        format: "png",
-
-        thumbnail:
-          dataUrl,
-
-        file: dataUrl,
-
-        createdAt:
-          new Date().toISOString(),
+        thumbnail: dataUrl,
+        rawData: data,
       });
 
       setOpen(false);
@@ -688,23 +693,10 @@ const LogoCanvas = ({ data }) => {
 
       // SAVE LIBRARY
       saveToLibrary({
-        id: Date.now(),
-
-        title: `${
-          data?.name || "Logo"
-        } ${type}`,
-
+        title: data?.name || "Logo",
         type: "logo",
-
-        format: "pdf",
-
-        thumbnail:
-          dataUrl,
-
-        file: pdfData,
-
-        createdAt:
-          new Date().toISOString(),
+        thumbnail: dataUrl,
+        rawData: data,
       });
 
       setOpen(false);
@@ -782,26 +774,10 @@ const LogoCanvas = ({ data }) => {
       reader.onloadend =
         () => {
           saveToLibrary({
-            id: Date.now(),
-
-            title: `${
-              data?.name ||
-              "Logo"
-            } ${type}`,
-
+            title: data?.name || "Logo",
             type: "logo",
-
-            format:
-              "docx",
-
-            thumbnail:
-              dataUrl,
-
-            file:
-              reader.result,
-
-            createdAt:
-              new Date().toISOString(),
+            thumbnail: dataUrl,
+            rawData: data,
           });
         };
 

@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 import {
   Plus,
@@ -48,6 +49,21 @@ const colors = [
 ];
 
 const Presentation = () => {
+  const location = useLocation();
+
+  // ================= AUTO DOWNLOAD FROM LIBRARY =================
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const downloadType = params.get("download");
+
+    if (downloadType) {
+      setTimeout(() => {
+        if (downloadType === "pptx") exportToPPT();
+        if (downloadType === "pdf") exportToPDF();
+      }, 1000);
+    }
+  }, [location.search]);
+
   const [slides, setSlides] = useState([
     {
       title: "Welcome",
@@ -74,6 +90,14 @@ const Presentation = () => {
     useState("#8B5CF6");
 
   const previewRef = useRef();
+
+  useEffect(() => {
+    if (location.state?.editData?.rawData) {
+      setSlides(location.state.editData.rawData.slides);
+      setTheme(location.state.editData.rawData.theme);
+      setAccent(location.state.editData.rawData.accent);
+    }
+  }, [location.state]);
 
   // ================= UPDATE SLIDE =================
   const handleChange = (
@@ -293,25 +317,10 @@ const Presentation = () => {
       reader.onloadend =
         () => {
           saveToLibrary({
-            id: Date.now(),
-
-            title:
-              slides[0]?.title ||
-              "Presentation",
-
+            title: slides[0]?.title || "Presentation",
             type: "presentation",
-
-            format: "pptx",
-
-            thumbnail:
-              slides[0]?.image ||
-              "",
-
-            file:
-              reader.result,
-
-            createdAt:
-              new Date().toISOString(),
+            thumbnail: slides[0]?.image || "",
+            rawData: { slides, theme, accent },
           });
         };
     } catch (err) {
@@ -404,22 +413,10 @@ const Presentation = () => {
         );
 
       saveToLibrary({
-        id: Date.now(),
-
-        title:
-          slides[0]?.title ||
-          "Presentation",
-
+        title: slides[0]?.title || "Presentation",
         type: "presentation",
-
-        format: "pdf",
-
         thumbnail: imgData,
-
-        file: pdfData,
-
-        createdAt:
-          new Date().toISOString(),
+        rawData: { slides, theme, accent },
       });
     } catch (err) {
       console.error(
