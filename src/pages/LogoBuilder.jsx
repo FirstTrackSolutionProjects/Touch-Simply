@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import LogoForm from "../components/logo/LogoForm";
 import LogoCanvas from "../components/logo/LogoCanvas";
 
 const LogoBuilder = () => {
+  const location = useLocation();
   const [data, setData] = useState({
     name: "Your Brand",
     color: "#7c3aed",
@@ -11,6 +13,12 @@ const LogoBuilder = () => {
     layout: "horizontal",
     gradient: true,
   });
+
+  useEffect(() => {
+    if (location.state?.editData?.rawData) {
+      setData(location.state.editData.rawData);
+    }
+  }, [location.state]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-gray-950 via-purple-900/30 to-black">

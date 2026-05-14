@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { useResume } from "../context/ResumeContext";
 
 import PersonalForm from "../components/forms/PersonalForm";
 import EducationForm from "../components/forms/EducationForm";
@@ -11,9 +13,17 @@ import Canvas from "../components/Canvas";
 
 
 const Editor = () => {
+  const { setResumeData } = useResume();
+  const location = useLocation();
   const [active, setActive] = useState("personal");
   const [mobileView, setMobileView] = useState("form");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    if (location.state?.editData?.rawData) {
+      setResumeData(location.state.editData.rawData);
+    }
+  }, [location.state, setResumeData]);
 
   useEffect(() => {
     const resize = () => setIsMobile(window.innerWidth < 768);

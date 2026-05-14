@@ -1,4 +1,5 @@
-// import React, { useState, useRef } from "react";
+// import React, { useState, useRef, useEffect } from "react";
+// import { useLocation } from "react-router-dom";
 // import { motion, AnimatePresence } from "framer-motion";
 
 // import ModernPortfolio from "../../templates/ModernPortfolio";
@@ -500,7 +501,8 @@
 // export default PortfolioCanvas;
 
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 import ModernPortfolio from "../../templates/ModernPortfolio";
@@ -515,16 +517,32 @@ import {
   Packer,
   Paragraph,
   ImageRun,
+  TextRun,
 } from "docx";
 
 import { saveAs } from "file-saver";
 import { saveToLibrary } from "../../utils/library";
 
 const PortfolioCanvas = ({ data }) => {
+  const location = useLocation();
   const [template, setTemplate] =
     useState("modern");
 
   const previewRef = useRef();
+
+  // ================= AUTO DOWNLOAD FROM LIBRARY =================
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const downloadType = params.get("download");
+
+    if (downloadType) {
+      setTimeout(() => {
+        if (downloadType === "png") downloadPNG();
+        if (downloadType === "pdf") downloadPDF();
+        if (downloadType === "docx") downloadDOCX();
+      }, 1000);
+    }
+  }, [location.search]);
 
   const tabs = [
     {
@@ -685,22 +703,10 @@ const PortfolioCanvas = ({ data }) => {
 
       // SAVE LIBRARY
       saveToLibrary({
-        id: Date.now(),
-
-        title:
-          data?.name ||
-          "Portfolio",
-
+        title: data?.name || "Portfolio",
         type: "portfolio",
-
-        format: "png",
-
         thumbnail: dataUrl,
-
-        file: dataUrl,
-
-        createdAt:
-          new Date().toISOString(),
+        rawData: data,
       });
     } catch (err) {
       console.error(err);
@@ -790,22 +796,10 @@ const PortfolioCanvas = ({ data }) => {
         );
 
       saveToLibrary({
-        id: Date.now(),
-
-        title:
-          data?.name ||
-          "Portfolio",
-
+        title: data?.name || "Portfolio",
         type: "portfolio",
-
-        format: "pdf",
-
         thumbnail: dataUrl,
-
-        file: pdfData,
-
-        createdAt:
-          new Date().toISOString(),
+        rawData: data,
       });
     } catch (err) {
       console.error(err);
@@ -816,85 +810,138 @@ const PortfolioCanvas = ({ data }) => {
   // ================= DOCX =================
   const downloadDOCX = async () => {
     try {
-      const dataUrl =
-        await generateImage();
+      // PREVIEW IMAGE FOR LIBRARY
+      const previewImage = await htmlToImage.toPng(previewRef.current, {
+        pixelRatio: 1,
+        cacheBust: true,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
 
-      if (!dataUrl) return;
+      const {
+        name,
+        email,
+        phone,
+        about,
+        education,
+        experience,
+        projects,
+        skills,
+        languages,
+      } = data;
 
-      const base64 =
-        dataUrl.split(",")[1];
+      const doc = new Document({
+        sections: [
+          {
+            children: [
+              // HEADER
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: name || "Your Name",
+                    bold: true,
+                    size: 36,
+                  }),
+                ],
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `${email || ""} | ${phone || ""}`,
+                    size: 20,
+                  }),
+                ],
+              }),
+              new Paragraph({ text: "" }),
 
-      const imageBuffer =
-        Uint8Array.from(
-          atob(base64),
-          (c) =>
-            c.charCodeAt(0)
-        );
-
-      const doc =
-        new Document({
-          sections: [
-            {
-              children: [
-                new Paragraph({
-                  children: [
-                    new ImageRun({
-                      data:
-                        imageBuffer,
-
-                      transformation: {
-                        width: 600,
-                        height: 900,
-                      },
+              // ABOUT
+              ...(about || "Building modern web applications"
+                ? [
+                    new Paragraph({
+                      children: [new TextRun({ text: "About Me", bold: true, size: 24 })],
                     }),
-                  ],
+                    new Paragraph({ text: about || "Building modern web applications" }),
+                    new Paragraph({ text: "" }),
+                  ]
+                : []),
+
+              // EXPERIENCE
+              new Paragraph({
+                children: [new TextRun({ text: "Professional Experience", bold: true, size: 24 })],
+              }),
+              ...(experience?.flatMap((exp) => [
+                new Paragraph({
+                  children: [new TextRun({ text: exp.role || "Role", bold: true })],
                 }),
-              ],
-            },
-          ],
+                new Paragraph({
+                  children: [new TextRun({ text: exp.company || "Company" })],
+                }),
+                new Paragraph({
+                  text: `${exp.start || ""} - ${exp.isWorking ? "Present" : exp.end || ""}`,
+                }),
+                new Paragraph({ text: "" }),
+              ]) || []),
+
+              // PROJECTS
+              new Paragraph({
+                children: [new TextRun({ text: "Projects", bold: true, size: 24 })],
+              }),
+              ...(projects?.flatMap((proj) => [
+                new Paragraph({
+                  children: [new TextRun({ text: proj.title || "Project Title", bold: true })],
+                }),
+                new Paragraph({ text: proj.desc || "" }),
+                ...(proj.github
+                  ? [new Paragraph({ children: [new TextRun({ text: `GitHub: ${proj.github}`, color: "0000FF" })] })]
+                  : []),
+                new Paragraph({ text: "" }),
+              ]) || []),
+
+              // EDUCATION
+              new Paragraph({
+                children: [new TextRun({ text: "Education", bold: true, size: 24 })],
+              }),
+              ...(education?.flatMap((edu) => [
+                new Paragraph({
+                  children: [new TextRun({ text: edu.degree || "Degree", bold: true })],
+                }),
+                new Paragraph({ text: edu.college || "College" }),
+                new Paragraph({
+                  text: `${edu.startYear || ""} - ${edu.isPresent ? "Present" : edu.endYear || ""}`,
+                }),
+                new Paragraph({ text: "" }),
+              ]) || []),
+
+              // SKILLS & LANGUAGES
+              new Paragraph({
+                children: [new TextRun({ text: "Skills", bold: true, size: 24 })],
+              }),
+              new Paragraph({ text: skills || "No skills listed" }),
+              new Paragraph({ text: "" }),
+
+              new Paragraph({
+                children: [new TextRun({ text: "Languages", bold: true, size: 24 })],
+              }),
+              new Paragraph({ text: languages || "No languages listed" }),
+            ],
+          },
+        ],
+      });
+
+      const blob = await Packer.toBlob(doc);
+      saveAs(blob, `${template}-portfolio.docx`);
+
+      // SAVE TO LIBRARY
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => {
+        saveToLibrary({
+          title: name || "Portfolio",
+          type: "portfolio",
+          thumbnail: previewImage,
+          rawData: data,
         });
-
-      const blob =
-        await Packer.toBlob(doc);
-
-      saveAs(
-        blob,
-        `${template}-portfolio.docx`
-      );
-
-      // SAVE LIBRARY
-      const reader =
-        new FileReader();
-
-      reader.readAsDataURL(
-        blob
-      );
-
-      reader.onloadend =
-        () => {
-          saveToLibrary({
-            id: Date.now(),
-
-            title:
-              data?.name ||
-              "Portfolio",
-
-            type:
-              "portfolio",
-
-            format:
-              "docx",
-
-            thumbnail:
-              dataUrl,
-
-            file:
-              reader.result,
-
-            createdAt:
-              new Date().toISOString(),
-          });
-        };
+      };
     } catch (err) {
       console.error(err);
       alert("DOCX download failed");

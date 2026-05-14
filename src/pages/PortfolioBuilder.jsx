@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import PortfolioForm from "../components/portfolio/PortfolioForm";
 import PortfolioCanvas from "../components/portfolio/PortfolioCanvas";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
 const PortfolioBuilder = () => {
+  const location = useLocation();
   const [data, setData] = useState({
   name: "",
   email: "",
@@ -40,6 +42,12 @@ const PortfolioBuilder = () => {
     },
   ],
 });
+
+useEffect(() => {
+  if (location.state?.editData?.rawData) {
+    setData(location.state.editData.rawData);
+  }
+}, [location.state]);
 
 const downloadPDF = async () => {
   const element = document.getElementById("portfolio-preview");
