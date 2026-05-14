@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
-import { loginUser } from "../services/authServices";
+import { loginUser, googleLoginUser } from "../services/authServices";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -117,11 +118,28 @@ const Login = () => {
             <div className="flex-1 h-px bg-gray-300"></div>
           </div>
 
-            {/* Google */}
-          <button className="w-full flex items-center justify-center gap-2 border py-3 rounded-lg hover:bg-gray-100 transition mt-5">
-            <FaGoogle className="text-red-500" />
-            Continue with Google
-          </button>
+          {/* Google */}
+          <div className="mt-5 flex justify-center">
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                try {
+                  const data = await googleLoginUser(credentialResponse.credential);
+                  localStorage.setItem("token", data.token);
+                  localStorage.setItem("user", JSON.stringify(data.user));
+                  alert("Login Successful 🚀");
+                  navigate("/dashboard");
+                } catch (error) {
+                  console.log(error);
+                  alert(error?.response?.data?.message || "Google Login Failed");
+                }
+              }}
+              onError={() => {
+                console.log("Login Failed");
+                alert("Google Login Failed");
+              }}
+              useOneTap
+            />
+          </div>
 
           <p className="text-sm text-center mt-5">
             Don’t have an account?{" "}
