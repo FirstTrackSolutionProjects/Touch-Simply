@@ -1,17 +1,3 @@
-import React from "react";
-
-import { Link } from "react-router-dom";
-
-import {
-  Trash2,
-  Download,
-  FileText,
-  Image as ImageIcon,
-  Presentation,
-  Briefcase,
-  Pencil,
-} from "lucide-react";
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
