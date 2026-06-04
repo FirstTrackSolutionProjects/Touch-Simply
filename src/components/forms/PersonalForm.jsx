@@ -63,23 +63,52 @@ const PersonalForm = ({ goNext }) => {
   };
 
   // ✅ Validation
-  const validate = () => {
-    let newErrors = {};
+ const validate = () => {
+  let newErrors = {};
 
-    if (!resumeData.personal?.name) newErrors.name = "Name is required";
-    if (!resumeData.personal?.email) newErrors.email = "Email is required";
-    if (!resumeData.personal?.phone) newErrors.phone = "Phone is required";
+  // Required Fields
+  if (!resumeData.personal?.name)
+    newErrors.name = "Name is required";
 
-    setErrors(newErrors);
+  if (!resumeData.personal?.email)
+    newErrors.email = "Email is required";
 
-    if (Object.keys(newErrors).length === 0) {
-      setSaved(true);
-      setTimeout(() => {
-        setSaved(false);
-        goNext();
-      }, 2000);
-    }
-  };
+  if (!resumeData.personal?.phone)
+    newErrors.phone = "Phone is required";
+
+  // ✅ LinkedIn URL Validation
+  const linkedinPattern =
+    /^(https?:\/\/)?(www\.)?linkedin\.com\/.*$/i;
+
+  if (
+    resumeData.personal?.linkedin &&
+    !linkedinPattern.test(resumeData.personal.linkedin)
+  ) {
+    newErrors.linkedin = "Enter valid LinkedIn URL";
+  }
+
+  // ✅ GitHub URL Validation
+  const githubPattern =
+    /^(https?:\/\/)?(www\.)?github\.com\/.*$/i;
+
+  if (
+    resumeData.personal?.github &&
+    !githubPattern.test(resumeData.personal.github)
+  ) {
+    newErrors.github = "Enter valid GitHub URL";
+  }
+
+  setErrors(newErrors);
+
+  if (Object.keys(newErrors).length === 0) {
+    setSaved(true);
+
+    setTimeout(() => {
+      setSaved(false);
+      goNext();
+    }, 2000);
+  }
+};
 
   return (
     <div>
@@ -246,16 +275,22 @@ const PersonalForm = ({ goNext }) => {
         <InputField
           label="LinkedIn Profile"
           name="linkedin"
+          type="url"
+          placeholder="https://linkedin.com/in/username"
           value={resumeData.personal?.linkedin}
           onChange={handleChange}
+          error={errors.linkedin}
         />
 
         {/* GitHub */}
         <InputField
           label="GitHub Profile"
           name="github"
+          type="url"
+          placeholder="https://github.com/username"
           value={resumeData.personal?.github}
           onChange={handleChange}
+          error={errors.github}
         />
 
         {/* Buttons */}
@@ -272,21 +307,7 @@ const PersonalForm = ({ goNext }) => {
 
         {/* Next */}
         <button
-          onClick={() => {
-          let newErrors = {};
-
-          if (!resumeData.personal?.name) newErrors.name = "Name is required";
-          if (!resumeData.personal?.email) newErrors.email = "Email is required";
-          if (!resumeData.personal?.phone) newErrors.phone = "Phone is required";
-
-          setErrors(newErrors);
-
-          if (Object.keys(newErrors).length === 0) {
-            setSaved(true);
-
-            goNext && goNext();
-          }
-        }}
+          onClick={validate}
           className="flex-1 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 transition"
         >
           Next

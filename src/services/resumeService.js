@@ -2,16 +2,23 @@ import API from "../api/api";
 
 
 // CREATE RESUME
-export const createResume = async (resumeData) => {
+// export const createResume = async (resumeData) => {
 
-  const res = await API.post(
-    "/resumes",
-    resumeData
-  );
+//   const res = await API.post(
+//     "/resumes",
+//     resumeData
+//   );
 
-  return res.data;
-};
+//   return res.data;
+// };
 
+export const createResume = async (data) => { 
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/resumes`, 
+  {method: 'POST', headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json'},body: JSON.stringify(data)})
+
+  const resumeData = await response.json()
+  return resumeData;
+  };
 
 // GET ALL RESUMES
 export const getAllResumes = async () => {

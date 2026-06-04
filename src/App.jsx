@@ -92,6 +92,12 @@ const hideLayout =
               <Dashboard />
             </ProtectedRoute>
           } />
+          <Route path="/admin/dashboard"   
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
 
         </Routes>
         {!hideLayout && <BottomNav />}

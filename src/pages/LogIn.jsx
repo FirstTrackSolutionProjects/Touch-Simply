@@ -33,7 +33,7 @@ const Login = () => {
       "user",
       JSON.stringify(data.user)
     );
-       alert("Login Successful 🚀");
+      alert("Login Successful 🚀");
 
     navigate("/dashboard");
 

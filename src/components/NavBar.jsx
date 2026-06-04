@@ -60,13 +60,7 @@ const NavBar = () => {
               </Link>
             ))}
 
-            {/* ✅ Login Button */}
-            <Link
-              to="/login"
-              className="ml-4 px-4 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition backdrop-blur-md border border-white/20"
-            >
-              Login
-            </Link>
+            
 
           </div>
 

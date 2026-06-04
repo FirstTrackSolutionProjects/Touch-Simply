@@ -14,6 +14,7 @@ const Register = () => {
     phone: "",
     password: "",
     confirmPassword: "",
+   
   });
 
   // ✅ Handle Input

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FaGithub } from "react-icons/fa";
 
 const PortfolioForm = ({ data, setData }) => {
   const [removingIndex, setRemovingIndex] = useState(null);
@@ -179,8 +180,6 @@ const handleProfileImage = (e) => {
     setData((prev) => ({ ...prev, education: updated }));
   };
 
-  // ---------------- UI (UNCHANGED) ----------------
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-900/20 to-black px-3 sm:px-6 py-6">
       <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
@@ -339,7 +338,7 @@ const handleProfileImage = (e) => {
           </button>
         </div>
 
-        {/* 🌐 SOCIAL LINKS */}
+       {/* 🌐 SOCIAL LINKS */}
         <div className="sm:col-span-2 mt-2">
           <h4 className="text-sm font-semibold text-gray-700 mb-3">
             Social Links
@@ -348,42 +347,48 @@ const handleProfileImage = (e) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
             <input
-              placeholder="GitHub URL"
+              type="url"
+              placeholder="https://github.com/username"
               value={data.github || ""}
               onChange={(e) => handleChange("github", e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-500 outline-none"
             />
 
             <input
-              placeholder="LinkedIn URL"
+              type="url"
+              placeholder="https://linkedin.com/in/username"
               value={data.linkedin || ""}
               onChange={(e) => handleChange("linkedin", e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-500 outline-none"
             />
 
             <input
-              placeholder="Instagram URL"
+              type="url"
+              placeholder="https://instagram.com/username"
               value={data.instagram || ""}
               onChange={(e) => handleChange("instagram", e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-500 outline-none"
             />
 
             <input
-              placeholder="Facebook URL"
+              type="url"
+              placeholder="https://facebook.com/username"
               value={data.facebook || ""}
               onChange={(e) => handleChange("facebook", e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-500 outline-none"
             />
 
             <input
-              placeholder="Twitter / X URL"
+              type="url"
+              placeholder="https://twitter.com/username"
               value={data.twitter || ""}
               onChange={(e) => handleChange("twitter", e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-500 outline-none"
             />
 
             <input
-              placeholder="YouTube URL"
+              type="url"
+              placeholder="https://youtube.com/@channel"
               value={data.youtube || ""}
               onChange={(e) => handleChange("youtube", e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-500 outline-none"
@@ -490,10 +495,10 @@ const handleProfileImage = (e) => {
 
         </div>
 
-       {/* 🚀 PROJECTS */}
-        <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-md border border-gray-200 space-y-4">
+      {/* ================= PROJECTS ================= */}
+        <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-200 space-y-4">
 
-          <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+          <h3 className="text-lg font-semibold text-gray-800">
             🚀 Projects
           </h3>
 
@@ -504,53 +509,117 @@ const handleProfileImage = (e) => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className={`border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-4 ${
+                className={`border rounded-xl p-4 bg-gray-50 space-y-4 ${
                   removingIndex === i ? "opacity-0 scale-95" : ""
                 }`}
               >
 
+                {/* TOP */}
                 <div className="flex justify-between items-center">
-                  <h4 className="text-sm font-semibold text-gray-700">
+
+                  <h4 className="font-semibold text-gray-700">
                     Project {i + 1}
                   </h4>
 
                   {i !== 0 && (
                     <button onClick={() => removeProject(i)}>
-                      <X className="text-gray-400 hover:text-red-500" />
+                      <X className="text-red-500 hover:scale-110 transition" />
                     </button>
                   )}
+
                 </div>
 
-                <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4">
+                {/* CONTENT */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-                  <div className="space-y-3">
+                  {/* LEFT */}
+                  <div className="space-y-4">
+
+                    {/* TITLE */}
                     <input
+                      type="text"
                       placeholder="Project Title"
-                      value={proj.title}
-                      onChange={(e)=>handleProjectChange(i,"title",e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-500 outline-none"
+                      value={proj.title || ""}
+                      onChange={(e) =>
+                        handleProjectChange(i, "title", e.target.value)
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white outline-none focus:ring-2 focus:ring-purple-500"
                     />
 
+                    {/* DESCRIPTION */}
                     <textarea
-                      placeholder="Description"
-                      value={proj.desc}
-                      onChange={(e)=>handleProjectChange(i,"desc",e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-purple-500 outline-none min-h-[100px]"
+                      placeholder="Project Description"
+                      value={proj.desc || ""}
+                      onChange={(e) =>
+                        handleProjectChange(i, "desc", e.target.value)
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white min-h-[120px] outline-none focus:ring-2 focus:ring-purple-500"
                     />
+
+                    {/* GITHUB LINK */}
+                    <div className="relative">
+
+                      <FaGithub
+                        size={18}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                      />
+
+                      <input
+                        type="url"
+                        placeholder="https://github.com/username/project"
+                        value={proj.github || ""}
+                        onChange={(e) =>
+                          handleProjectChange(i, "github", e.target.value)
+                        }
+                        className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl bg-white outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+
+                    </div>
+
+                    {/* LIVE LINK */}
+                    <div className="relative">
+
+                      <Globe
+                        size={18}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                      />
+
+                      <input
+                        type="url"
+                        placeholder="https://yourproject.com"
+                        value={proj.live || ""}
+                        onChange={(e) =>
+                          handleProjectChange(i, "live", e.target.value)
+                        }
+                        className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl bg-white outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+
+                    </div>
+
                   </div>
 
+                  {/* RIGHT IMAGE */}
                   <div>
+
                     <label className="cursor-pointer block">
-                      <div className="w-full h-[140px] sm:h-[160px] rounded-lg border border-gray-300 bg-gray-100 flex items-center justify-center overflow-hidden hover:border-purple-500 transition">
+
+                      <div className="w-full h-[240px] rounded-2xl border border-dashed border-gray-300 bg-gray-100 overflow-hidden flex items-center justify-center hover:border-purple-500 transition">
 
                         {proj.image ? (
-                          <img src={proj.image}
-                           alt="Project Image"
-                          className="w-full h-full object-cover"/>
+                          <img
+                            src={proj.image}
+                            alt="project"
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <div className="text-center text-gray-400">
-                            <p className="text-sm">Upload Image</p>
-                            <p className="text-xs">PNG, JPG</p>
+                            <p className="text-sm font-medium">
+                              Upload Project Image
+                            </p>
+
+                            <p className="text-xs mt-1">
+                              PNG, JPG, JPEG
+                            </p>
                           </div>
                         )}
 
@@ -558,10 +627,15 @@ const handleProfileImage = (e) => {
 
                       <input
                         type="file"
+                        accept="image/*"
                         className="hidden"
-                        onChange={(e)=>handleImageUpload(i,e.target.files[0])}
+                        onChange={(e) =>
+                          handleImageUpload(i, e.target.files[0])
+                        }
                       />
+
                     </label>
+
                   </div>
 
                 </div>
@@ -570,11 +644,12 @@ const handleProfileImage = (e) => {
             ))}
           </AnimatePresence>
 
+          {/* ADD BUTTON */}
           <button
             onClick={addProject}
-            className="w-full flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-lg font-medium"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium flex items-center justify-center gap-2 hover:opacity-90 transition"
           >
-            <Plus size={12} />
+            <Plus size={16} />
             Add New Project
           </button>
 

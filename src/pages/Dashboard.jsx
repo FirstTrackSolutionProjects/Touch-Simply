@@ -1,5 +1,8 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
 
 import {
   FileText,
@@ -15,16 +18,37 @@ import {
   Layers3,
   Wand2,
   ChevronRight,
+  ShieldCheck,
+  Menu,
+  X,
+  Bell,
+  Search,
+  BarChart3,
+  Zap,
+  Activity,
+  Star,
+  Settings,
+  Crown,
 } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+
+  const [mobileMenu, setMobileMenu] =
+    useState(false);
+
+  const [search, setSearch] =
+    useState("");
 
   const user =
     JSON.parse(
       localStorage.getItem("user")
     ) || {};
 
+  const isAdmin =
+    user?.role === "admin";
+
+  // ================= TOOLS =================
   const tools = [
     {
       title: "Resume Builder",
@@ -46,7 +70,7 @@ const Dashboard = () => {
 
     {
       title: "Logo Maker",
-      desc: "Design premium logos for your brand instantly.",
+      desc: "Design premium logos instantly.",
       icon: <Palette size={28} />,
       link: "/logo",
       gradient:
@@ -55,43 +79,311 @@ const Dashboard = () => {
 
     {
       title: "Presentation Maker",
-      desc: "Generate modern business presentations easily.",
-      icon: <Presentation size={28} />,
+      desc: "Generate modern presentations easily.",
+      icon: (
+        <Presentation size={28} />
+      ),
       link: "/presentation",
       gradient:
         "from-orange-500 to-amber-500",
     },
   ];
 
-  const recent = [
+  // ================= STATS =================
+  const stats = [
     {
-      title: "Modern Resume",
-      type: "Resume",
+      title: "Resumes",
+      value: "12",
+      icon: <FileText size={22} />,
     },
 
     {
-      title: "Creative Portfolio",
-      type: "Portfolio",
+      title: "Portfolios",
+      value: "4",
+      icon: <Briefcase size={22} />,
     },
 
     {
-      title: "Startup Logo",
-      type: "Logo",
+      title: "Projects",
+      value: "18",
+      icon: <BarChart3 size={22} />,
+    },
+
+    {
+      title: "AI Credits",
+      value: "120",
+      icon: <Zap size={22} />,
     },
   ];
 
+  // ================= RECENT =================
+  const recent = [
+    {
+      id: 1,
+      title: "Modern Resume",
+      type: "Resume",
+      route: "/editor",
+    },
+
+    {
+      id: 2,
+      title: "Creative Portfolio",
+      type: "Portfolio",
+      route: "/portfolio",
+    },
+
+    {
+      id: 3,
+      title: "Startup Logo",
+      type: "Logo",
+      route: "/logo",
+    },
+  ];
+
+  // ================= LOGOUT =================
   const handleLogout = () => {
     localStorage.removeItem("token");
+
     localStorage.removeItem("user");
 
     navigate("/login");
   };
 
   return (
-    <div className="min-h-screen bg-[#060816] text-white flex">
+    <div className="min-h-screen bg-[#060816] text-white flex relative overflow-hidden">
 
-      {/* ================= SIDEBAR ================= */}
-      <aside className="hidden lg:flex w-72 border-r border-white/10 bg-white/[0.03] backdrop-blur-2xl flex-col justify-between p-6 sticky top-0 h-screen">
+      {/* BG EFFECTS */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-purple-600/20 blur-3xl rounded-full"></div>
+
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-600/20 blur-3xl rounded-full"></div>
+
+      {/* ================= MOBILE SIDEBAR ================= */}
+      <div
+        className={`fixed inset-0 z-50 lg:hidden transition duration-300 ${
+          mobileMenu
+            ? "visible opacity-100"
+            : "invisible opacity-0"
+        }`}
+      >
+        <div
+          className="absolute inset-0 bg-black/70"
+          onClick={() =>
+            setMobileMenu(false)
+          }
+        ></div>
+
+        <div
+          className={`absolute left-0 top-0 h-full w-72 bg-[#0b1023] border-r border-white/10 p-6 overflow-y-auto transform transition duration-300 ${
+            mobileMenu
+              ? "translate-x-0"
+              : "-translate-x-full"
+          }`}
+        >
+          {/* LOGO */}
+          <div className="flex items-center justify-between">
+
+            <div className="flex items-center gap-3">
+
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center">
+                <Sparkles size={22} />
+              </div>
+
+              <div>
+                <h1 className="text-xl font-bold">
+                  Touch Simply
+                </h1>
+
+                <p className="text-xs text-gray-400">
+                  Creative Dashboard
+                </p>
+              </div>
+
+            </div>
+
+            <button
+              onClick={() =>
+                setMobileMenu(false)
+              }
+            >
+              <X size={24} />
+            </button>
+
+          </div>
+
+         {/* MENU */}
+      <div className="mt-10">
+
+        {/* MAIN */}
+        <div className="mb-6">
+
+          <p className="text-xs text-gray-500 uppercase tracking-[0.2em] px-3 mb-3">
+            Main
+          </p>
+
+          <div className="space-y-3">
+
+            <Link
+              to="/dashboard"
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600"
+            >
+              <Home size={20} />
+              Dashboard
+            </Link>
+
+            <Link
+              to="/templates"
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+            >
+              <Layers3 size={20} />
+              Templates
+            </Link>
+
+          </div>
+
+        </div>
+
+        {/* WORKSPACE */}
+        <div className="mb-6">
+
+          <p className="text-xs text-gray-500 uppercase tracking-[0.2em] px-3 mb-3">
+            Workspace
+          </p>
+
+          <div className="space-y-3">
+
+            <Link
+              to="/library"
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+            >
+              <FolderOpen size={20} />
+              My Library
+            </Link>
+
+            <Link
+              to="/activity"
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+            >
+              <Activity size={20} />
+              Activity
+            </Link>
+
+            <Link
+              to="/favorites"
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+            >
+              <Star size={20} />
+              Favorites
+            </Link>
+
+            <Link
+              to="/chat"
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+            >
+              <Wand2 size={20} />
+              AI Assistant
+            </Link>
+
+          </div>
+
+        </div>
+
+        {/* ACCOUNT */}
+        <div>
+
+          <p className="text-xs text-gray-500 uppercase tracking-[0.2em] px-3 mb-3">
+            Account
+          </p>
+
+          <div className="space-y-3">
+
+            <Link
+              to="/settings"
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+            >
+              <Settings size={20} />
+              Settings
+            </Link>
+
+            {isAdmin && (
+              <Link
+                to="/admin/dashboard"
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500"
+              >
+                <ShieldCheck size={20} />
+                Admin Panel
+              </Link>
+            )}
+
+          </div>
+
+        </div>
+
+        {/* UPGRADE CARD */}
+        <div className="mt-8 rounded-3xl p-5 bg-gradient-to-r from-purple-600 to-indigo-600 shadow-2xl">
+
+          <div className="flex items-center gap-2">
+
+            <Crown size={20} />
+
+            <h3 className="font-semibold">
+              Upgrade Pro
+            </h3>
+
+          </div>
+
+          <p className="text-sm mt-3 text-white/80 leading-relaxed">
+            Unlock premium templates and unlimited AI tools.
+          </p>
+
+          <button className="mt-4 w-full bg-white text-black py-3 rounded-2xl font-semibold hover:scale-[1.02] transition">
+            Upgrade Now
+          </button>
+
+        </div>
+
+      </div>
+
+          {/* USER */}
+        <div className="mt-8 bg-white/5 border border-white/10 rounded-3xl p-4">
+
+            <div className="flex items-center gap-3">
+
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center">
+                <User size={20} />
+              </div>
+
+              <div>
+                <h3 className="font-semibold">
+                  {user?.name || "User"}
+                </h3>
+
+                <p className="text-xs text-gray-400 break-all">
+                  {user?.email}
+                </p>
+
+                <p className="text-xs mt-1 text-purple-400 uppercase">
+                  {user?.role || "user"}
+                </p>
+              </div>
+
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="mt-4 w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 transition py-3 rounded-2xl"
+            >
+              <LogOut size={18} />
+              Logout
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+          {/* ================= DESKTOP SIDEBAR ================= */}
+      <aside className="hidden lg:flex w-72 border-r border-white/10 bg-white/[0.03] backdrop-blur-2xl flex-col justify-between p-6 sticky top-0 h-screen z-40">
 
         <div>
 
@@ -115,39 +407,135 @@ const Dashboard = () => {
           </div>
 
           {/* MENU */}
-          <div className="mt-10 space-y-3">
+          <div className="mt-10">
 
-            <Link
-              to="/dashboard"
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg"
-            >
-              <Home size={20} />
-              Dashboard
-            </Link>
+            {/* MAIN */}
+            <div className="mb-6">
 
-            <Link
-              to="/templates"
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
-            >
-              <Layers3 size={20} />
-              Templates
-            </Link>
+              <p className="text-xs text-gray-500 uppercase tracking-[0.2em] px-3 mb-3">
+                Main
+              </p>
 
-            <Link
-              to="/library"
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
-            >
-              <FolderOpen size={20} />
-              My Library
-            </Link>
+              <div className="space-y-3">
 
-            <Link
-              to="/chat"
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
-            >
-              <Wand2 size={20} />
-              AI Assistant
-            </Link>
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600"
+                >
+                  <Home size={20} />
+                  Dashboard
+                </Link>
+
+                <Link
+                  to="/templates"
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+                >
+                  <Layers3 size={20} />
+                  Templates
+                </Link>
+
+              </div>
+
+            </div>
+
+            {/* WORKSPACE */}
+            <div className="mb-6">
+
+              <p className="text-xs text-gray-500 uppercase tracking-[0.2em] px-3 mb-3">
+                Workspace
+              </p>
+
+              <div className="space-y-3">
+
+                <Link
+                  to="/library"
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+                >
+                  <FolderOpen size={20} />
+                  My Library
+                </Link>
+
+                <Link
+                  to="/activity"
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+                >
+                  <Activity size={20} />
+                  Activity
+                </Link>
+
+                <Link
+                  to="/favorites"
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+                >
+                  <Star size={20} />
+                  Favorites
+                </Link>
+
+                <Link
+                  to="/chat"
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+                >
+                  <Wand2 size={20} />
+                  AI Assistant
+                </Link>
+
+              </div>
+
+            </div>
+
+            {/* ACCOUNT */}
+            <div>
+
+              <p className="text-xs text-gray-500 uppercase tracking-[0.2em] px-3 mb-3">
+                Account
+              </p>
+
+              <div className="space-y-3">
+
+                <Link
+                  to="/settings"
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+                >
+                  <Settings size={20} />
+                  Settings
+                </Link>
+
+                {isAdmin && (
+                  <Link
+                    to="/admin/dashboard"
+                    className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500"
+                  >
+                    <ShieldCheck size={20} />
+                    Admin Panel
+                  </Link>
+                )}
+
+              </div>
+
+            </div>
+
+            {/* UPGRADE CARD */}
+            <div className="mt-8 rounded-3xl p-5 bg-gradient-to-r from-purple-600 to-indigo-600 shadow-2xl">
+
+              <div className="flex items-center gap-2">
+
+                <Crown size={20} />
+
+                <h3 className="font-semibold">
+                  Upgrade Pro
+                </h3>
+
+              </div>
+
+              <p className="text-sm mt-3 text-white/80 leading-relaxed">
+                Unlock premium templates and unlimited AI tools.
+              </p>
+
+              <button className="mt-4 w-full bg-white text-black py-3 rounded-2xl font-semibold hover:scale-[1.02] transition">
+                Upgrade Now
+              </button>
+
+            </div>
 
           </div>
 
@@ -167,8 +555,12 @@ const Dashboard = () => {
                 {user?.name || "User"}
               </h3>
 
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 break-all">
                 {user?.email}
+              </p>
+
+              <p className="text-xs mt-1 text-purple-400 uppercase">
+                {user?.role || "user"}
               </p>
             </div>
 
@@ -187,39 +579,74 @@ const Dashboard = () => {
       </aside>
 
       {/* ================= MAIN ================= */}
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-hidden relative z-10">
 
         {/* TOPBAR */}
-        <div className="border-b border-white/10 bg-white/[0.03] backdrop-blur-xl sticky top-0 z-50">
+        <div className="border-b border-white/10 bg-white/[0.03] backdrop-blur-xl sticky top-0 z-40">
 
-          <div className="px-4 sm:px-6 lg:px-10 py-5 flex items-center justify-between">
+          <div className="px-4 sm:px-6 lg:px-10 py-5 flex items-center justify-between gap-4">
 
-            <div>
+            {/* LEFT */}
+            <div className="flex items-center gap-4">
 
-              <h2 className="text-2xl font-bold">
-                Welcome Back 👋
-              </h2>
+              <button
+                className="lg:hidden"
+                onClick={() =>
+                  setMobileMenu(true)
+                }
+              >
+                <Menu size={28} />
+              </button>
 
-              <p className="text-gray-400 text-sm mt-1">
-                Create resumes, portfolios & logos faster than ever.
-              </p>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold">
+                  Welcome Back 👋
+                </h2>
+
+                <p className="text-gray-400 text-sm mt-1 hidden sm:block">
+                  Create resumes, portfolios &
+                  logos faster than ever.
+                </p>
+              </div>
 
             </div>
 
+            {/* RIGHT */}
             <div className="flex items-center gap-3">
 
-              <Link
-                to="/templates"
-                className="hidden sm:flex px-5 py-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition"
-              >
-                Browse Templates
-              </Link>
+              {/* SEARCH */}
+              <div className="hidden md:flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+
+                <Search size={18} />
+
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={search}
+                  onChange={(e) =>
+                    setSearch(
+                      e.target.value
+                    )
+                  }
+                  className="bg-transparent outline-none text-sm w-40"
+                />
+
+              </div>
+
+              {/* BELL */}
+              <button className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition relative">
+
+                <Bell size={20} />
+
+                <span className="absolute top-3 right-3 w-2 h-2 rounded-full bg-purple-500"></span>
+
+              </button>
 
               <Link
                 to="/editor"
                 className="px-5 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:scale-105 transition shadow-2xl"
               >
-                Create Now
+                Create
               </Link>
 
             </div>
@@ -229,116 +656,78 @@ const Dashboard = () => {
         </div>
 
         {/* HERO */}
-        <div className="relative overflow-hidden">
+        <div className="px-4 sm:px-6 lg:px-10 py-10">
 
-          {/* BG GLOW */}
-          <div className="absolute top-0 left-0 w-72 h-72 bg-purple-600/20 blur-3xl rounded-full"></div>
+          <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 rounded-[36px] overflow-hidden">
 
-          <div className="absolute bottom-0 right-0 w-72 h-72 bg-blue-600/20 blur-3xl rounded-full"></div>
+            <div className="grid lg:grid-cols-2 gap-10 items-center p-6 sm:p-10 lg:p-14">
 
-          <div className="relative px-4 sm:px-6 lg:px-10 py-10">
+              {/* LEFT */}
+              <div>
 
-            <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 rounded-[36px] overflow-hidden">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-sm mb-6">
+                  🚀 AI Powered Creative Platform
+                </div>
 
-              <div className="grid lg:grid-cols-2 gap-10 items-center p-6 sm:p-10 lg:p-14">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight">
 
-                {/* LEFT */}
-                <div>
+                  Build Amazing
 
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-sm mb-6">
-                    🚀 AI Powered Creative Platform
-                  </div>
+                  <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                    Digital Designs
+                  </span>
 
-                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight">
+                </h1>
 
-                    Build Amazing
+                <p className="mt-6 text-gray-300 text-base sm:text-lg leading-relaxed">
+                  Create professional resumes,
+                  portfolios, logos and
+                  presentations with AI powered
+                  tools.
+                </p>
 
-                    <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                      Digital Designs
-                    </span>
+                <div className="flex flex-col sm:flex-row gap-4 mt-8">
 
-                  </h1>
+                  <Link
+                    to="/editor"
+                    className="px-7 py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-center font-semibold"
+                  >
+                    Create Resume
+                  </Link>
 
-                  <p className="mt-6 text-gray-300 text-base sm:text-lg leading-relaxed max-w-2xl">
-
-                    Create professional resumes, stunning portfolios,
-                    logos and presentations with modern templates,
-                    AI tools and instant downloads.
-
-                  </p>
-
-                  {/* BUTTONS */}
-                  <div className="flex flex-col sm:flex-row gap-4 mt-8">
-
-                    <Link
-                      to="/editor"
-                      className="px-7 py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold shadow-2xl hover:scale-105 transition duration-300 text-center"
-                    >
-                      Create Resume
-                    </Link>
-
-                    <Link
-                      to="/portfolio"
-                      className="px-7 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-semibold transition duration-300 text-center"
-                    >
-                      Build Portfolio
-                    </Link>
-
-                  </div>
-
-                  {/* TAGS */}
-                  <div className="flex flex-wrap gap-3 mt-8">
-
-                    {[
-                      "100+ Templates",
-                      "AI Assisted",
-                      "Instant Download",
-                      "Mobile Friendly",
-                    ].map((item, i) => (
-                      <div
-                        key={i}
-                        className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300"
-                      >
-                        {item}
-                      </div>
-                    ))}
-
-                  </div>
+                  <Link
+                    to="/portfolio"
+                    className="px-7 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-center font-semibold"
+                  >
+                    Build Portfolio
+                  </Link>
 
                 </div>
 
-                {/* RIGHT */}
-                <div className="relative flex justify-center">
+              </div>
 
-                  <div className="relative w-full max-w-md">
+              {/* RIGHT */}
+              <div className="hidden lg:flex justify-center">
 
-                    <div className="absolute -top-5 -left-5 w-full h-full rounded-3xl bg-gradient-to-r from-purple-600 to-indigo-600 blur-2xl opacity-30"></div>
+                <div className="relative w-full max-w-md">
 
-                    <div className="relative bg-gradient-to-br from-gray-900 to-black border border-white/10 rounded-3xl p-5 shadow-2xl">
+                  <div className="absolute -top-5 -left-5 w-full h-full rounded-3xl bg-gradient-to-r from-purple-600 to-indigo-600 blur-2xl opacity-30"></div>
 
-                      {/* BROWSER */}
-                      <div className="flex items-center gap-2 mb-5">
-                        <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                        <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                        <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                      </div>
+                  <div className="relative bg-gradient-to-br from-gray-900 to-black border border-white/10 rounded-3xl p-5 shadow-2xl">
 
-                      {/* UI */}
-                      <div className="space-y-4">
+                    <div className="space-y-4">
 
-                        <div className="h-36 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600"></div>
+                      <div className="h-36 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600"></div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-4">
 
-                          <div className="h-24 rounded-2xl bg-white/5"></div>
+                        <div className="h-24 rounded-2xl bg-white/5"></div>
 
-                          <div className="h-24 rounded-2xl bg-white/5"></div>
-
-                        </div>
-
-                        <div className="h-16 rounded-2xl bg-white/5"></div>
+                        <div className="h-24 rounded-2xl bg-white/5"></div>
 
                       </div>
+
+                      <div className="h-16 rounded-2xl bg-white/5"></div>
 
                     </div>
 
@@ -354,54 +743,82 @@ const Dashboard = () => {
 
         </div>
 
-        {/* TOOLS */}
-        <div className="px-4 sm:px-6 lg:px-10 py-8">
+        {/* STATS */}
+        <div className="px-4 sm:px-6 lg:px-10">
 
-          <div className="flex items-center justify-between mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
 
-            <div>
+            {stats.map((item, index) => (
+              <div
+                key={index}
+                className="bg-white/[0.04] border border-white/10 rounded-3xl p-5 backdrop-blur-xl"
+              >
 
-              <h2 className="text-3xl font-bold">
-                Creative Tools
-              </h2>
+                <div className="flex items-center justify-between">
 
-              <p className="text-gray-400 mt-2">
-                Everything you need in one platform.
-              </p>
+                  <div className="text-purple-400">
+                    {item.icon}
+                  </div>
 
-            </div>
+                  <p className="text-3xl font-bold">
+                    {item.value}
+                  </p>
+
+                </div>
+
+                <p className="mt-4 text-gray-400 text-sm">
+                  {item.title}
+                </p>
+
+              </div>
+            ))}
 
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        </div>
+
+        {/* TOOLS */}
+        <div className="px-4 sm:px-6 lg:px-10 py-10">
+
+          <div className="mb-8">
+
+            <h2 className="text-3xl font-bold">
+              Creative Tools
+            </h2>
+
+            <p className="text-gray-400 mt-2">
+              Everything you need in one
+              platform.
+            </p>
+
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
 
             {tools.map((tool, index) => (
               <div
                 key={index}
-                className="group bg-white/[0.04] border border-white/10 rounded-3xl p-6 hover:scale-[1.02] transition duration-300 backdrop-blur-xl shadow-2xl"
+                className="group bg-white/[0.04] border border-white/10 rounded-3xl p-6 hover:scale-[1.02] hover:-translate-y-1 transition duration-300 backdrop-blur-xl shadow-2xl"
               >
 
-                {/* ICON */}
                 <div
                   className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${tool.gradient} flex items-center justify-center shadow-xl`}
                 >
                   {tool.icon}
                 </div>
 
-                {/* CONTENT */}
                 <div className="mt-6">
 
-                  <h3 className="text-2xl font-semibold">
+                  <h3 className="text-xl font-semibold">
                     {tool.title}
                   </h3>
 
-                  <p className="text-gray-400 mt-3 leading-relaxed">
+                  <p className="text-gray-400 mt-3 leading-relaxed text-sm">
                     {tool.desc}
                   </p>
 
                 </div>
 
-                {/* BUTTON */}
                 <Link
                   to={tool.link}
                   className={`mt-8 inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r ${tool.gradient} text-white font-medium shadow-lg hover:opacity-90 transition`}
@@ -412,6 +829,37 @@ const Dashboard = () => {
 
               </div>
             ))}
+
+          </div>
+
+        </div>
+
+        {/* AI CARD */}
+        <div className="px-4 sm:px-6 lg:px-10 pb-8">
+
+          <div className="bg-gradient-to-r from-purple-600/20 to-indigo-600/10 border border-purple-500/20 rounded-3xl p-6">
+
+            <div className="flex items-start gap-4">
+
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center">
+                <Sparkles size={24} />
+              </div>
+
+              <div>
+
+                <h3 className="text-xl font-semibold">
+                  AI Suggestion
+                </h3>
+
+                <p className="text-gray-300 mt-2 leading-relaxed">
+                  Add more project details in
+                  your resume to improve ATS
+                  score and recruiter visibility.
+                </p>
+
+              </div>
+
+            </div>
 
           </div>
 
@@ -468,7 +916,12 @@ const Dashboard = () => {
 
                   </div>
 
-                  <button className="mt-5 w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 transition">
+                  <button
+                    onClick={() =>
+                      navigate(item.route)
+                    }
+                    className="mt-5 w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 transition"
+                  >
                     Continue Editing
                   </button>
 
@@ -488,4 +941,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

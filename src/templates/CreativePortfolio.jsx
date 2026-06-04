@@ -36,7 +36,7 @@ const CreativePortfolio = ({ data }) => {
               Available For Work
             </div>
 
-            <h1 className="text-3xl sm:text-5xl md:text-5xl xl:text-2xl font-black leading-tight break-words">
+            <h1 className="text-xl sm:text-5xl md:text-5xl xl:text-3xl font-black leading-tight break-words">
               {data.name || "Your Name"}
             </h1>
 
@@ -148,69 +148,69 @@ const CreativePortfolio = ({ data }) => {
 
        {/* RIGHT IMAGE */}
 
-<div className="order-1 lg:order-2 flex justify-center lg:justify-end">
+      <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
 
-  <div className="relative">
+        <div className="relative">
 
-    {/* Glow */}
-    <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/30 to-cyan-500/30 rounded-[24px] blur-2xl scale-105"></div>
+        {/* Glow */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/30 to-cyan-500/30 rounded-[24px] blur-2xl scale-105"></div>
 
-    {/* CARD */}
-    <div className="relative bg-white/10 backdrop-blur-xl border border-white/10 p-2 rounded-[24px] shadow-2xl">
+        {/* CARD */}
+        <div className="relative bg-white/10 backdrop-blur-xl border border-white/10 p-2 rounded-[24px] shadow-2xl">
 
-      {data.profileImage ? (
-        <img
-          src={data.profileImage}
-          alt="profile"
-          className="
-            w-[150px]
-            sm:w-[190px]
-            md:w-[230px]
-            lg:w-[260px]
+                {data.profileImage ? (
+                  <img
+                    src={data.profileImage}
+                    alt="profile"
+                    className="
+                      w-[150px]
+                      sm:w-[190px]
+                      md:w-[220px]
+                      lg:w-[300px]
 
-            h-[210px]
-            sm:h-[260px]
-            md:h-[310px]
-            lg:h-[340px]
+                      h-[210px]
+                      sm:h-[260px]
+                      md:h-[310px]
+                      lg:h-[300px]
 
-            object-cover
-            rounded-[20px]
-          "
-        />
-      ) : (
-        <div
-          className="
-            w-[150px]
-            sm:w-[190px]
-            md:w-[230px]
-            lg:w-[260px]
+                      object-cover
+                      rounded-[20px]
+                    "
+                  />
+                ) : (
+                  <div
+                    className="
+                      w-[150px]
+                      sm:w-[190px]
+                      md:w-[230px]
+                      lg:w-[300px]
 
-            h-[210px]
-            sm:h-[260px]
-            md:h-[310px]
-            lg:h-[340px]
+                      h-[210px]
+                      sm:h-[260px]
+                      md:h-[310px]
+                      lg:h-[320px]
 
-            rounded-[20px]
-            bg-gradient-to-br
-            from-purple-500
-            to-cyan-500
-            flex
-            items-center
-            justify-center
-            text-lg
-            sm:text-xl
-            font-bold
-          "
-        >
-          PROFILE
-        </div>
-      )}
+                      rounded-[20px]
+                      bg-gradient-to-br
+                      from-purple-500
+                      to-cyan-500
+                      flex
+                      items-center
+                      justify-center
+                      text-lg
+                      sm:text-xl
+                      font-bold
+                    "
+                  >
+                    PROFILE
+                  </div>
+                )}
 
-    </div>
+              </div>
 
-  </div>
+            </div>
 
-</div>
+          </div>
 
         </div>
       </section>
@@ -343,7 +343,7 @@ const CreativePortfolio = ({ data }) => {
       </section>
 
       {/* ================= PROJECTS ================= */}
-      <section className="px-4 sm:px-6 md:px-14 py-14 md:py-16 bg-white/[0.03]">
+      <section className="px-4 sm:px-6 md:px-12 py-14 md:py-15 bg-white/[0.03]">
 
         <div className="max-w-7xl mx-auto">
 
@@ -351,11 +351,6 @@ const CreativePortfolio = ({ data }) => {
             <h2 className="text-3xl sm:text-4xl font-bold text-center md:text-left">
               Featured Projects
             </h2>
-
-            <div className="hidden md:flex items-center gap-2 text-gray-400">
-              <Globe size={18} />
-              Portfolio Showcase
-            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
@@ -371,7 +366,7 @@ const CreativePortfolio = ({ data }) => {
                     <img
                       src={proj.image}
                       alt="project"
-                      className="w-full h-52 sm:h-56 object-cover group-hover:scale-110 transition duration-500"
+                      className="w-full h-50 sm:h-50 object-cover group-hover:scale-110 transition duration-500"
                     />
                   </div>
                 )}

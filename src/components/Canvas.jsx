@@ -1,526 +1,8 @@
-// import { useRef, useEffect, useState } from "react";
-// import { useResume } from "../context/ResumeContext";
-// import * as htmlToImage from "html-to-image";
-// import jsPDF from "jspdf";
-// import { Document, Packer, Paragraph, TextRun } from "docx";
-// import { saveAs } from "file-saver";
-// import { saveToLibrary } from "../utils/library";
-
-// import MinimalTemplate from "../templates/MinimalTemplate";
-// import ModernTemplate from "../templates/ModernTemplate";
-// import CreativeTemplate from "../templates/CreativeTemplate";
-// import ProfessionalTemplate from "../templates/ProfessionalTemplate";
-
-// const Canvas = () => {
-//   const { template, setTemplate, resumeData } = useResume();
-
-//   const resumeRef = useRef();
-
-//   // ✅ Responsive Scale
-//   const [scale, setScale] = useState(1);
-
-//   useEffect(() => {
-//     const updateScale = () => {
-//       const width = window.innerWidth;
-
-//       if (width < 768) {
-//         setScale(1);
-//       } else if (width < 1200) {
-//         setScale(0.7);
-//       } else {
-//         setScale(0.85);
-//       }
-//     };
-
-//     updateScale();
-
-//     window.addEventListener("resize", updateScale);
-
-//     return () =>
-//       window.removeEventListener("resize", updateScale);
-//   }, []);
-
-//   // 🎯 Template Render
-//   const renderTemplate = () => {
-//     switch (template) {
-//       case "minimal":
-//         return <MinimalTemplate />;
-
-//       case "modern":
-//         return <ModernTemplate />;
-
-//       case "creative":
-//         return <CreativeTemplate />;
-
-//       case "professional":
-//         return <ProfessionalTemplate />;
-
-//       default:
-//         return <ModernTemplate />;
-//     }
-//   };
-
-//   // ✅ Validation
-//   const isFormComplete = () => {
-//     const {
-//       personal,
-//       education,
-//       experience,
-//       skills,
-//       languages,
-//       agreement,
-//     } = resumeData;
-
-//     return (
-//       personal?.name &&
-//       personal?.email &&
-//       personal?.phone &&
-//       education.length > 0 &&
-//       experience.length > 0 &&
-//       skills.length > 0 &&
-//       languages.length > 0 &&
-//       agreement?.agreed === true &&
-//       agreement?.signature
-//     );
-//   };
-
-//   // ✅ Reusable Validation
-//   const validateBeforeDownload = () => {
-//     if (!isFormComplete()) {
-//       alert(
-//         "⚠️ Please complete all sections & accept agreement before downloading"
-//       );
-
-//       return false;
-//     }
-
-//     return true;
-//   };
-
-//   // ================= PNG =================
-//   const downloadPNG = async () => {
-//     if (!validateBeforeDownload()) return;
-
-//     try {
-//       const node = resumeRef.current;
-
-//       const dataUrl = await htmlToImage.toPng(node, {
-//         pixelRatio: 3,
-//         cacheBust: true,
-//         useCORS: true,
-//         backgroundColor: "#ffffff",
-//       });
-
-//       const link = document.createElement("a");
-
-//       link.download = "resume.png";
-//       link.href = dataUrl;
-//       document.body.appendChild(link);
-//       link.click();
-//       document.body.removeChild(link);
-      
-//       saveToLibrary({
-//         id: Date.now(),
-//         title:
-//           resumeData?.personal?.name || "Resume",
-//         type: "resume",
-//         format: "png",
-//         thumbnail: dataUrl,
-//         file: dataUrl,
-//         createdAt: new Date().toISOString(),
-//       });
-//     } catch (error) {
-//       console.error(error);
-//       alert("Failed to download PNG");
-//     }
-//   };
-
-//   // ================= PDF =================
-//   const downloadPDF = async () => {
-//     if (!validateBeforeDownload()) return;
-
-//     try {
-//       const node = resumeRef.current;
-
-//       const dataUrl = await htmlToImage.toPng(node, {
-//         pixelRatio: 3,
-//         cacheBust: true,
-//         useCORS: true,
-//         backgroundColor: "#ffffff",
-//       });
-
-//       const pdf = new jsPDF("p", "mm", "a4");
-
-//       const imgProps =
-//         pdf.getImageProperties(dataUrl);
-
-//       const pdfWidth =
-//         pdf.internal.pageSize.getWidth();
-//       const pdfHeight =
-//         pdf.internal.pageSize.getHeight();
-
-//       const ratio = Math.min(
-//         pdfWidth / imgProps.width,
-//         pdfHeight / imgProps.height
-//       );
-
-//       const imgWidth =
-//         imgProps.width * ratio;
-//       const imgHeight =
-//         imgProps.height * ratio;
-
-//       const x =
-//         (pdfWidth - imgWidth) / 2;
-//       const y =
-//         (pdfHeight - imgHeight) / 2;
-
-//       pdf.addImage(
-//         dataUrl,
-//         "PNG",
-//         x,
-//         y,
-//         imgWidth,
-//         imgHeight
-//       );
-
-//       pdf.save("resume.pdf");
-
-//       const pdfData =
-//         pdf.output("datauristring");
-
-//       saveToLibrary({
-//         id: Date.now(),
-//         title:
-//           resumeData?.personal?.name || "Resume",
-//         type: "resume",
-//         format: "pdf",
-//         thumbnail: dataUrl,
-//         file: pdfData,
-//         createdAt: new Date().toISOString(),
-//       });
-//     } catch (error) {
-//       console.error(error);
-//       alert("Failed to download PDF");
-//     }
-//   };
-
-//   // ================= DOCX =================
-//   const downloadDOCX = async () => {
-//     if (!validateBeforeDownload()) return;
-
-//     try {
-//       const {
-//         personal,
-//         education,
-//         experience,
-//         skills,
-//         projects,
-//         languages,
-//       } = resumeData;
-
-//       // PREVIEW IMAGE
-//       const previewImage =
-//         await htmlToImage.toPng(
-//           resumeRef.current,
-//           {
-//             pixelRatio: 2,
-//             cacheBust: true,
-//             useCORS: true,
-//             backgroundColor: "#ffffff",
-//           }
-//         );
-
-//       const doc = new Document({
-//         sections: [
-//           {
-//             children: [
-//               // NAME
-//               new Paragraph({
-//                 children: [
-//                   new TextRun({
-//                     text:
-//                       personal?.name ||
-//                       "Your Name",
-//                     bold: true,
-//                     size: 32,
-//                   }),
-//                 ],
-//               }),
-
-//               // CONTACT
-//               new Paragraph(
-//                 `${personal?.email || ""} | ${
-//                   personal?.phone || ""
-//                 }`
-//               ),
-
-//               new Paragraph(""),
-
-//               // EXPERIENCE
-//               new Paragraph({
-//                 children: [
-//                   new TextRun({
-//                     text: "Experience",
-//                     bold: true,
-//                   }),
-//                 ],
-//               }),
-
-//               ...experience.flatMap((e) => [
-//                 new Paragraph({
-//                   children: [
-//                     new TextRun({
-//                       text: e.role || "",
-//                       bold: true,
-//                     }),
-//                   ],
-//                 }),
-
-//                 new Paragraph(
-//                   e.company || ""
-//                 ),
-
-//                 new Paragraph(
-//                   `${e.startYear || ""} - ${
-//                     e.endYear || "Present"
-//                   }`
-//                 ),
-
-//                 new Paragraph(
-//                   e.description || ""
-//                 ),
-
-//                 new Paragraph(""),
-//               ]),
-
-//               // PROJECTS
-//               new Paragraph({
-//                 children: [
-//                   new TextRun({
-//                     text: "Projects",
-//                     bold: true,
-//                   }),
-//                 ],
-//               }),
-
-//               ...projects.flatMap((p) => [
-//                 new Paragraph({
-//                   children: [
-//                     new TextRun({
-//                       text: p.title || "",
-//                       bold: true,
-//                     }),
-//                   ],
-//                 }),
-
-//                 new Paragraph(p.tech || ""),
-
-//                 new Paragraph(
-//                   p.description || ""
-//                 ),
-
-//                 new Paragraph(""),
-//               ]),
-
-//               // EDUCATION
-//               new Paragraph({
-//                 children: [
-//                   new TextRun({
-//                     text: "Education",
-//                     bold: true,
-//                   }),
-//                 ],
-//               }),
-
-//               ...education.flatMap((e) => [
-//                 new Paragraph({
-//                   children: [
-//                     new TextRun({
-//                       text: e.level || "",
-//                       bold: true,
-//                     }),
-//                   ],
-//                 }),
-
-//                 new Paragraph(
-//                   e.school || ""
-//                 ),
-
-//                 new Paragraph(
-//                   `${e.startYear || ""} - ${
-//                     e.endYear || ""
-//                   }`
-//                 ),
-
-//                 new Paragraph(""),
-//               ]),
-
-//               // SKILLS
-//               new Paragraph({
-//                 children: [
-//                   new TextRun({
-//                     text: "Skills",
-//                     bold: true,
-//                   }),
-//                 ],
-//               }),
-
-//               new Paragraph(
-//                 skills
-//                   .map((s) => s.name)
-//                   .join(", ")
-//               ),
-
-//               new Paragraph(""),
-
-//               // LANGUAGES
-//               new Paragraph({
-//                 children: [
-//                   new TextRun({
-//                     text: "Languages",
-//                     bold: true,
-//                   }),
-//                 ],
-//               }),
-
-//               new Paragraph(
-//                 languages
-//                   .map(
-//                     (l) =>
-//                       `${l.name} (${l.level})`
-//                   )
-//                   .join(", ")
-//               ),
-//             ],
-//           },
-//         ],
-//       });
-
-//       const blob = await Packer.toBlob(doc);
-
-//       // DOWNLOAD
-//       saveAs(blob, "resume.docx");
-
-//       // SAVE LIBRARY
-//       const reader = new FileReader();
-
-//       reader.readAsDataURL(blob);
-
-//       reader.onloadend = () => {
-//         saveToLibrary({
-//           id: Date.now(),
-//           title:
-//             resumeData?.personal?.name ||
-//             "Resume",
-//           type: "resume",
-//           format: "docx",
-//           thumbnail: previewImage,
-//           file: reader.result,
-//           createdAt:
-//             new Date().toISOString(),
-//         });
-//       };
-//     } catch (error) {
-//       console.error(error);
-//       alert("Failed to download DOCX");
-//     }
-//   };
-
-//   return (
-//     <div className="w-full bg-white border-b shadow-sm px-4 py-3 flex flex-col gap-4">
-
-//       {/* TITLE */}
-//       <h1 className="text-lg font-semibold text-center md:text-left">
-//         Resume Builder
-//       </h1>
-
-//       {/* TEMPLATE BUTTONS */}
-//       <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
-//         {[
-//           "minimal",
-//           "modern",
-//           "creative",
-//           "professional",
-//         ].map((t) => (
-//           <button
-//             key={t}
-//             onClick={() =>
-//               setTemplate(t)
-//             }
-//             className={`w-full sm:w-auto px-3 py-2 text-sm rounded-full border transition-all duration-200 capitalize
-//               ${
-//                 template === t
-//                   ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-md"
-//                   : "bg-white text-gray-700 hover:bg-gray-100"
-//               }`}
-//           >
-//             {t}
-//           </button>
-//         ))}
-//       </div>
-
-//       {/* DOWNLOAD BUTTONS */}
-//       <div className="grid grid-cols-3 gap-2">
-
-//         <button
-//           onClick={downloadPNG}
-//           className="py-2 text-sm font-medium rounded-md border bg-white text-gray-700 hover:bg-gray-100 transition active:scale-95"
-//         >
-//           PNG
-//         </button>
-
-//         <button
-//           onClick={downloadPDF}
-//           className="py-2 text-sm font-medium rounded-md bg-black text-white shadow-md active:scale-95"
-//         >
-//           PDF
-//         </button>
-
-//         <button
-//           onClick={downloadDOCX}
-//           className="py-2 text-sm font-medium rounded-md bg-blue-600 text-white shadow-md active:scale-95"
-//         >
-//           DOCX
-//         </button>
-
-//       </div>
-
-//       {/* PREVIEW */}
-//       <div className="flex-1 w-full overflow-auto bg-gradient-to-br from-gray-100 to-gray-200 flex justify-center py-4 px-2">
-
-//         <div className="flex justify-center w-full">
-
-//           <div
-//             className="bg-white shadow-xl border rounded-md transition-all duration-300 w-full max-w-[210mm] overflow-hidden"
-//             style={{
-//               minHeight: "297mm",
-//               zoom: scale,
-//             }}
-//           >
-
-//             <div
-//               ref={resumeRef}
-//               className="p-4 md:p-10"
-//             >
-//               {renderTemplate()}
-//             </div>
-
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Canvas;
-
-
 import { useRef, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useResume } from "../context/ResumeContext";
 
 import * as htmlToImage from "html-to-image";
-
 import jsPDF from "jspdf";
 
 import {
@@ -533,8 +15,6 @@ import {
 import { saveAs } from "file-saver";
 
 import { saveToLibrary } from "../utils/library";
-
-import { createResume } from "../services/resumeService";
 
 import MinimalTemplate from "../templates/MinimalTemplate";
 import ModernTemplate from "../templates/ModernTemplate";
@@ -552,58 +32,57 @@ const Canvas = () => {
 
   const resumeRef = useRef();
 
-  const [scale, setScale] = useState(1);
+  const [isMobile, setIsMobile] =
+    useState(false);
 
-  // ================= AUTO DOWNLOAD FROM LIBRARY =================
+  // ================= MOBILE CHECK =================
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const downloadType = params.get("download");
-
-    if (downloadType && resumeRef.current) {
-      setTimeout(() => {
-        if (downloadType === "png") downloadPNG();
-        if (downloadType === "pdf") downloadPDF();
-        if (downloadType === "docx") downloadDOCX();
-      }, 1000);
-    }
-  }, [location.search]);
-
-  // ================= RESPONSIVE SCALE =================
-  useEffect(() => {
-
-    const updateScale = () => {
-
-      const width = window.innerWidth;
-
-      if (width < 768) {
-        setScale(1);
-      } else if (width < 1200) {
-        setScale(0.7);
-      } else {
-        setScale(0.85);
-      }
+    const handleResize = () => {
+      setIsMobile(
+        window.innerWidth < 768
+      );
     };
 
-    updateScale();
+    handleResize();
 
     window.addEventListener(
       "resize",
-      updateScale
+      handleResize
     );
 
     return () =>
       window.removeEventListener(
         "resize",
-        updateScale
+        handleResize
       );
-
   }, []);
+
+  // ================= AUTO DOWNLOAD =================
+  useEffect(() => {
+    const params = new URLSearchParams(
+      location.search
+    );
+
+    const downloadType =
+      params.get("download");
+
+    if (downloadType && resumeRef.current) {
+      setTimeout(() => {
+        if (downloadType === "png")
+          downloadPNG();
+
+        if (downloadType === "pdf")
+          downloadPDF();
+
+        if (downloadType === "docx")
+          downloadDOCX();
+      }, 1000);
+    }
+  }, [location.search]);
 
   // ================= TEMPLATE =================
   const renderTemplate = () => {
-
     switch (template) {
-
       case "minimal":
         return <MinimalTemplate />;
 
@@ -623,96 +102,89 @@ const Canvas = () => {
 
   // ================= VALIDATION =================
   const isFormComplete = () => {
-
     const {
       personal,
       education,
-      experience,
       skills,
       languages,
       agreement,
     } = resumeData;
 
     return (
-      personal?.name &&
-      personal?.email &&
-      personal?.phone &&
-      education.length > 0 &&
-      experience.length > 0 &&
-      skills.length > 0 &&
-      languages.length > 0 &&
+      personal?.name?.trim() &&
+      personal?.email?.trim() &&
+      personal?.phone?.trim() &&
+      education?.length > 0 &&
+      skills?.length > 0 &&
+      languages?.length > 0 &&
       agreement?.agreed === true &&
       agreement?.signature
     );
   };
 
-  const validateBeforeDownload = () => {
+  const validateBeforeDownload =
+    () => {
+      if (!isFormComplete()) {
+        alert(
+          "⚠️ Please complete all sections before downloading"
+        );
 
-    if (!isFormComplete()) {
+        return false;
+      }
 
-      alert(
-        "⚠️ Please complete all sections & accept agreement before downloading"
-      );
+      return true;
+    };
 
-      return false;
-    }
-
-    return true;
-  };
-
-  // ================= SAVE TO DATABASE =================
-  const saveResumeToDatabase = async (
-    imageUrl
-  ) => {
-
+  // ================= SAVE =================
+  const handleSave = async () => {
     try {
+      const preview =
+        await htmlToImage.toPng(
+          resumeRef.current,
+          {
+            pixelRatio: 2,
+            cacheBust: true,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+          }
+        );
 
-      await createResume({
-
+      saveToLibrary({
         title:
           resumeData?.personal?.name ||
-          "My Resume",
+          "Resume",
 
-        image: imageUrl,
+        type: "resume",
 
-        data: resumeData,
+        thumbnail: preview,
 
-        desc: "Professional Resume",
-
-        template,
+        rawData: resumeData,
       });
 
-      console.log(
-        "Resume Saved To Database"
-      );
-
+      alert("✅ Resume Saved");
     } catch (error) {
-
       console.log(error);
 
-      alert(
-        "Database Save Failed"
-      );
+      alert("Save Failed");
     }
   };
 
   // ================= PNG =================
   const downloadPNG = async () => {
-
     if (!validateBeforeDownload())
       return;
 
     try {
-
-      const node = resumeRef.current;
-
       const dataUrl =
-        await htmlToImage.toPng(node, {
-          pixelRatio: 3,
-          cacheBust: true,
-          useCORS: true,
-          backgroundColor: "#ffffff",
-        });
+        await htmlToImage.toPng(
+          resumeRef.current,
+          {
+            pixelRatio: 3,
+            cacheBust: true,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+          }
+        );
 
       const link =
         document.createElement("a");
@@ -721,52 +193,42 @@ const Canvas = () => {
 
       link.href = dataUrl;
 
-      document.body.appendChild(link);
-
       link.click();
 
-      document.body.removeChild(link);
-
-      // SAVE LOCAL LIBRARY
       saveToLibrary({
-        title: resumeData?.personal?.name || "Resume",
+        title:
+          resumeData?.personal?.name ||
+          "Resume",
+
         type: "resume",
+
         thumbnail: dataUrl,
+
         rawData: resumeData,
       });
-
-      // SAVE DATABASE
-      await saveResumeToDatabase(
-        dataUrl
-      );
-
     } catch (error) {
+      console.log(error);
 
-      console.error(error);
-
-      alert(
-        "Failed to download PNG"
-      );
+      alert("PNG Download Failed");
     }
   };
 
   // ================= PDF =================
   const downloadPDF = async () => {
-
     if (!validateBeforeDownload())
       return;
 
     try {
-
-      const node = resumeRef.current;
-
       const dataUrl =
-        await htmlToImage.toPng(node, {
-          pixelRatio: 3,
-          cacheBust: true,
-          useCORS: true,
-          backgroundColor: "#ffffff",
-        });
+        await htmlToImage.toPng(
+          resumeRef.current,
+          {
+            pixelRatio: 3,
+            cacheBust: true,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+          }
+        );
 
       const pdf = new jsPDF(
         "p",
@@ -813,70 +275,30 @@ const Canvas = () => {
       );
 
       pdf.save("resume.pdf");
-
-      const pdfData =
-        pdf.output(
-          "datauristring"
-        );
-
-      // SAVE LOCAL LIBRARY
-      saveToLibrary({
-        title: resumeData?.personal?.name || "Resume",
-        type: "resume",
-        thumbnail: dataUrl,
-        rawData: resumeData,
-      });
-
-      // SAVE DATABASE
-      await saveResumeToDatabase(
-        dataUrl
-      );
-
     } catch (error) {
+      console.log(error);
 
-      console.error(error);
-
-      alert(
-        "Failed to download PDF"
-      );
+      alert("PDF Download Failed");
     }
   };
 
   // ================= DOCX =================
   const downloadDOCX = async () => {
-
     if (!validateBeforeDownload())
       return;
 
     try {
-
       const {
         personal,
         education,
-        experience,
         skills,
-        projects,
         languages,
       } = resumeData;
-
-      const previewImage =
-        await htmlToImage.toPng(
-          resumeRef.current,
-          {
-            pixelRatio: 2,
-            cacheBust: true,
-            useCORS: true,
-            backgroundColor:
-              "#ffffff",
-          }
-        );
 
       const doc = new Document({
         sections: [
           {
             children: [
-
-              // NAME
               new Paragraph({
                 children: [
                   new TextRun({
@@ -886,12 +308,11 @@ const Canvas = () => {
 
                     bold: true,
 
-                    size: 32,
+                    size: 34,
                   }),
                 ],
               }),
 
-              // CONTACT
               new Paragraph(
                 `${personal?.email || ""} | ${
                   personal?.phone || ""
@@ -900,104 +321,10 @@ const Canvas = () => {
 
               new Paragraph(""),
 
-              // EXPERIENCE TITLE
               new Paragraph({
                 children: [
                   new TextRun({
-                    text:
-                      "Experience",
-
-                    bold: true,
-                  }),
-                ],
-              }),
-
-              ...experience.flatMap(
-                (e) => [
-
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text:
-                          e.role ||
-                          "",
-
-                        bold: true,
-                      }),
-                    ],
-                  }),
-
-                  new Paragraph(
-                    e.company ||
-                      ""
-                  ),
-
-                  new Paragraph(
-                    `${
-                      e.startYear ||
-                      ""
-                    } - ${
-                      e.endYear ||
-                      "Present"
-                    }`
-                  ),
-
-                  new Paragraph(
-                    e.description ||
-                      ""
-                  ),
-
-                  new Paragraph(""),
-                ]
-              ),
-
-              // PROJECTS
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text:
-                      "Projects",
-
-                    bold: true,
-                  }),
-                ],
-              }),
-
-              ...projects.flatMap(
-                (p) => [
-
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text:
-                          p.title ||
-                          "",
-
-                        bold: true,
-                      }),
-                    ],
-                  }),
-
-                  new Paragraph(
-                    p.tech || ""
-                  ),
-
-                  new Paragraph(
-                    p.description ||
-                      ""
-                  ),
-
-                  new Paragraph(""),
-                ]
-              ),
-
-              // EDUCATION
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text:
-                      "Education",
-
+                    text: "Education",
                     bold: true,
                   }),
                 ],
@@ -1005,45 +332,26 @@ const Canvas = () => {
 
               ...education.flatMap(
                 (e) => [
-
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text:
-                          e.level ||
-                          "",
-
-                        bold: true,
-                      }),
-                    ],
-                  }),
-
                   new Paragraph(
-                    e.school ||
-                      ""
+                    e.level || ""
                   ),
 
                   new Paragraph(
-                    `${
-                      e.startYear ||
-                      ""
-                    } - ${
-                      e.endYear ||
-                      ""
-                    }`
+                    e.school || ""
+                  ),
+
+                  new Paragraph(
+                    `${e.startYear} - ${e.endYear}`
                   ),
 
                   new Paragraph(""),
                 ]
               ),
 
-              // SKILLS
               new Paragraph({
                 children: [
                   new TextRun({
-                    text:
-                      "Skills",
-
+                    text: "Skills",
                     bold: true,
                   }),
                 ],
@@ -1059,13 +367,10 @@ const Canvas = () => {
 
               new Paragraph(""),
 
-              // LANGUAGES
               new Paragraph({
                 children: [
                   new TextRun({
-                    text:
-                      "Languages",
-
+                    text: "Languages",
                     bold: true,
                   }),
                 ],
@@ -1087,124 +392,248 @@ const Canvas = () => {
       const blob =
         await Packer.toBlob(doc);
 
-      // DOWNLOAD DOCX
       saveAs(blob, "resume.docx");
-
-      // SAVE LIBRARY
-      const reader =
-        new FileReader();
-
-      reader.readAsDataURL(blob);
-
-      reader.onloadend =
-        async () => {
-
-          saveToLibrary({
-            title: resumeData?.personal?.name || "Resume",
-            type: "resume",
-            thumbnail: previewImage,
-            rawData: resumeData,
-          });
-
-          // SAVE DATABASE
-          await saveResumeToDatabase(
-            previewImage
-          );
-        };
-
     } catch (error) {
+      console.log(error);
 
-      console.error(error);
-
-      alert(
-        "Failed to download DOCX"
-      );
+      alert("DOCX Download Failed");
     }
   };
 
   return (
-    <div className="w-full bg-white border-b shadow-sm px-4 py-3 flex flex-col gap-4">
-
-      {/* TITLE */}
-      <h1 className="text-lg font-semibold text-center md:text-left">
-        Resume Builder
-      </h1>
-
-      {/* TEMPLATE BUTTONS */}
-      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
-
-        {[
-          "minimal",
-          "modern",
-          "creative",
-          "professional",
-        ].map((t) => (
-
-          <button
-            key={t}
-
-            onClick={() =>
-              setTemplate(t)
-            }
-
-            className={`w-full sm:w-auto px-3 py-2 text-sm rounded-full border transition-all duration-200 capitalize
-            ${
-              template === t
-                ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-md"
-                : "bg-white text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-
-      {/* DOWNLOAD BUTTONS */}
-      <div className="grid grid-cols-3 gap-2">
-
-        <button
-          onClick={downloadPNG}
-          className="py-2 text-sm font-medium rounded-md border bg-white text-gray-700 hover:bg-gray-100 transition active:scale-95"
+    <div
+      className="
+        min-h-screen
+        bg-gradient-to-br
+        from-slate-100
+        via-gray-100
+        to-slate-200
+      "
+    >
+      {/* ================= TOP NAVBAR ================= */}
+      <div
+        className="
+          sticky
+          top-0
+          z-50
+          bg-white/90
+          backdrop-blur-md
+          border-b
+          shadow-sm
+        "
+      >
+        <div
+          className="
+            max-w-7xl
+            mx-auto
+            px-3
+            sm:px-6
+            py-4
+          "
         >
-          PNG
-        </button>
-
-        <button
-          onClick={downloadPDF}
-          className="py-2 text-sm font-medium rounded-md bg-black text-white shadow-md active:scale-95"
-        >
-          PDF
-        </button>
-
-        <button
-          onClick={downloadDOCX}
-          className="py-2 text-sm font-medium rounded-md bg-blue-600 text-white shadow-md active:scale-95"
-        >
-          DOCX
-        </button>
-
-      </div>
-
-      {/* PREVIEW */}
-      <div className="flex-1 w-full overflow-auto bg-gradient-to-br from-gray-100 to-gray-200 flex justify-center py-4 px-2">
-
-        <div className="flex justify-center w-full">
-
+          {/* TOP */}
           <div
-            className="bg-white shadow-xl border rounded-md transition-all duration-300 w-full max-w-[210mm] overflow-hidden"
+            className="
+              flex
+              flex-col
+              md:flex-row
+              md:items-center
+              md:justify-between
+              gap-4
+            "
+          >
+            {/* TITLE */}
+            <div>
+              <h1
+                className="
+                  text-2xl
+                  font-bold
+                  text-gray-800
+                "
+              >
+                Resume Builder
+              </h1>
+
+              <p
+                className="
+                  text-sm
+                  text-gray-500
+                  mt-1
+                "
+              >
+                Build professional resumes
+              </p>
+            </div>
+
+            {/* ACTION BUTTONS */}
+            <div
+              className="
+                grid
+                grid-cols-2
+                sm:flex
+                gap-2
+              "
+            >
+              <button
+                onClick={handleSave}
+                className="
+                  px-4
+                  py-2.5
+                  rounded-xl
+                  bg-green-600
+                  hover:bg-green-700
+                  text-white
+                  font-medium
+                  shadow-md
+                  transition
+                "
+              >
+                Save
+              </button>
+
+              <button
+                onClick={downloadPNG}
+                className="
+                  px-4
+                  py-2.5
+                  rounded-xl
+                  border
+                  bg-white
+                  hover:bg-gray-100
+                  font-medium
+                "
+              >
+                PNG
+              </button>
+
+              <button
+                onClick={downloadPDF}
+                className="
+                  px-4
+                  py-2.5
+                  rounded-xl
+                  bg-black
+                  text-white
+                  hover:opacity-90
+                  font-medium
+                "
+              >
+                PDF
+              </button>
+
+              <button
+                onClick={downloadDOCX}
+                className="
+                  px-4
+                  py-2.5
+                  rounded-xl
+                  bg-blue-600
+                  text-white
+                  hover:bg-blue-700
+                  font-medium
+                "
+              >
+                DOCX
+              </button>
+            </div>
+          </div>
+
+          {/* TEMPLATE BUTTONS */}
+          <div
+            className="
+              mt-5
+              flex
+              gap-3
+              overflow-x-auto
+              pb-1
+              scrollbar-hide
+            "
+          >
+            {[
+              "minimal",
+              "modern",
+              "creative",
+              "professional",
+            ].map((t) => (
+              <button
+                key={t}
+                onClick={() =>
+                  setTemplate(t)
+                }
+                className={`
+                  whitespace-nowrap
+                  px-5
+                  py-2.5
+                  rounded-full
+                  text-sm
+                  font-medium
+                  border
+                  transition-all
+                  duration-200
+
+                  ${
+                    template === t
+                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-transparent shadow-lg"
+                      : "bg-white text-gray-700 hover:bg-gray-100"
+                  }
+                `}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ================= RESUME PREVIEW ================= */}
+      <div
+        className="
+          w-full
+          flex
+          justify-center
+          px-2
+          sm:px-4
+          py-6
+        "
+      >
+        <div
+          className="
+            w-full
+            flex
+            justify-center
+            overflow-auto
+          "
+        >
+          <div
+            className="
+              bg-white
+              rounded-2xl
+              shadow-2xl
+              border
+              overflow-hidden
+              transition-all
+              duration-300
+            "
             style={{
-              minHeight: "297mm",
-              zoom: scale,
+              width: isMobile
+                ? "100%"
+                : "210mm",
+
+              minHeight: isMobile
+                ? "auto"
+                : "297mm",
             }}
           >
-
             <div
               ref={resumeRef}
-              className="p-4 md:p-10"
+              className="
+                p-2
+                sm:p-4
+                md:p-8
+              "
             >
               {renderTemplate()}
             </div>
-
           </div>
         </div>
       </div>
