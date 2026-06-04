@@ -41,15 +41,44 @@ const EducationForm = ({ goBack, goNext }) => {
       return false;
     }
 
-    const exists = resumeData.education.some(
-      (e, i) =>
-        e.level === edu.level &&
-        e.school === edu.school &&
-        i !== editIndex
-    );
+    // ✅ School Validation
+    const schoolRegex = /^[A-Za-z\s.,-]+$/;
 
-    if (exists) {
-      setError("This education already exists");
+    if (!schoolRegex.test(edu.school)) {
+      setError("Enter valid school/college name");
+      return false;
+    }
+
+    // ✅ Location Validation
+    if (
+      edu.location &&
+      !/^[A-Za-z\s,.-]+$/.test(edu.location)
+    ) {
+      setError("Enter valid location");
+      return false;
+    }
+
+    // ✅ Year Validation
+    const currentYear = new Date().getFullYear();
+
+    if (
+      edu.startYear &&
+      !/^\d{4}$/.test(edu.startYear)
+    ) {
+      setError("Start year must be 4 digits");
+      return false;
+    }
+
+    if (
+      edu.endYear &&
+      !/^\d{4}$/.test(edu.endYear)
+    ) {
+      setError("End year must be 4 digits");
+      return false;
+    }
+
+    if (Number(edu.endYear) > currentYear) {
+      setError("End year cannot be in future");
       return false;
     }
 
@@ -59,6 +88,36 @@ const EducationForm = ({ goBack, goNext }) => {
       Number(edu.startYear) > Number(edu.endYear)
     ) {
       setError("Start year cannot be greater than end year");
+      return false;
+    }
+
+    // ✅ CGPA / Percentage Validation
+    if (edu.cgpa) {
+      const value = parseFloat(edu.cgpa);
+
+      if (edu.cgpa.includes("%")) {
+        if (value < 0 || value > 100) {
+          setError("Percentage must be between 0-100");
+          return false;
+        }
+      } else {
+        if (value < 0 || value > 10) {
+          setError("CGPA must be between 0-10");
+          return false;
+        }
+      }
+    }
+
+    // ✅ Duplicate Check
+    const exists = resumeData.education.some(
+      (e, i) =>
+        e.level === edu.level &&
+        e.school === edu.school &&
+        i !== editIndex
+    );
+
+    if (exists) {
+      setError("This education already exists");
       return false;
     }
 
@@ -74,7 +133,6 @@ const EducationForm = ({ goBack, goNext }) => {
 
     setResumeData({ ...resumeData, education: updated });
 
-    // reset form
     setEdu(emptyEdu);
     setEditIndex(null);
     setError("");
@@ -82,15 +140,15 @@ const EducationForm = ({ goBack, goNext }) => {
     return true;
   };
 
-  const removeEducation = (i) => {
-    const updated = resumeData.education.filter((_, idx) => idx !== i);
-    setResumeData({ ...resumeData, education: updated });
-  };
+    const removeEducation = (i) => {
+      const updated = resumeData.education.filter((_, idx) => idx !== i);
+      setResumeData({ ...resumeData, education: updated });
+    };
 
-  const editEducation = (i) => {
-    setEdu(resumeData.education[i]);
-    setEditIndex(i);
-  };
+    const editEducation = (i) => {
+      setEdu(resumeData.education[i]);
+      setEditIndex(i);
+    };
 
   return (
     <div className="px-4 md:px-8 py-4 max-w-3xl mx-auto">
@@ -150,7 +208,7 @@ const EducationForm = ({ goBack, goNext }) => {
         </div>
 
         <input
-          placeholder="CGPA / %"
+          placeholder="CGPA / % (Ex: 8.5 or 85%)"
           value={edu.cgpa}
           onChange={(e) => setEdu({ ...edu, cgpa: e.target.value })}
           className="border px-3 py-2 rounded-lg"
@@ -216,72 +274,34 @@ const EducationForm = ({ goBack, goNext }) => {
           ← Back
         </button>
 
-       <button
-          onClick={() => {
-            const hasCurrentData =
-              edu.level || edu.school || edu.startYear || edu.endYear;
+      <button
+        onClick={() => {
+          const hasCurrentData =
+            edu.level ||
+            edu.school ||
+            edu.startYear ||
+            edu.endYear;
 
-            let updatedList = [...resumeData.education];
+          // ✅ If user typed something → save with validation
+          if (hasCurrentData) {
+            const saved = saveEducation();
 
-            // ✅ If user typed something → simulate save
-            if (hasCurrentData) {
-              if (!edu.level || !edu.school) {
-                setError("Education level and school are required");
-                return;
-              }
+            if (!saved) return;
+          }
 
-              const exists = resumeData.education.some(
-                (e, i) =>
-                  e.level === edu.level &&
-                  e.school === edu.school &&
-                  i !== editIndex
-              );
+          // ✅ At least one education required
+          if (resumeData.education.length === 0 && !hasCurrentData) {
+            setError("Please add at least one education");
+            return;
+          }
 
-              if (exists) {
-                setError("This education already exists");
-                return;
-              }
-
-              if (
-                edu.startYear &&
-                edu.endYear &&
-                Number(edu.startYear) > Number(edu.endYear)
-              ) {
-                setError("Start year cannot be greater than end year");
-                return;
-              }
-
-              if (editIndex !== null) {
-                updatedList[editIndex] = edu;
-              } else {
-                updatedList.push(edu);
-              }
-
-              // sort
-              updatedList.sort((a, b) => orderMap[a.level] - orderMap[b.level]);
-
-              // update state
-              setResumeData({ ...resumeData, education: updatedList });
-
-              // reset form
-              setEdu(emptyEdu);
-              setEditIndex(null);
-              setError("");
-            }
-
-            // ✅ NOW check updated list (not old state)
-            if (updatedList.length === 0) {
-              setError("Please add at least one education");
-              return;
-            }
-
-            // ✅ move next
-            goNext();
-          }}
-          className="flex-1 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
-        >
-          Next →
-        </button>
+          // ✅ Move next
+          goNext();
+        }}
+        className="flex-1 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
+      >
+        Next →
+      </button>
       </div>
     </div>
   );

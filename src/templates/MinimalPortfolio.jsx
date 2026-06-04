@@ -2,201 +2,360 @@ import React from "react";
 
 const MinimalPortfolio = ({ data }) => {
   return (
-    <div className="bg-white text-gray-900 min-h-full font-sans">
+    <div className="bg-[#fafaf9] text-[#1c1917] min-h-screen">
 
-      {/* ================= HEADER ================= */}
-      <section className="px-6 py-12 border-b text-center">
+      {/* ================= HERO ================= */}
+      <section className="max-w-5xl mx-auto px-6 sm:px-8 py-16 sm:py-20">
 
-         {/* PROFILE IMAGE */}
-        {data.profileImage && (
-          <div className="flex justify-center mb-6">
-            <img
-              src={data.profileImage}
-              alt="profile"
-              className="w-32 h-32 rounded-full object-cover border-4 border-purple-500 shadow-2xl"
-            />
+        <div className="grid lg:grid-cols-[220px_1fr] gap-10 items-center">
+
+          {/* IMAGE */}
+          <div className="flex justify-center lg:justify-start">
+
+            {data.profileImage && (
+              <div className="relative">
+
+                <div className="absolute inset-0 bg-orange-200 rounded-[28px] rotate-6"></div>
+
+                <img
+                  src={data.profileImage}
+                  alt="profile"
+                  className="relative w-44 h-44 sm:w-52 sm:h-52 rounded-[28px] object-cover border-4 border-white shadow-xl"
+                />
+
+              </div>
+            )}
+
           </div>
-        )}
-        
-        <h1 className="text-3xl font-bold">{data.name}</h1>
 
-        <p className="text-gray-600 mt-2">
-          {data.email} | {data.phone}
-        </p>
+          {/* CONTENT */}
+          <div className="text-center lg:text-left">
 
-        <p className="text-gray-500 text-sm mt-1">
-          {data.dob} • {data.city}, {data.state} - {data.pincode}
-        </p>
-      </section>
+            <p className="text-sm uppercase tracking-[0.25em] text-orange-600 font-medium">
+              Portfolio
+            </p>
 
-      {/* ================= EDUCATION ================= */}
-      <section className="px-6 py-10">
-        <h2 className="text-2xl font-semibold mb-8 text-center">
-          Education
-        </h2>
+            <h1 className="mt-4 text-4xl sm:text-5xl font-bold leading-tight">
+              {data.name}
+            </h1>
 
-        {data.education?.length > 0 ? (
-          <div className="max-w-3xl mx-auto relative">
+            <p className="mt-5 text-gray-600 leading-8 max-w-2xl">
+              {data.about ||
+                "Creative developer focused on building clean, user-friendly and meaningful digital experiences."}
+            </p>
 
-            <div className="absolute left-2 top-0 bottom-0 w-[2px] bg-gray-300"></div>
+            {/* INFO */}
+            <div className="mt-8 flex flex-wrap gap-3 justify-center lg:justify-start">
 
-            <div className="space-y-8">
-              {data.education.map((edu, i) => (
-                <div key={i} className="relative pl-8">
+              <div className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm shadow-sm">
+                {data.email}
+              </div>
 
-                  <div className="absolute left-0 top-2 w-4 h-4 bg-orange-500 rounded-full"></div>
+              <div className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm shadow-sm">
+                {data.phone}
+              </div>
 
-                  <div className="bg-white p-5 rounded-xl shadow hover:scale-[1.02] transition">
+              <div className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm shadow-sm">
+                {data.city}, {data.state}
+              </div>
 
-                    <h3 className="text-lg font-semibold">
-                      {edu.degree || "Degree"}
-                    </h3>
+            </div>
 
-                    <p className="text-gray-500 text-sm mt-1">
-                      {edu.college || "College / University"}
-                    </p>
+            {/* SOCIALS */}
+            <div className="flex flex-wrap gap-3 mt-6 justify-center lg:justify-start font-semibold text-md text-yellow-600">
 
-                    <p className="text-gray-400 text-xs mt-2">
-                      {edu.startYear} - {edu.isPresent ? "Present" : edu.endYear}
-                    </p>
+              {data.github && (
+                <a
+                  href={data.github}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-black transition"
+                >
+                  GitHub
+                </a>
+              )}
 
-                    {edu.desc && (
-                      <p className="text-gray-500 text-sm mt-3">
-                        {edu.desc}
-                      </p>
-                    )}
+              {data.linkedin && (
+                <a
+                  href={data.linkedin}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-blue-600 transition"
+                >
+                  LinkedIn
+                </a>
+              )}
 
-                  </div>
-                </div>
-              ))}
+              {data.twitter && (
+                <a
+                  href={data.twitter}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-blue-600 transition"
+                >
+                  Twitter
+                </a>
+              )}
+
+              {data.instagram && (
+                <a
+                  href={data.instagram}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-orange-500 transition"
+                >
+                  Instagram
+                </a>
+              )}
+
+              {data.facebook && (
+                <a
+                  href={data.facebook}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-blue-600 transition"
+                >
+                  Facebook
+                </a>
+              )}
+
+              {data.youtube && (
+                <a
+                  href={data.youtube}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-red-600 transition"
+                >
+                  YouTube
+                </a>
+              )}
+
             </div>
 
           </div>
-        ) : (
-          <p className="text-center text-gray-400">
-            No education added
-          </p>
-        )}
+
+        </div>
+
+      </section>
+
+      {/* ================= EDUCATION ================= */}
+      <section className="border-t border-gray-200">
+
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 py-16">
+
+          <div className="flex items-center gap-4 mb-12">
+            <div className="w-10 h-[2px] bg-orange-500"></div>
+
+            <h2 className="text-2xl font-semibold">
+              Education
+            </h2>
+          </div>
+
+          {data.education?.length > 0 ? (
+            <div className="space-y-8">
+
+              {data.education.map((edu, i) => (
+                <div
+                  key={i}
+                  className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm hover:shadow-md transition"
+                >
+
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+
+                    <div>
+                      <h3 className="text-xl font-semibold">
+                        {edu.degree || "Degree"}
+                      </h3>
+
+                      <p className="mt-2 text-gray-600">
+                        {edu.college || "College / University"}
+                      </p>
+
+                      {edu.desc && (
+                        <p className="mt-4 text-gray-500 leading-7 text-sm">
+                          {edu.desc}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="text-sm text-orange-600 font-medium whitespace-nowrap">
+                      {edu.startYear} -{" "}
+                      {edu.isPresent ? "Present" : edu.endYear}
+                    </div>
+
+                  </div>
+
+                </div>
+              ))}
+
+            </div>
+          ) : (
+            <p className="text-gray-400">
+              No education added
+            </p>
+          )}
+
+        </div>
+
       </section>
 
       {/* ================= EXPERIENCE ================= */}
-      <section className="px-6 py-10 border-t">
-        <h2 className="text-2xl font-semibold mb-6 text-center">
-          Experience
-        </h2>
+      <section className="border-t border-gray-200 bg-white">
 
-        {data.experience?.length > 0 ? (
-          <div className="max-w-3xl mx-auto space-y-6">
-            {data.experience.map((exp, i) => (
-              <div key={i} className="border-b pb-4">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 py-16">
 
-                <h3 className="font-semibold text-lg">
-                  {exp.role || "Role"}
-                </h3>
+          <div className="flex items-center gap-4 mb-12">
+            <div className="w-10 h-[2px] bg-orange-500"></div>
 
-                <p className="text-gray-600 text-sm">
-                  {exp.company || "Company"}
-                </p>
-
-                <p className="text-gray-400 text-xs mt-1">
-                  {exp.start} - {exp.isWorking ? "Present" : exp.end}
-                </p>
-
-              </div>
-            ))}
+            <h2 className="text-2xl font-semibold">
+              Experience
+            </h2>
           </div>
-        ) : (
-          <p className="text-center text-gray-400">
-            No experience added
-          </p>
-        )}
+
+          {data.experience?.length > 0 ? (
+            <div className="space-y-8">
+
+              {data.experience.map((exp, i) => (
+                <div
+                  key={i}
+                  className="relative pl-8"
+                >
+
+                  <div className="absolute left-0 top-2 w-4 h-4 rounded-full bg-orange-500"></div>
+
+                  <div className="border-l-2 border-orange-200 pl-6">
+
+                    <h3 className="text-xl font-semibold">
+                      {exp.role || "Role"}
+                    </h3>
+
+                    <p className="mt-2 text-gray-600">
+                      {exp.company || "Company"}
+                    </p>
+
+                    <p className="mt-3 text-sm text-gray-500">
+                      {exp.start} -{" "}
+                      {exp.isWorking ? "Present" : exp.end}
+                    </p>
+
+                  </div>
+
+                </div>
+              ))}
+
+            </div>
+          ) : (
+            <p className="text-gray-400">
+              No experience added
+            </p>
+          )}
+
+        </div>
+
       </section>
 
-      {/* ================= SKILLS & LANGUAGES ================= */}
-      <section className="px-6 py-10 border-t">
-        <h2 className="text-xl font-semibold mb-6 text-center">
-          Skills & Languages
-        </h2>
+      {/* ================= SKILLS ================= */}
+      <section className="border-t border-gray-200">
 
-        <div className="max-w-3xl mx-auto grid md:grid-cols-2 gap-6">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 py-16">
 
-          <div>
-            <h3 className="font-semibold mb-2">Skills</h3>
-            <p className="text-gray-600 text-sm">
-              {data.skills || "No skills added"}
-            </p>
-          </div>
+          <div className="grid md:grid-cols-2 gap-8">
 
-          <div>
-            <h3 className="font-semibold mb-2">Languages</h3>
-            <p className="text-gray-600 text-sm">
-              {data.languages || "No languages added"}
-            </p>
+            <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm">
+              <h2 className="text-2xl font-semibold mb-6">
+                Skills
+              </h2>
+
+              <p className="text-gray-600 leading-8">
+                {data.skills || "No skills added"}
+              </p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm">
+              <h2 className="text-2xl font-semibold mb-6">
+                Languages
+              </h2>
+
+              <p className="text-gray-600 leading-8">
+                {data.languages || "No languages added"}
+              </p>
+            </div>
+
           </div>
 
         </div>
-      </section>
 
-      {/* ================= SOCIAL ================= */}
-      <section className="px-6 py-4 text-center border-t">
-        <div className="flex flex-wrap justify-center gap-4 text-sm text-blue-600">
-
-          {data.github && <a href={data.github} target="_blank">GitHub</a>}
-          {data.linkedin && <a href={data.linkedin} target="_blank">LinkedIn</a>}
-          {data.twitter && <a href={data.twitter} target="_blank">Twitter</a>}
-          {data.instagram && <a href={data.instagram} target="_blank">Instagram</a>}
-          {data.facebook && <a href={data.facebook} target="_blank">Facebook</a>}
-          {data.youtube && <a href={data.youtube} target="_blank">YouTube</a>}
-
-        </div>
       </section>
 
       {/* ================= PROJECTS ================= */}
-      <section className="px-6 py-10 max-w-3xl mx-auto">
-        <h2 className="text-xl font-semibold mb-6">Projects</h2>
+      <section className="border-t border-gray-200 bg-white">
 
-        {data.projects?.length > 0 ? (
-          <div className="space-y-6">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 py-16">
 
-            {data.projects.map((proj, i) => (
-              <div key={i} className="border-b pb-4">
+          <div className="flex items-center gap-4 mb-12">
+            <div className="w-10 h-[2px] bg-orange-500"></div>
+
+            <h2 className="text-2xl font-semibold">
+              Projects
+            </h2>
+          </div>
+
+          {data.projects?.length > 0 ? (
+            <div className="grid md:grid-cols-2 gap-8">
+
+              {data.projects.map((proj, i) => (
+                <div
+                  key={i}
+                  className="bg-[#fafaf9] border border-gray-200 rounded-3xl overflow-hidden hover:-translate-y-1 hover:shadow-md transition"
+                >
 
                   {proj.image && (
-                  <img
-                    src={proj.image}
-                    alt="project"
-                    className="w-full h-44 object-cover"
-                  />
-                )}
+                    <img
+                      src={proj.image}
+                      alt="project"
+                      className="w-full h-52 object-cover"
+                    />
+                  )}
 
-                <h3 className="font-semibold text-lg">
-                  {proj.title || "Project Title"}
-                </h3>
+                  <div className="p-6">
 
-                <p className="text-gray-600 mt-1">
-                  {proj.desc || "Project description"}
-                </p>
+                    <h3 className="text-xl font-semibold">
+                      {proj.title || "Project Title"}
+                    </h3>
 
-                {proj.github && (
-                  <a
-                    href={proj.github}
-                    target="_blank"
-                    className="text-blue-600 text-sm mt-2 inline-block"
-                  >
-                    View Code
-                  </a>
-                )}
-              </div>
-            ))}
+                    <p className="mt-4 text-gray-600 leading-7 text-sm">
+                      {proj.desc || "Project description"}
+                    </p>
 
-          </div>
-        ) : (
-          <p className="text-gray-400">No projects added</p>
-        )}
+                    {proj.github && (
+                      <a
+                        href={proj.github}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-block mt-5 text-orange-600 text-sm font-medium hover:underline"
+                      >
+                        View Project →
+                      </a>
+                    )}
+
+                  </div>
+
+                </div>
+              ))}
+
+            </div>
+          ) : (
+            <p className="text-gray-400">
+              No projects added
+            </p>
+          )}
+
+        </div>
+
       </section>
 
       {/* ================= FOOTER ================= */}
-      <footer className="text-center text-sm text-gray-400 py-6 border-t">
+      <footer className="border-t border-gray-200 py-8 text-center text-sm text-gray-500">
         © {new Date().getFullYear()} {data.name}
       </footer>
 

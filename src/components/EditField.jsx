@@ -8,8 +8,11 @@ const EditField = ({
   className = "",
   placeholder = "",
   type = "text",
+  hideIfEmpty = false, // ✅ NEW
 }) => {
+
   const { resumeData, setResumeData } = useResume();
+
   const [editing, setEditing] = useState(false);
 
   let value = "";
@@ -24,11 +27,18 @@ const EditField = ({
     const newValue = e.target.value;
 
     if (index !== null) {
+
       const updated = [...resumeData[section]];
+
       updated[index][field] = newValue;
 
-      setResumeData({ ...resumeData, [section]: updated });
+      setResumeData({
+        ...resumeData,
+        [section]: updated,
+      });
+
     } else {
+
       setResumeData({
         ...resumeData,
         [section]: {
@@ -36,20 +46,26 @@ const EditField = ({
           [field]: newValue,
         },
       });
+
     }
   };
 
-  // 🔥 Handle keyboard
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && type !== "textarea") {
       setEditing(false);
     }
+
     if (e.key === "Escape") {
       setEditing(false);
     }
   };
 
-  // 🔥 TEXTAREA
+  // ✅ HIDE ONLY OPTIONAL EMPTY FIELD
+  if (hideIfEmpty && !value) {
+    return null;
+  }
+
+  // TEXTAREA
   if (editing && type === "textarea") {
     return (
       <textarea
@@ -63,7 +79,7 @@ const EditField = ({
     );
   }
 
-  // 🔥 INPUT
+  // INPUT
   if (editing) {
     return (
       <input
@@ -77,15 +93,15 @@ const EditField = ({
     );
   }
 
-  // 🔥 DISPLAY MODE
+  // DISPLAY MODE
   return (
     <span
       onClick={() => setEditing(true)}
       className={`
-        cursor-pointer 
-        px-1 rounded 
+        cursor-pointer
+        px-1 rounded
         transition-all duration-200
-        hover:bg-yellow-100 
+        hover:bg-yellow-100
         hover:shadow-sm
         ${!value ? "text-gray-400 italic" : ""}
         ${className}

@@ -41,7 +41,7 @@ const Stats = () => {
       icon: "⭐",
       value: 48,
       label: "User Rating",
-      suffix: "/50",
+      suffix: "/5",
       decimal: true,
     },
   ];

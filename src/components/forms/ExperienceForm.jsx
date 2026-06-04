@@ -21,50 +21,124 @@ const ExperienceForm = ({ goBack, goNext }) => {
   const [editIndex, setEditIndex] = useState(null);
   const [error, setError] = useState("");
 
+  // EDIT EXPERIENCE
+const editExp = (index) => {
+  setExp(resumeData.experience[index]);
+  setEditIndex(index);
+  setError("");
+};
+
+// REMOVE EXPERIENCE
+const removeExp = (index) => {
+  const updated = resumeData.experience.filter((_, i) => i !== index);
+
+  setResumeData({
+    ...resumeData,
+    experience: updated,
+  });
+
+  // reset form if deleting currently edited item
+  if (editIndex === index) {
+    setExp(emptyExp);
+    setEditIndex(null);
+  }
+
+  setError("");
+};
+
   const months = [
     "Jan","Feb","Mar","Apr","May","Jun",
     "Jul","Aug","Sep","Oct","Nov","Dec"
   ];
 
   const saveExperience = () => {
-    if (!exp.role || !exp.company || !exp.startYear) {
-      setError("Role, company & start date are required");
-      return;
+  if (!exp.role || !exp.company || !exp.startYear) {
+    setError("Role, company & start date are required");
+    return false;
+  }
+
+  // ✅ Role Validation
+  if (!/^[A-Za-z\s.&-]+$/.test(exp.role)) {
+    setError("Enter valid role");
+    return false;
+  }
+
+  // ✅ Company Validation
+  if (!/^[A-Za-z0-9\s.&-]+$/.test(exp.company)) {
+    setError("Enter valid company name");
+    return false;
+  }
+
+  const currentYear = new Date().getFullYear();
+
+  // ✅ Start Year Validation
+  if (!/^\d{4}$/.test(exp.startYear)) {
+    setError("Start year must be 4 digits");
+    return false;
+  }
+
+  if (Number(exp.startYear) > currentYear) {
+    setError("Start year cannot be in future");
+    return false;
+  }
+
+  // ✅ End Date Validation
+  if (!exp.isCurrent) {
+    if (!/^\d{4}$/.test(exp.endYear)) {
+      setError("End year must be 4 digits");
+      return false;
     }
 
-    if (!exp.isCurrent && (!exp.endMonth || !exp.endYear)) {
-      setError("Please add end date or mark as currently working");
-      return;
+    if (Number(exp.endYear) > currentYear) {
+      setError("End year cannot be in future");
+      return false;
     }
 
-    let updated = [...resumeData.experience];
-
-    if (editIndex !== null) {
-      updated[editIndex] = exp;
-    } else {
-      updated.push(exp);
+    if (Number(exp.startYear) > Number(exp.endYear)) {
+      setError("End year cannot be less than start year");
+      return false;
     }
+  }
 
-    setResumeData({ ...resumeData, experience: updated });
-    setExp(emptyExp);
-    setEditIndex(null);
-    setError("");
-  };
+  // ✅ Duplicate Check
+  const exists = resumeData.experience.some(
+    (e, i) =>
+      e.role === exp.role &&
+      e.company === exp.company &&
+      i !== editIndex
+  );
 
-  const editExp = (i) => {
-    setExp(resumeData.experience[i]);
-    setEditIndex(i);
-  };
+  if (exists) {
+    setError("This experience already exists");
+    return false;
+  }
 
-  const removeExp = (i) => {
-    const updated = resumeData.experience.filter((_, idx) => idx !== i);
-    setResumeData({ ...resumeData, experience: updated });
-  };
+  let updated = [...resumeData.experience];
+
+  if (editIndex !== null) {
+    updated[editIndex] = exp;
+  } else {
+    updated.push(exp);
+  }
+
+  setResumeData({ ...resumeData, experience: updated });
+
+  setExp(emptyExp);
+  setEditIndex(null);
+  setError("");
+
+  return true;
+};
 
   const handleAI = () => {
-    const text = generateExperienceDesc(exp.role);
-    setExp({ ...exp, description: text });
-  };
+  const text = generateExperienceDesc(exp.role);
+
+  setExp({
+    ...exp,
+    description: text,
+  });
+};
+
 
   return (
     <div className="px-4 md:px-8 py-4 max-w-3xl mx-auto">
@@ -234,47 +308,30 @@ const ExperienceForm = ({ goBack, goNext }) => {
           ← Back
         </button>
 
-       <button
+      <button
           onClick={() => {
             const hasCurrentData =
-              exp.role || exp.company || exp.startYear || exp.startMonth;
+              exp.role ||
+              exp.company ||
+              exp.startYear ||
+              exp.startMonth;
 
-            let updatedList = [...resumeData.experience];
-
-            // ✅ Auto-save if user typed something
+            // ✅ Auto save with validation
             if (hasCurrentData) {
-              if (!exp.role || !exp.company || !exp.startYear) {
-                setError("Role, company & start date are required");
-                return;
-              }
+              const saved = saveExperience();
 
-              if (!exp.isCurrent && (!exp.endMonth || !exp.endYear)) {
-                setError("Please add end date or mark as currently working");
-                return;
-              }
-
-              if (editIndex !== null) {
-                updatedList[editIndex] = exp;
-              } else {
-                updatedList.push(exp);
-              }
-
-              // update state
-              setResumeData({ ...resumeData, experience: updatedList });
-
-              // reset form
-              setExp(emptyExp);
-              setEditIndex(null);
-              setError("");
+              if (!saved) return;
             }
 
-            // ✅ Check using updated list (NOT state)
-            if (updatedList.length === 0) {
-              setError("Add at least one experience");
-              return;
-            }
+            // ✅ Minimum one experience
+            // if (
+            //   resumeData.experience.length === 0 &&
+            //   !hasCurrentData
+            // ) {
+            //   setError("Add at least one experience");
+            //   return;
+            // }
 
-            // ✅ move next
             goNext();
           }}
           className="flex-1 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
