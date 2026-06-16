@@ -18,7 +18,7 @@ const BottomNav = () => {
     { name: "Portfolio", path: "/portfolio", icon: <FaBriefcase /> },
     {
       name: isLoggedIn ? "Profile" : "Account",
-      path: "/login",
+      path: isLoggedIn ? "/dashboard" : "/login",
       icon: <FaUser />,
     },
   ];
