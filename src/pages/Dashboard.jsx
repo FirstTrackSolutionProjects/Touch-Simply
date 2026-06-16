@@ -123,6 +123,7 @@ const Dashboard = () => {
       title: "Modern Resume",
       type: "Resume",
       route: "/editor",
+      image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
     },
 
     {
@@ -130,6 +131,7 @@ const Dashboard = () => {
       title: "Creative Portfolio",
       type: "Portfolio",
       route: "/portfolio",
+      image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80",
     },
 
     {
@@ -137,6 +139,7 @@ const Dashboard = () => {
       title: "Startup Logo",
       type: "Logo",
       route: "/logo",
+      image: "https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=800&q=80",
     },
   ];
 
@@ -706,36 +709,31 @@ const Dashboard = () => {
 
               </div>
 
-              {/* RIGHT */}
-              <div className="hidden lg:flex justify-center">
+            <div className="relative w-full max-w-xl">
+              {/* Glow */}
+              <div className="absolute inset-0 bg-purple-600/20 blur-3xl rounded-3xl"></div>
 
-                <div className="relative w-full max-w-md">
+              <img
+                src="/images/hero-section.jpg"
+                alt="Dashboard"
+                className="relative z-10 w-full rounded-3xl border border-white/10 shadow-[0_20px_80px_rgba(124,58,237,0.4)]"
+              />
 
-                  <div className="absolute -top-5 -left-5 w-full h-full rounded-3xl bg-gradient-to-r from-purple-600 to-indigo-600 blur-2xl opacity-30"></div>
-
-                  <div className="relative bg-gradient-to-br from-gray-900 to-black border border-white/10 rounded-3xl p-5 shadow-2xl">
-
-                    <div className="space-y-4">
-
-                      <div className="h-36 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600"></div>
-
-                      <div className="grid grid-cols-2 gap-4">
-
-                        <div className="h-24 rounded-2xl bg-white/5"></div>
-
-                        <div className="h-24 rounded-2xl bg-white/5"></div>
-
-                      </div>
-
-                      <div className="h-16 rounded-2xl bg-white/5"></div>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
+              {/* Floating Card */}
+              <div className="absolute -top-6 -left-6 bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 z-20">
+                <p className="text-xs text-gray-400">AI Resume Score</p>
+                <h3 className="text-2xl font-bold text-green-400">
+                  92%
+                </h3>
               </div>
+
+              <div className="absolute -bottom-6 -right-6 bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 z-20">
+                <p className="text-xs text-gray-400">Projects</p>
+                <h3 className="text-2xl font-bold">
+                  18+
+                </h3>
+              </div>
+            </div>
 
             </div>
 
@@ -751,7 +749,10 @@ const Dashboard = () => {
             {stats.map((item, index) => (
               <div
                 key={index}
-                className="bg-white/[0.04] border border-white/10 rounded-3xl p-5 backdrop-blur-xl"
+                className="bg-white/[0.04] border border-white/10 rounded-3xl p-6  backdrop-blur-xl transition-all duration-300
+                hover:-translate-y-2
+                hover:border-purple-500/30
+                hover:shadow-[0_0_40px_rgba(124,58,237,0.25)]"
               >
 
                 <div className="flex items-center justify-between">
@@ -768,6 +769,10 @@ const Dashboard = () => {
 
                 <p className="mt-4 text-gray-400 text-sm">
                   {item.title}
+                </p>
+
+                <p className="text-green-400 text-xs mt-2">
+                  +12% this month
                 </p>
 
               </div>
@@ -798,14 +803,25 @@ const Dashboard = () => {
             {tools.map((tool, index) => (
               <div
                 key={index}
-                className="group bg-white/[0.04] border border-white/10 rounded-3xl p-6 hover:scale-[1.02] hover:-translate-y-1 transition duration-300 backdrop-blur-xl shadow-2xl"
+                className="
+                group
+                relative
+                overflow-hidden
+                bg-white/[0.04]
+                border border-white/10
+                rounded-3xl
+                p-6
+                transition-all duration-300
+                hover:-translate-y-2
+                hover:border-purple-500/30
+                "
               >
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
 
-                <div
-                  className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${tool.gradient} flex items-center justify-center shadow-xl`}
-                >
-                  {tool.icon}
-                </div>
+              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${tool.gradient}`}>
+                {tool.icon}
+              </div>
+
 
                 <div className="mt-6">
 
@@ -841,7 +857,7 @@ const Dashboard = () => {
 
             <div className="flex items-start gap-4">
 
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center">
+              <div className="w-14 h-14 shrink-0 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center">
                 <Sparkles size={24} />
               </div>
 
@@ -896,14 +912,27 @@ const Dashboard = () => {
 
             <div className="grid md:grid-cols-3 gap-5 mt-8">
 
-              {recent.map((item, index) => (
+              {recent.map((item) => (
                 <div
-                  key={index}
+                  key={item.id}
                   className="bg-black/30 border border-white/10 rounded-2xl p-5 hover:bg-white/[0.03] transition"
                 >
+                  {/* IMAGE */}
+                  <div className="relative h-44 rounded-2xl overflow-hidden border border-white/10">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                  />
 
-                  <div className="h-36 rounded-2xl bg-gradient-to-br from-purple-600/20 to-indigo-600/10 border border-white/10"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
+                  <span className="absolute bottom-3 left-3 text-xs bg-purple-600 px-3 py-1 rounded-full uppercase tracking-wider">
+                    {item.type}
+                  </span>
+                </div>
+
+                  {/* CONTENT */}
                   <div className="mt-5">
 
                     <p className="text-xs text-purple-400 uppercase tracking-wider">
