@@ -40,6 +40,8 @@ const Dashboard = () => {
   const [search, setSearch] =
     useState("");
 
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+
   const user =
     JSON.parse(
       localStorage.getItem("user")
@@ -299,14 +301,45 @@ const Dashboard = () => {
 
           <div className="space-y-3">
 
-            <Link
-              to="/settings"
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
-            >
-              <Settings size={20} />
-              Settings
-            </Link>
+            {/* Settings Dropdown */}
+            <div>
+              <button
+                onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+              >
+                <div className="flex items-center gap-3">
+                  <Settings size={20} />
+                  <span>Settings</span>
+                </div>
 
+                <ChevronRight
+                  size={18}
+                  className={`transition-transform duration-300 ${
+                    showSettingsMenu ? "rotate-90" : ""
+                  }`}
+                  />
+            </button> 
+
+            {showSettingsMenu && (
+              <div className="ml-8 mt-2 space-y-2 border-l border-gray-700 pl-4">
+                <Link
+                  to="/profile"
+                  className="block px-3 py-2 rounded-lg hover:bg-white/5 transition"
+                >
+                  Profile
+                </Link>
+
+                <Link
+                  to="/change-password"
+                  className="block px-3 py-2 rounded-lg hover:bg-white/5 transition"
+                >
+                  Change Password
+                </Link>
+              </div>
+            )}
+
+            </div>
+            
             {isAdmin && (
               <Link
                 to="/admin/dashboard"
@@ -487,35 +520,62 @@ const Dashboard = () => {
             </div>
 
             {/* ACCOUNT */}
-            <div>
+          <div>
+            <p className="text-xs text-gray-500 uppercase tracking-[0.2em] px-3 mb-3">
+              Account
+            </p>
 
-              <p className="text-xs text-gray-500 uppercase tracking-[0.2em] px-3 mb-3">
-                Account
-              </p>
+            <div className="space-y-3">
 
-              <div className="space-y-3">
-
-                <Link
-                  to="/settings"
-                  className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition"
+              <div>
+                <button
+                  onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-2xl hover:bg-white/5 transition"
                 >
-                  <Settings size={20} />
-                  Settings
-                </Link>
+                  <div className="flex items-center gap-3">
+                    <Settings size={20} />
+                    <span>Settings</span>
+                  </div>
 
-                {isAdmin && (
-                  <Link
-                    to="/admin/dashboard"
-                    className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500"
-                  >
-                    <ShieldCheck size={20} />
-                    Admin Panel
-                  </Link>
+                  <ChevronRight
+                    size={18}
+                    className={`transition-transform duration-300 ${
+                      showSettingsMenu ? "rotate-90" : ""
+                    }`}
+                  />
+                </button>
+
+                {showSettingsMenu && (
+                  <div className="ml-8 mt-2 space-y-2 border-l border-gray-700 pl-4">
+                    <Link
+                      to="/profile"
+                      className="block px-3 py-2 rounded-lg hover:bg-white/5 transition"
+                    >
+                      Profile
+                    </Link>
+
+                    <Link
+                      to="/change-password"
+                      className="block px-3 py-2 rounded-lg hover:bg-white/5 transition"
+                    >
+                      Change Password
+                    </Link>
+                  </div>
                 )}
-
               </div>
 
+              {isAdmin && (
+                <Link
+                  to="/admin/dashboard"
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500"
+                >
+                  <ShieldCheck size={20} />
+                  Admin Panel
+                </Link>
+              )}
+
             </div>
+          </div>
 
             {/* UPGRADE CARD */}
             <div className="mt-8 rounded-3xl p-5 bg-gradient-to-r from-purple-600 to-indigo-600 shadow-2xl">

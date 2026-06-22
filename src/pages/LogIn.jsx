@@ -3,10 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
 import { loginUser, googleLoginUser } from "../services/authServices";
 import { GoogleLogin } from "@react-oauth/google";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const { login } = useAuth();
 
   const [form, setForm] = useState({
     email: "",
@@ -24,16 +26,11 @@ const Login = () => {
 
     const data = await loginUser(form);
 
-    localStorage.setItem(
-      "token",
-      data.token
-    );
+    console.log("Login API Response:", data);
 
-    localStorage.setItem(
-      "user",
-      JSON.stringify(data.user)
-    );
-      alert("Login Successful 🚀");
+    login(data);
+
+    alert("Login Successful 🚀");
 
     navigate("/dashboard");
 
@@ -124,9 +121,15 @@ const Login = () => {
               onSuccess={async (credentialResponse) => {
                 try {
                   const data = await googleLoginUser(credentialResponse.credential);
-                  localStorage.setItem("token", data.token);
-                  localStorage.setItem("user", JSON.stringify(data.user));
-                  alert("Login Successful 🚀");
+                   console.log(
+                  "Google Login Response:",
+                  data
+                );
+
+                login(data);
+
+                alert("Login Successful 🚀");
+                
                   navigate("/dashboard");
                 } catch (error) {
                   console.log(error);

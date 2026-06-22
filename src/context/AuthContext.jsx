@@ -33,10 +33,10 @@ export const AuthProvider = ({
 
     localStorage.setItem(
       "user",
-      JSON.stringify(data)
+      JSON.stringify(data.user)
     );
 
-    setUser(data);
+    setUser(data.user);
   };
 
   const logout = () => {
@@ -55,6 +55,7 @@ export const AuthProvider = ({
     <AuthContext.Provider
       value={{
         user,
+        setUser,
         login,
         logout,
       }}

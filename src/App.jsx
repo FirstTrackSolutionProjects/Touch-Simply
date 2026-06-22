@@ -26,6 +26,8 @@ import LegalPolicy from "./pages/LegalPolicy";
 import ChatBox from "./pages/ChatBox";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Profile from "./pages/Profile";
+import ChangePassword from "./pages/ChangePassword";
 
 function App() {
    const { pathname } = useLocation();
@@ -98,7 +100,8 @@ const hideLayout =
               <Dashboard />
             </ProtectedRoute>
           } />
-
+          <Route path="/profile" element={ <Profile />} />
+          <Route path="/change-password" element={ <ChangePassword />} />
         </Routes>
         {!hideLayout && <BottomNav />}
         {!hideLayout && <Footer />}
