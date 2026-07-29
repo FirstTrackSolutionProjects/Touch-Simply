@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { loginUser, googleLoginUser } from "../services/authServices";
 import { GoogleLogin } from "@react-oauth/google";
 
@@ -20,37 +20,22 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-      try {
+    try {
+      const data = await loginUser(form);
 
-    const data = await loginUser(form);
-
-    localStorage.setItem(
-      "token",
-      data.token
-    );
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify(data.user)
-    );
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       alert("Login Successful 🚀");
 
-    navigate("/dashboard");
-
-  } catch (error) {
-
-    console.log(error);
-
-    alert(
-      error?.response?.data?.message ||
-      "Login Failed"
-    );
-  }
-};
+      navigate("/dashboard");
+    } catch (error) {
+      console.log(error);
+      alert(error?.response?.data?.message || "Login Failed");
+    }
+  };
 
   return (
     <div className="min-h-screen grid md:grid-cols-2 bg-gray-100">
-
       {/* LEFT */}
       <div className="hidden md:flex flex-col justify-center px-16 bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-900 text-white">
         <h1 className="text-4xl font-bold mb-4">Welcome Back 👋</h1>
@@ -62,13 +47,11 @@ const Login = () => {
       {/* RIGHT */}
       <div className="flex items-center justify-center px-6 py-10">
         <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl">
-
           <h2 className="text-2xl font-bold text-center mb-6">
             Login to your account
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-
             <input
               type="email"
               name="email"
@@ -100,25 +83,27 @@ const Login = () => {
                 <input type="checkbox" />
                 Remember me
               </label>
-
               <Link to="/forgot-password" className="text-purple-600">
                 Forgot Password?
               </Link>
             </div>
 
-            <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:scale-105 transition">
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:scale-105 transition"
+            >
               Login
             </button>
           </form>
 
-            {/* Divider */}
+          {/* Divider */}
           <div className="flex items-center gap-2 mt-5">
             <div className="flex-1 h-px bg-gray-300"></div>
             <span className="text-sm text-gray-400">OR</span>
             <div className="flex-1 h-px bg-gray-300"></div>
           </div>
 
-          {/* Google */}
+          {/* Google Login */}
           <div className="mt-5 flex justify-center">
             <GoogleLogin
               onSuccess={async (credentialResponse) => {
@@ -142,12 +127,11 @@ const Login = () => {
           </div>
 
           <p className="text-sm text-center mt-5">
-            Don’t have an account?{" "}
+            Don't have an account?{" "}
             <Link to="/register" className="text-purple-600 font-medium">
               Register
             </Link>
           </p>
-
         </div>
       </div>
     </div>
@@ -155,4 +139,3 @@ const Login = () => {
 };
 
 export default Login;
-
