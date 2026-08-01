@@ -1,10 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import UserAvatar from "./UserAvatar";
 
 const NavBar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const location = useLocation();
+
+  // Get user from localStorage when component mounts
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch (e) {
+        setUser(null);
+      }
+    }
+  }, []);
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -60,7 +74,19 @@ const NavBar = () => {
               </Link>
             ))}
 
-            
+            {/* 🔥 User Avatar or Login Button */}
+            {user ? (
+              <Link to="/dashboard" className="hover:scale-105 transition">
+                <UserAvatar user={user} size="sm" />
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 transition"
+              >
+                Login
+              </Link>
+            )}
 
           </div>
 
@@ -115,13 +141,25 @@ const NavBar = () => {
             </Link>
           ))}
 
-          <Link
-            to="/login"
-            onClick={() => setMenuOpen(false)}
-            className="mt-4 px-4 py-2 rounded-lg bg-white/10 text-center hover:bg-white/20 transition"
-          >
-            Login
-          </Link>
+          {/* 🔥 User Avatar or Login Button in Mobile Menu */}
+          {user ? (
+            <Link
+              to="/dashboard"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3 mt-4 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
+            >
+              <UserAvatar user={user} size="sm" />
+              <span>Dashboard</span>
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              onClick={() => setMenuOpen(false)}
+              className="mt-4 px-4 py-2 rounded-lg bg-white/10 text-center hover:bg-white/20 transition"
+            >
+              Login
+            </Link>
+          )}
 
         </div>
       </div>
