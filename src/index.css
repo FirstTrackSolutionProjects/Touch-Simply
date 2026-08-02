@@ -1,1 +1,58 @@
 @import "tailwindcss";
+
+/* ================= SCROLLBAR STYLING ================= */
+
+/* For Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #7c3aed, #4f46e5);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #6d28d9, #4338ca);
+  transform: scale(1.05);
+}
+
+/* For dark backgrounds */
+.dark-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #8b5cf6, #6366f1);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #7c3aed rgba(255, 255, 255, 0.05);
+}
+
+/* Firefox dark variant */
+.dark-scrollbar {
+  scrollbar-color: #8b5cf6 rgba(255, 255, 255, 0.03);
+}
+
+/* Hide scrollbar when not hovering (optional) */
+.hide-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.hide-scrollbar::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+.hide-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #7c3aed, #4f46e5);
+}
