@@ -26,6 +26,7 @@ import LegalPolicy from "./pages/LegalPolicy";
 import ChatBox from "./pages/ChatBox";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { ToastContainer } from "react-toastify";
 
 function App() {
    const { pathname } = useLocation();
@@ -63,6 +64,7 @@ const hideLayout =
   id="main-scroll"
   className="h-screen overflow-y-auto"
   >
+  <ToastContainer/>
       {!hideLayout && <NavBar />}
         <Routes>
           <Route path="/" element={<Home />} />

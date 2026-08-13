@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { Send } from "lucide-react";
 
+
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import sendContactUs from "../services/contact/send_contact_us.contact.service";
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
   show: { opacity: 1, y: 0 },
@@ -15,23 +20,45 @@ const stagger = {
     },
   },
 };
-
-const Contact = () => {
-  const [form, setForm] = useState({
+export default function ContactPage() {
+  const INITIAL_CONTACT_FORM_STATE = Object.freeze({
     name: "",
-    email: "",
     phone: "",
+    email: "",
     message: "",
-  });
+  })
+  const [form, setForm] = useState(INITIAL_CONTACT_FORM_STATE);
+  const [submitted, setSubmitted] = useState(false);
+  const [focused, setFocused] = useState("");
+  
+  // 1. Uncomment the loading state
+  const [loading, setLoading] = useState(false);
+ 
+  const handleChange = (e) =>
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert("Message sent successfully!");
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent default form submission behavior
+    try {
+      setLoading(true);
+      
+      // 2. Use 'form' instead of 'formData', as that is your active state variable
+      // Note: Ensure `sendContactUs` is imported at the top of your file!
+      await sendContactUs(form); //send actual form data to backend
+      
+      // 3. Trigger your success UI by setting submitted to true 
+      // (This replaces the commented out setFormData logic)
+      setSubmitted(true); 
+      
+      // Note: Ensure `toast` is imported (e.g., from 'react-hot-toast' or 'react-toastify')
+      toast.success("Message sent successfully");
+    } catch (error) {
+      console.error(error.message || "Something Went Wrong");
+      toast.error(error.message || "Failed to send message")
+    } finally {
+      setLoading(false); //finally block ensures loading is reset regardless of success or failure(alwaye executed with try and catch block)
+    }
+  }
 
   return (
     <div className="relative min-h-screen bg-white overflow-hidden">
@@ -71,9 +98,9 @@ const Contact = () => {
             variants={fadeUp}
             className="backdrop-blur-xl bg-white/70 p-8 rounded-2xl shadow-xl border border-gray-100"
           >
-            <h2 className="text-xl font-semibold mb-6 text-gray-800">
+            {/* <h2 className="text-xl font-semibold mb-6 text-gray-800">
               Send a message
-            </h2>
+            </h2> */}
 
             <form onSubmit={handleSubmit} className="space-y-5">
 
@@ -113,9 +140,16 @@ const Contact = () => {
                 required
               />
 
-              <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:scale-[1.02] transition shadow-lg">
-                Send Message
-              </button>
+                  {/* Submit */}
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-white font-black text-sm tracking-wide py-4 rounded-xl transition-all duration-200 active:scale-[0.98] shadow-[0_4px_24px_rgba(250,204,21,0.3)] hover:shadow-[0_6px_32px_rgba(250,204,21,0.45)] mt-1 group relative overflow-hidden"
+                    >
+                      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500 pointer-events-none" />
+                      <Send size={16} />
+                      {loading ? "Sending..." : "Send Message"}
+                    </button>
             </form>
           </motion.div>
 
@@ -171,5 +205,3 @@ const Contact = () => {
     </div>
   );
 };
-
-export default Contact;
