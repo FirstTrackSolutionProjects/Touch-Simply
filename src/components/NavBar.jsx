@@ -1,14 +1,27 @@
+// Touch-Simply/src/components/NavBar.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import {
+  Menu,
+  X,
+  ChevronDown,
+  FileText,
+  Palette,
+  Briefcase,
+  Presentation,
+  Zap,
+} from "lucide-react";
 import UserAvatar from "./UserAvatar";
+import { getWalletBalance } from "../services/walletService";
 
 const NavBar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [credits, setCredits] = useState(null);
+  const [createOpen, setCreateOpen] = useState(false);
   const location = useLocation();
 
-  // Get user from localStorage when component mounts
+  // Load user from localStorage
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) {
@@ -20,23 +33,42 @@ const NavBar = () => {
     }
   }, []);
 
+  // Load wallet balance
+  useEffect(() => {
+    if (!localStorage.getItem("token")) return;
+    (async () => {
+      try {
+        const w = await getWalletBalance();
+        setCredits(w.data?.balance ?? 0);
+      } catch {
+        // ignore
+      }
+    })();
+  }, [user]);
+
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "About", path: "/about" },
     { name: "Templates", path: "/templates" },
     { name: "Library", path: "/library" },
-    { name: "Slides", path: "/presentation" },  
+    { name: "Slides", path: "/presentation" },
     { name: "Contact", path: "/contact" },
-    { name: "Chat", path: "/chat" }
+    { name: "Chat", path: "/chat" },
+  ];
+
+  const createItems = [
+    { label: "Resume", icon: <FileText size={15} />, to: "/templates?type=resume" },
+    { label: "Logo", icon: <Palette size={15} />, to: "/logo" },
+    { label: "Portfolio", icon: <Briefcase size={15} />, to: "/portfolio" },
+    { label: "Presentation", icon: <Presentation size={15} />, to: "/presentation" },
   ];
 
   return (
     <>
-      {/* 🔥 Navbar */}
+      {/* Navbar */}
       <nav className="w-full bg-gradient-to-r from-indigo-300 via-purple-800 to-gray-900 backdrop-blur-md shadow-md sticky top-0 z-50">
         <div className="w-full flex items-center justify-between h-16 px-4 md:px-12 lg:px-16">
-
-          {/* ✅ Logo */}
+          {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <img
               src="/images/logo.png"
@@ -48,9 +80,8 @@ const NavBar = () => {
             </span>
           </Link>
 
-          {/* ✅ Desktop Menu */}
+          {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-8 text-white font-medium">
-
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -62,23 +93,64 @@ const NavBar = () => {
                 }`}
               >
                 {link.name}
-
-                {/* 🔥 Underline animation */}
                 <span
                   className={`absolute left-0 -bottom-1 h-[2px] bg-blue-400 transition-all duration-300 ${
                     location.pathname === link.path
                       ? "w-full"
-                      : "w-0 group-hover:w-full"
+                      : "w-0"
                   }`}
                 ></span>
               </Link>
             ))}
 
-            {/* 🔥 User Avatar or Login Button */}
+            {/* User Avatar / Credits / Create */}
             {user ? (
-              <Link to="/dashboard" className="hover:scale-105 transition">
-                <UserAvatar user={user} size="sm" />
-              </Link>
+              <div className="flex items-center gap-3">
+                {/* Credits badge */}
+                <div className="hidden md:flex items-center gap-1 text-xs bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-full">
+                  <Zap size={12} className="text-amber-500" />
+                  <span className="font-bold">{credits ?? "—"}</span>
+                  <span>credits</span>
+                </div>
+
+                {/* CREATE dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setCreateOpen((v) => !v)}
+                    className="flex items-center gap-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg"
+                  >
+                    Create <ChevronDown size={14} />
+                  </button>
+                  {createOpen && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setCreateOpen(false)}
+                      />
+                      <div className="absolute right-0 mt-2 w-56 bg-white border rounded-xl shadow-2xl z-20 py-2">
+                        {createItems.map((item) => (
+                          <Link
+                            key={item.label}
+                            to={item.to}
+                            onClick={() => setCreateOpen(false)}
+                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          >
+                            {item.icon} {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Avatar */}
+                <Link
+                  to="/dashboard"
+                  className="hover:scale-105 transition"
+                >
+                  <UserAvatar user={user} size="sm" />
+                </Link>
+              </div>
             ) : (
               <Link
                 to="/login"
@@ -87,10 +159,9 @@ const NavBar = () => {
                 Login
               </Link>
             )}
-
           </div>
 
-          {/* ✅ Mobile Menu Button */}
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(true)}
             className="md:hidden text-white"
@@ -100,7 +171,7 @@ const NavBar = () => {
         </div>
       </nav>
 
-      {/* 🔥 Overlay */}
+      {/* Overlay */}
       <div
         className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition ${
           menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
@@ -108,24 +179,23 @@ const NavBar = () => {
         onClick={() => setMenuOpen(false)}
       />
 
-      {/* 🔥 Mobile Drawer */}
+      {/* Mobile Drawer */}
       <div
         className={`fixed top-0 right-0 h-full w-60 bg-gray-900 border-l border-white/10 z-50 shadow-2xl transform transition-all duration-300 ${
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <h2 className="text-white font-semibold">Menu</h2>
-          <button onClick={() => setMenuOpen(false)} className="text-white">
+          <button
+            onClick={() => setMenuOpen(false)}
+            className="text-white"
+          >
             <X size={22} />
           </button>
         </div>
 
-        {/* Links */}
         <div className="flex flex-col gap-5 p-6 text-gray-300">
-
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -141,16 +211,23 @@ const NavBar = () => {
             </Link>
           ))}
 
-          {/* 🔥 User Avatar or Login Button in Mobile Menu */}
           {user ? (
-            <Link
-              to="/dashboard"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-3 mt-4 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
-            >
-              <UserAvatar user={user} size="sm" />
-              <span>Dashboard</span>
-            </Link>
+            <>
+              <div className="flex items-center gap-2 text-xs bg-amber-900/40 border border-amber-700/50 text-amber-200 px-3 py-2 rounded-lg">
+                <Zap size={12} />
+                <span className="font-bold">{credits ?? "—"}</span>
+                <span>credits</span>
+              </div>
+
+              <Link
+                to="/dashboard"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 mt-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
+              >
+                <UserAvatar user={user} size="sm" />
+                <span>Dashboard</span>
+              </Link>
+            </>
           ) : (
             <Link
               to="/login"
@@ -160,7 +237,6 @@ const NavBar = () => {
               Login
             </Link>
           )}
-
         </div>
       </div>
     </>
