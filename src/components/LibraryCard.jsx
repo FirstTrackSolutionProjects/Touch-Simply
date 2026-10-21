@@ -11,7 +11,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-const LibraryCard = ({ item, onDelete }) => {
+const LibraryCard = ({ item, onDelete, onRedownload }) => {
   const [showDownloads, setShowDownloads] = useState(false);
 
   // ================= ICON =================
@@ -50,6 +50,20 @@ const LibraryCard = ({ item, onDelete }) => {
 
   // ================= DOWNLOAD OPTIONS =================
   const getDownloadOptions = () => {
+    if (onRedownload) {
+      return (
+        <button
+          onClick={() => {
+            onRedownload();
+            setShowDownloads(false);
+          }}
+          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+        >
+          Download PDF
+        </button>
+      );
+    }
+
     const baseLink = getEditLink();
     const formats = [];
 
@@ -153,12 +167,14 @@ const LibraryCard = ({ item, onDelete }) => {
             </div>
 
             {/* DELETE */}
-            <button
-              onClick={() => onDelete(item.id)}
-              className="w-12 h-11 flex items-center justify-center bg-red-500/10 text-red-500 border border-red-100 rounded-xl hover:bg-red-500 hover:text-white transition-all hover:scale-105"
-            >
-              <Trash2 size={18} />
-            </button>
+            {onDelete && (
+              <button
+                onClick={() => onDelete(item.id)}
+                className="w-12 h-11 flex items-center justify-center bg-red-500/10 text-red-500 border border-red-100 rounded-xl hover:bg-red-500 hover:text-white transition-all hover:scale-105"
+              >
+                <Trash2 size={18} />
+              </button>
+            )}
           </div>
         </div>
 

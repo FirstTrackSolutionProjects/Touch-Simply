@@ -45,11 +45,10 @@ useEffect(() => {
 }, []);
 
   const handlePreview = (key, type) => {
-    localStorage.setItem("selectedTemplate", key);
-
-    if (type === "resume") navigate("/editor?preview=true");
-    if (type === "logo") navigate("/logo?preview=true");
-    if (type === "portfolio") navigate("/portfolio?preview=true");
+    // Preview functionality is currently disabled.
+    // To re-enable, ensure Editor.jsx can handle ?preview=true without location.state.templateId
+    // and remove this function.
+    console.log("Preview clicked for", key, type);
   };
 
   return (
@@ -104,12 +103,12 @@ useEffect(() => {
                   <FaCheckCircle /> Use Template
                 </button>
 
-                <button
+                {/* <button
                   onClick={() => handlePreview(t.key, type)}
                   className="flex items-center gap-2 border border-white text-white px-4 py-2 rounded-lg hover:bg-white hover:text-black transition"
                 >
                   <FaEye /> Preview
-                </button>
+                </button> */}
               </div>
             </div>
 

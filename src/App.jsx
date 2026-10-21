@@ -1,3 +1,4 @@
+// Touch-Simply/src/App.jsx
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Routes, Route } from "react-router-dom";
@@ -25,25 +26,22 @@ import DataSecurity from "./pages/DataSecurity";
 import LegalPolicy from "./pages/LegalPolicy";
 import ChatBox from "./pages/ChatBox";
 import Dashboard from "./pages/Dashboard";
+import BuyCredits from "./pages/BuyCredits";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 
 function App() {
   const { pathname } = useLocation();
 
-  // Routes where footer should be hidden
   const hideFooterRoutes = ["/login", "/register"];
   const hideFooter = hideFooterRoutes.includes(pathname);
 
-  // Routes where bottom nav should be hidden
   const hideBottomNavRoutes = ["/login", "/register", "/dashboard"];
   const hideBottomNav = hideBottomNavRoutes.includes(pathname);
 
   useEffect(() => {
-    // WINDOW SCROLL
     window.scrollTo(0, 0);
 
-    // MAIN APP SCROLL CONTAINER
     const scrollContainer = document.getElementById("main-scroll");
 
     if (scrollContainer) {
@@ -57,17 +55,24 @@ function App() {
   return (
     <div id="main-scroll" className="h-screen overflow-y-auto">
       <ToastContainer />
-      
-      {/* ✅ ALWAYS SHOW NAVBAR */}
+
+      {/* ALWAYS SHOW NAVBAR */}
       <NavBar />
-      
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/templates" element={<Templates />} />
         <Route path="/logo" element={<LogoBuilder />} />
         <Route path="/portfolio" element={<PortfolioBuilder />} />
         <Route path="/portfolio/view" element={<OneClickPage />} />
-        <Route path="/editor" element={<Editor />} />
+        <Route
+          path="/editor"
+          element={
+            <ProtectedRoute>
+              <Editor />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/presentation" element={<Presentation />} />
         <Route path="/login" element={<LogIn />} />
         <Route path="/register" element={<Register />} />
@@ -82,14 +87,33 @@ function App() {
         <Route path="/data-security" element={<DataSecurity />} />
         <Route path="/legal-policy" element={<LegalPolicy />} />
         <Route path="/chat" element={<ChatBox />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/admin/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/credits/buy"
+          element={
+            <ProtectedRoute>
+              <BuyCredits />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
-      
-      {/* ✅ SHOW BOTTOM NAV EXCEPT ON SPECIFIC PAGES */}
+
       {!hideBottomNav && <BottomNav />}
-      
-      {/* ✅ SHOW FOOTER EXCEPT ON LOGIN/REGISTER */}
       {!hideFooter && <Footer />}
     </div>
   );
