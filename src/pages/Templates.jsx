@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 import TemplateSection from "../components/TemplateSection";
 import { getResumeTemplates } from "../services/resumeService";
 
@@ -37,6 +38,9 @@ const Templates = () => {
         setResumeTemplates(list);
       } catch (e) {
         console.error("Failed to load resume templates", e);
+        // Temporary UX mitigation: show an error toast if templates fail to load
+        toast.error("Failed to load resume templates. Please try again later.");
+        setResumeTemplates([]); // Ensure it's empty if fetch fails
       }
     })();
   }, []);

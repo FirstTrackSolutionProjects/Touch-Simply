@@ -83,8 +83,8 @@ const BuyCredits = () => {
           Buy Credits
         </h1>
         <p className="text-sm text-gray-500 mb-6">
-          Credits are used to download your designs. 1 credit = ₹
-          {RATE_PER_CREDIT}
+          Credits are used to download your designs. 1 download = 4 credits (₹
+          {4 * RATE_PER_CREDIT}).
         </p>
 
         {/* Packs */}

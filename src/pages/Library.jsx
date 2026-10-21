@@ -6,20 +6,21 @@ import React, {
 import LibraryCard from "../components/LibraryCard";
 
 import {
-  getLibrary,
-  deleteFromLibrary,
-  clearLibrary,
-} from "../utils/library";
+  getAllResumeDownloads,
+  redownloadFromLibrary,
+} from "../services/resumeService";
 
 import {
   FolderOpen,
-  Trash2,
   Search,
+  Loader2,
 } from "lucide-react";
+import { toast } from "react-toastify";
 
 const Library = () => {
   const [items, setItems] =
     useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [search, setSearch] =
     useState("");
@@ -29,29 +30,47 @@ const Library = () => {
     loadLibrary();
   }, []);
 
-  const loadLibrary = () => {
-    const data = getLibrary();
-    setItems(data);
-  };
-
-  // ================= DELETE =================
-  const handleDelete = (id) => {
-    deleteFromLibrary(id);
-    loadLibrary();
-  };
-
-  // ================= CLEAR =================
-  const handleClear = () => {
-    const confirmDelete =
-      window.confirm(
-        "Delete all library items?"
-      );
-
-    if (confirmDelete) {
-      clearLibrary();
-      loadLibrary();
+  const loadLibrary = async () => {
+    try {
+      setLoading(true);
+      const res = await getAllResumeDownloads();
+      // Map backend downloads to LibraryCard format
+      const mapped = (res.data?.downloads || []).map((d) => ({
+        id: d.id,
+        resumeId: d.resume_id,
+        title: d.title || "Untitled Resume",
+        type: "resume",
+        createdAt: d.created_at,
+        updatedAt: d.updated_at,
+        thumbnail: null, // Backend doesn't provide thumbnails yet
+        description: d.description,
+      }));
+      setItems(mapped);
+    } catch (err) {
+      toast.error("Failed to load library");
+    } finally {
+      setLoading(false);
     }
   };
+
+  // ================= REDOWNLOAD =================
+  const handleRedownload = async (downloadId) => {
+    try {
+      const res = await redownloadFromLibrary(downloadId);
+      const url = res?.data?.downloadUrl;
+      if (url) {
+        window.open(url, "_blank");
+        toast.success("Download started");
+      } else {
+        toast.error("No download URL returned");
+      }
+    } catch (err) {
+      toast.error("Failed to redownload");
+    }
+  };
+
+  // ================= DELETE (Not implemented in backend yet for downloads) =================
+  const handleDelete = undefined;
 
   // ================= FILTER =================
   const filteredItems =
@@ -103,22 +122,17 @@ const Library = () => {
 
           </div>
 
-          {/* CLEAR */}
-          {items.length > 0 && (
-            <button
-              onClick={handleClear}
-              className="flex items-center justify-center gap-2 bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600 transition-all"
-            >
-              <Trash2 size={18} />
-              Clear All
-            </button>
-          )}
-
         </div>
       </div>
 
-      {/* EMPTY */}
-      {filteredItems.length === 0 ? (
+      {/* LOADING */}
+      {loading ? (
+        <div className="flex flex-col items-center justify-center h-[60vh]">
+          <Loader2 className="animate-spin text-purple-600" size={48} />
+          <p className="text-gray-500 mt-4">Loading your library...</p>
+        </div>
+      ) : filteredItems.length === 0 ? (
+        /* EMPTY */
         <div className="flex flex-col items-center justify-center h-[60vh] text-center">
 
           <FolderOpen
@@ -131,10 +145,7 @@ const Library = () => {
           </h2>
 
           <p className="text-gray-500 mt-2">
-            Download resumes,
-            portfolios, logos, or
-            presentations to save them
-            here.
+            Download resumes to save them here.
           </p>
 
         </div>
@@ -150,6 +161,7 @@ const Library = () => {
               onDelete={
                 handleDelete
               }
+              onRedownload={() => handleRedownload(item.id)}
             />
           ))}
 

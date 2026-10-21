@@ -35,16 +35,21 @@ const NavBar = () => {
 
   // Load wallet balance
   useEffect(() => {
-    if (!localStorage.getItem("token")) return;
-    (async () => {
+    const refresh = async () => {
+      if (!localStorage.getItem("token")) return;
       try {
         const w = await getWalletBalance();
         setCredits(w.data?.balance ?? 0);
       } catch {
         // ignore
       }
-    })();
-  }, [user]);
+    };
+    refresh();
+
+    window.addEventListener("touchsimply:balance-changed", refresh);
+    return () =>
+      window.removeEventListener("touchsimply:balance-changed", refresh);
+  }, []);
 
   const navLinks = [
     { name: "Home", path: "/" },

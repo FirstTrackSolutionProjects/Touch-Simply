@@ -65,7 +65,14 @@ function App() {
         <Route path="/logo" element={<LogoBuilder />} />
         <Route path="/portfolio" element={<PortfolioBuilder />} />
         <Route path="/portfolio/view" element={<OneClickPage />} />
-        <Route path="/editor" element={<Editor />} />
+        <Route
+          path="/editor"
+          element={
+            <ProtectedRoute>
+              <Editor />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/presentation" element={<Presentation />} />
         <Route path="/login" element={<LogIn />} />
         <Route path="/register" element={<Register />} />

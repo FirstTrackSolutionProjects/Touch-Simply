@@ -7,9 +7,10 @@ import { Loader2, Copy, ArrowLeft } from "lucide-react";
 import {
   createResumeFromTemplate,
   compileResume,
-  saveResumeFormData,
   downloadResume,
   cloneResume,
+  getSimpleWorkspace,
+  uploadDataJson,
 } from "../services/resumeService";
 import { getWalletBalance } from "../services/walletService";
 import {
@@ -21,7 +22,9 @@ import DynamicForm from "../components/DynamicForm";
 import WatermarkedPreview from "../components/WatermarkedPreview";
 
 const DOWNLOADED_KEY = "touchsimply-downloaded-resumes";
+const EDITOR_SESSION_KEY = "touchsimply-editor-session";
 const AUTO_COMPILE_MS = 3000;
+const DOWNLOAD_RESUME_CREDIT_COST = 4;
 
 const isAlreadyDownloaded = (id) => {
   try {
@@ -77,9 +80,52 @@ const Editor = () => {
       return;
     }
     let cancelled = false;
+    const sessionKey = `${EDITOR_SESSION_KEY}-${templateId}`;
+
     (async () => {
       try {
         setCreating(true);
+
+        // 0. Check session storage for existing resume
+        const saved = sessionStorage.getItem(sessionKey);
+        if (saved) {
+          const { resumeId: savedId, templateId: savedTemplate } =
+            JSON.parse(saved);
+          if (savedTemplate === templateId) {
+            setResumeId(savedId);
+            const ws = await getSimpleWorkspace(savedId);
+            const configUrl = ws.data?.configJsonUrl;
+            if (configUrl) {
+              const cfg = await loadConfigJson(configUrl);
+              setConfig(cfg);
+
+              // Try to fetch saved form data from data.json
+              try {
+                const dataUrl = configUrl.replace("config.json", "data.json");
+                const dataRes = await fetch(dataUrl);
+                if (dataRes.ok) {
+                  const savedForm = await dataRes.json();
+                  setFormData(savedForm);
+                } else {
+                  setFormData(buildEmptyFormData(cfg));
+                }
+              } catch {
+                setFormData(buildEmptyFormData(cfg));
+              }
+
+              // Wallet balance
+              try {
+                const w = await getWalletBalance();
+                setBalance(w.data?.balance ?? 0);
+              } catch {
+                setBalance(null);
+              }
+
+              setCreating(false);
+              return;
+            }
+          }
+        }
 
         // 1. Create resume record
         const createRes = await createResumeFromTemplate(templateId, {
@@ -90,12 +136,25 @@ const Editor = () => {
         if (cancelled) return;
 
         const resume = createRes.data?.resume;
-        const configJsonUrl = createRes.data?.configJsonUrl;
-
         if (!resume?.id) throw new Error("Backend did not return resume id");
         setResumeId(resume.id);
 
+        // Save to session
+        sessionStorage.setItem(
+          sessionKey,
+          JSON.stringify({
+            resumeId: resume.id,
+            templateId,
+          })
+        );
+
         // 2. Load config JSON
+        let configJsonUrl = createRes.data?.configJsonUrl;
+        if (!configJsonUrl) {
+          const ws = await getSimpleWorkspace(resume.id);
+          configJsonUrl = ws.data?.configJsonUrl;
+        }
+
         if (!configJsonUrl) {
           throw new Error(
             "Backend did not return configJsonUrl — template config not available"
@@ -134,7 +193,7 @@ const Editor = () => {
     if (!resumeId) return;
     setSaving(true);
     try {
-      await saveResumeFormData(resumeId, formDataRef.current);
+      await uploadDataJson(resumeId, formDataRef.current);
     } catch (err) {
       // Non-fatal — compile will still attempt
       console.warn("Save form data failed:", err?.message);
@@ -153,8 +212,11 @@ const Editor = () => {
       await persistFormData();
 
       const res = await compileResume(resumeId);
-      const urls = res.data?.previewImageUrls || [];
+      const images = res.data?.images || [];
+      // Convert base64 PNG buffers to data URLs
+      const urls = images.map((b64) => `data:image/png;base64,${b64}`);
       setPreviewImageUrls(urls);
+
       if (urls.length === 0) {
         toast.warn("Compile succeeded but returned no pages");
       }
@@ -227,20 +289,43 @@ const Editor = () => {
     setDownloading(true);
     try {
       const res = await downloadResume(resumeId);
+      const downloadUrlOrBase64 = res.data?.downloadUrl;
 
-      const blob = new Blob([res.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${templateTitle || "resume"}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      if (!downloadUrlOrBase64) throw new Error("No download payload returned");
+
+      // Heuristic: if it looks like a base64 PDF (starts with JVBER which is "%PDF"), decode it.
+      if (
+        downloadUrlOrBase64.startsWith("JVBER") ||
+        (downloadUrlOrBase64.length > 2000 &&
+          !downloadUrlOrBase64.startsWith("http"))
+      ) {
+        // Decode base64 → Blob → trigger download
+        const byteChars = atob(downloadUrlOrBase64);
+        const byteNumbers = new Array(byteChars.length);
+        for (let i = 0; i < byteChars.length; i++) {
+          byteNumbers[i] = byteChars.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${templateTitle || "resume"}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        // It's an actual URL — open in new tab
+        window.open(downloadUrlOrBase64, "_blank");
+      }
 
       try {
         const w = await getWalletBalance();
         setBalance(w.data?.balance ?? 0);
+        // Notify navbar
+        window.dispatchEvent(new Event("touchsimply:balance-changed"));
       } catch {
         // ignore
       }
@@ -248,14 +333,18 @@ const Editor = () => {
       const firstTime = !isAlreadyDownloaded(resumeId);
       markDownloaded(resumeId);
       toast.success(
-        firstTime ? "Downloaded (1 credit deducted)" : "Downloaded"
+        firstTime
+          ? `Downloaded (${DOWNLOAD_RESUME_CREDIT_COST} credits deducted)`
+          : "Downloaded"
       );
     } catch (err) {
       const status = err.response?.status;
       if (status === 402 || status === 400) {
-        toast.error("Insufficient credits. Redirecting to buy credits...");
+        toast.error(
+          `Insufficient credits. ${DOWNLOAD_RESUME_CREDIT_COST} credits needed. Redirecting...`
+        );
         navigate("/credits/buy", {
-          state: { from: "/editor", needed: 1 },
+          state: { from: "/editor", needed: DOWNLOAD_RESUME_CREDIT_COST },
         });
       } else {
         toast.error(err.response?.data?.message || "Download failed");
@@ -274,12 +363,15 @@ const Editor = () => {
       const res = await cloneResume(templateId, templateTitle || "Resume");
       const newId = res.data?.resume?.id;
       if (!newId) throw new Error("Clone did not return new resume");
+      // Clear the session key so bootstrap creates a fresh entry for the clone
+      sessionStorage.removeItem(`${EDITOR_SESSION_KEY}-${templateId}`);
+      // Seed the session with the new resumeId
+      sessionStorage.setItem(`${EDITOR_SESSION_KEY}-${templateId}`, JSON.stringify({
+        resumeId: newId, templateId,
+      }));
       toast.success("Cloned! Opening new resume...");
       navigate("/editor", {
-        state: {
-          templateId,
-          templateTitle: `${templateTitle} (Clone)`,
-        },
+        state: { templateId, templateTitle: `${templateTitle} (Clone)` },
         replace: true,
       });
     } catch (err) {
