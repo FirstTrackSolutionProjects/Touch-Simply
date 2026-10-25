@@ -190,8 +190,7 @@ const Login = () => {
                   onSuccess={async (credentialResponse) => {
                     try {
                       const data = await googleLoginUser(credentialResponse.credential);
-                      localStorage.setItem("token", data.token);
-                      localStorage.setItem("user", JSON.stringify(data.user));
+                      await login(data.data?.tokens?.accessToken);
                       navigate("/dashboard");
                     } catch (error) {
                       setError(error?.response?.data?.message || "Google Login Failed");

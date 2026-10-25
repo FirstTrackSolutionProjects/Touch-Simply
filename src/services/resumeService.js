@@ -102,7 +102,7 @@ export const uploadDataJson = async (resumeId, formData) => {
 };
 
 // UPLOAD CONFIG JSON DIRECTLY TO S3
-export const uploadConfigJson = async (resumeId, formData) => {
+export const uploadConfigJson = async (resumeId, configJson) => {
   // 1. Get signed PUT URL
   const res = await getConfigJsonUploadUrl(resumeId);
   const uploadUrl = res.data?.uploadUrl;
@@ -112,7 +112,7 @@ export const uploadConfigJson = async (resumeId, formData) => {
   const put = await fetch(uploadUrl, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(formData),
+    body: JSON.stringify(configJson),
   });
 
   if (!put.ok) throw new Error(`S3 upload failed: ${put.status}`);

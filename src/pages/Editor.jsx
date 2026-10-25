@@ -10,12 +10,12 @@ import {
   downloadResume,
   cloneResume,
   getSimpleWorkspace,
-  uploadDataJson,
+  uploadConfigJson,
 } from "../services/resumeService";
 import { getWalletBalance } from "../services/walletService";
 import {
   loadConfigJson,
-  buildEmptyFormData,
+  createEmptyConfigNode,
 } from "../utils/configJsonLoader";
 
 import DynamicForm from "../components/DynamicForm";
@@ -25,6 +25,18 @@ const DOWNLOADED_KEY = "touchsimply-downloaded-resumes";
 const EDITOR_SESSION_KEY = "touchsimply-editor-session";
 const AUTO_COMPILE_MS = 3000;
 const DOWNLOAD_RESUME_CREDIT_COST = 4;
+
+const getValueAtPath = (value, path) =>
+  path.reduce((current, key) => current?.[key], value);
+
+const setValueAtPath = (value, path, nextValue) => {
+  if (path.length === 0) return nextValue;
+
+  const [key, ...remainingPath] = path;
+  const next = Array.isArray(value) ? [...value] : { ...value };
+  next[key] = setValueAtPath(value?.[key], remainingPath, nextValue);
+  return next;
+};
 
 const isAlreadyDownloaded = (id) => {
   try {
@@ -56,7 +68,6 @@ const Editor = () => {
 
   const [resumeId, setResumeId] = useState(null);
   const [config, setConfig] = useState(null);
-  const [formData, setFormData] = useState({});
   const [previewImageUrls, setPreviewImageUrls] = useState([]);
   const [balance, setBalance] = useState(null);
 
@@ -67,8 +78,8 @@ const Editor = () => {
   const [autoCompile, setAutoCompile] = useState(false);
 
   const debounceRef = useRef(null);
-  const formDataRef = useRef({});
-  formDataRef.current = formData;
+  const configRef = useRef(null);
+  configRef.current = config;
 
   // ─────────────────────────────────────────────
   // BOOTSTRAP: create resume + load config
@@ -98,20 +109,6 @@ const Editor = () => {
             if (configUrl) {
               const cfg = await loadConfigJson(configUrl);
               setConfig(cfg);
-
-              // Try to fetch saved form data from data.json
-              try {
-                const dataUrl = configUrl.replace("config.json", "data.json");
-                const dataRes = await fetch(dataUrl);
-                if (dataRes.ok) {
-                  const savedForm = await dataRes.json();
-                  setFormData(savedForm);
-                } else {
-                  setFormData(buildEmptyFormData(cfg));
-                }
-              } catch {
-                setFormData(buildEmptyFormData(cfg));
-              }
 
               // Wallet balance
               try {
@@ -164,7 +161,6 @@ const Editor = () => {
         if (cancelled) return;
 
         setConfig(cfg);
-        setFormData(buildEmptyFormData(cfg));
 
         // 3. Wallet balance
         try {
@@ -187,16 +183,13 @@ const Editor = () => {
   }, [templateId, templateTitle, navigate]);
 
   // ─────────────────────────────────────────────
-  // PERSIST FORM DATA
+  // PERSIST CONFIG JSON
   // ─────────────────────────────────────────────
-  const persistFormData = useCallback(async () => {
-    if (!resumeId) return;
+  const persistConfig = useCallback(async () => {
+    if (!resumeId || !configRef.current) return;
     setSaving(true);
     try {
-      await uploadDataJson(resumeId, formDataRef.current);
-    } catch (err) {
-      // Non-fatal — compile will still attempt
-      console.warn("Save form data failed:", err?.message);
+      await uploadConfigJson(resumeId, configRef.current);
     } finally {
       setSaving(false);
     }
@@ -209,7 +202,7 @@ const Editor = () => {
     if (!resumeId) return;
     setCompiling(true);
     try {
-      await persistFormData();
+      await persistConfig();
 
       const res = await compileResume(resumeId);
       const images = res.data?.images || [];
@@ -221,11 +214,13 @@ const Editor = () => {
         toast.warn("Compile succeeded but returned no pages");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Compile failed");
+      toast.error(
+        err.response?.data?.message || err.message || "Compile failed"
+      );
     } finally {
       setCompiling(false);
     }
-  }, [resumeId, persistFormData]);
+  }, [resumeId, persistConfig]);
 
   const scheduleAutoCompile = useCallback(() => {
     if (!autoCompile) return;
@@ -238,41 +233,35 @@ const Editor = () => {
   // ─────────────────────────────────────────────
   // FORM CHANGE HANDLERS
   // ─────────────────────────────────────────────
-  const handleChange = (sectionId, fieldName, value, index = null) => {
-    setFormData((prev) => {
-      const next = { ...prev };
-      if (index !== null) {
-        const arr = [...(next[sectionId] || [])];
-        arr[index] = { ...arr[index], [fieldName]: value };
-        next[sectionId] = arr;
-      } else {
-        next[sectionId] = { ...next[sectionId], [fieldName]: value };
-      }
-      return next;
+  const handleChange = (path, value) => {
+    setConfig((prev) =>
+      setValueAtPath(prev, [...path, "current_value"], value)
+    );
+    scheduleAutoCompile();
+  };
+
+  const addArrayField = (path) => {
+    setConfig((prev) => {
+      const items = getValueAtPath(prev, path);
+      if (!Array.isArray(items) || items.length === 0) return prev;
+      return setValueAtPath(prev, path, [
+        ...items,
+        createEmptyConfigNode(items[0]),
+      ]);
     });
     scheduleAutoCompile();
   };
 
-  const addArrayField = (sectionId) => {
-    if (!config) return;
-    const sec = config.sections.find((s) => s.id === sectionId);
-    if (!sec) return;
-    const empty = {};
-    sec.fields.forEach(
-      (f) => (empty[f.name] = f.type === "checkbox" ? false : "")
-    );
-    setFormData((prev) => ({
-      ...prev,
-      [sectionId]: [...(prev[sectionId] || []), empty],
-    }));
-    scheduleAutoCompile();
-  };
-
-  const removeArrayField = (sectionId, index) => {
-    setFormData((prev) => ({
-      ...prev,
-      [sectionId]: (prev[sectionId] || []).filter((_, i) => i !== index),
-    }));
+  const removeArrayField = (path, index) => {
+    setConfig((prev) => {
+      const items = getValueAtPath(prev, path);
+      if (!Array.isArray(items) || items.length <= 1) return prev;
+      return setValueAtPath(
+        prev,
+        path,
+        items.filter((_, itemIndex) => itemIndex !== index)
+      );
+    });
     scheduleAutoCompile();
   };
 
@@ -438,7 +427,6 @@ const Editor = () => {
           {config ? (
             <DynamicForm
               config={config}
-              data={formData}
               onChange={handleChange}
               onAddArrayField={addArrayField}
               onRemoveArrayField={removeArrayField}
