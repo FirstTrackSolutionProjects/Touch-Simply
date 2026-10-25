@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import ToolCard from "../components/ToolCard";
 
@@ -31,10 +32,10 @@ import {
 const Dashboard = () => {
   const navigate = useNavigate();
 
+  const { user } = useAuth();
+
   const [mobileMenu, setMobileMenu] = useState(false);
   const [search, setSearch] = useState("");
-
-  const user = JSON.parse(localStorage.getItem("user")) || {};
   const isAdmin = user?.role === "admin";
 
   // ================= TOOLS =================
@@ -232,7 +233,7 @@ const Dashboard = () => {
                   <User size={20} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold truncate">{user?.name || "User"}</h3>
+                  <h3 className="font-semibold truncate">{user?.first_name || "User"}</h3>
                   <p className="text-xs text-gray-400 truncate">{user?.email}</p>
                   <p className="text-xs mt-1 text-purple-400 uppercase">{user?.role || "user"}</p>
                 </div>
@@ -333,7 +334,7 @@ const Dashboard = () => {
                   <User size={20} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold truncate">{user?.name || "User"}</h3>
+                  <h3 className="font-semibold truncate">{user?.first_name || "User"}</h3>
                   <p className="text-xs text-gray-400 truncate">{user?.email}</p>
                   <p className="text-xs mt-1 text-purple-400 uppercase">{user?.role || "user"}</p>
                 </div>

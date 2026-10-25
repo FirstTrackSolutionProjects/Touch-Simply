@@ -8,7 +8,11 @@ export const registerUser = async (userData) => {
 
 // GOOGLE LOGIN
 export const googleLoginUser = async (tokenId) => {
-  const res = await API.post("/auth/google-login", { tokenId });
+  const res = await API.post("/auth/login/google", { token: tokenId }, {
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
   return res.data;
 };
 
@@ -17,3 +21,8 @@ export const loginUser = async (userData) => {
   const res = await API.post("/auth/login", userData);
   return res.data;
 };
+
+export const checkAuthService = async () => {
+  const res = await API.get("/auth/check");
+  return res.data;
+}

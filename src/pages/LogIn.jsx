@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa";
 import { loginUser, googleLoginUser } from "../services/authServices";
@@ -7,6 +8,7 @@ import { GoogleLogin } from "@react-oauth/google";
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -22,8 +24,10 @@ const Login = () => {
     setError("");
     try {
       const data = await loginUser(form);
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+
+      await login(data.data?.tokens?.accessToken);
+      alert("Login Successful 🚀");
+
       navigate("/dashboard");
     } catch (error) {
       setError(error?.response?.data?.message || "Login Failed");
@@ -186,8 +190,7 @@ const Login = () => {
                   onSuccess={async (credentialResponse) => {
                     try {
                       const data = await googleLoginUser(credentialResponse.credential);
-                      localStorage.setItem("token", data.token);
-                      localStorage.setItem("user", JSON.stringify(data.user));
+                      await login(data.data?.tokens?.accessToken);
                       navigate("/dashboard");
                     } catch (error) {
                       setError(error?.response?.data?.message || "Google Login Failed");

@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
   FaHome,
   FaLayerGroup,
@@ -10,7 +11,8 @@ import {
 
 const BottomNav = () => {
   const location = useLocation();
-  const isLoggedIn = localStorage.getItem("user");
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
 
   const navItems = [
     { name: "Home", path: "/", icon: <FaHome /> },
