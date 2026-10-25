@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Hero = () => {
 
-  const isLoggedIn =
-    localStorage.getItem("token");
+  const { user } = useAuth();
+
+  const isLoggedIn = !!user;
 
   return (
     <section className="relative w-full overflow-hidden bg-gradient-to-br from-gray-950 via-purple-900/40 to-gray-950 py-16 md:py-24 mt-4">

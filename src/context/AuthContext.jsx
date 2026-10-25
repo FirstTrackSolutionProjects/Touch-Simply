@@ -4,51 +4,46 @@ import {
   useEffect,
   useState,
 } from "react";
+import { checkAuthService } from "../services/authServices";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({
   children,
 }) => {
-  const [user, setUser] =
-    useState(null);
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
-    const token =
-      localStorage.getItem("token");
-
-    const userData =
-      localStorage.getItem("user");
-
-    if (token && userData) {
-      setUser(JSON.parse(userData));
-    }
+    checkAuth();
   }, []);
 
-  const login = (data) => {
-    localStorage.setItem(
-      "token",
-      data.token
-    );
+  const checkAuth = async () => {
+    setAuthLoading(true);
+    const token = localStorage.getItem("token");
+    try{
+      if (token) {
+        const data = await checkAuthService();
+        setUser(data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
 
-    localStorage.setItem(
-      "user",
-      JSON.stringify(data)
-    );
-
-    setUser(data);
+  const login = async (token) => {
+    localStorage.setItem("token", token);
+    await checkAuth();
   };
 
   const logout = () => {
     localStorage.removeItem(
       "token"
     );
-
-    localStorage.removeItem(
-      "user"
-    );
-
     setUser(null);
+    setAuthLoading(false);
   };
 
   return (
@@ -57,6 +52,8 @@ export const AuthProvider = ({
         user,
         login,
         logout,
+        authLoading,
+        checkAuth,
       }}
     >
       {children}

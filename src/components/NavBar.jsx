@@ -1,5 +1,6 @@
 // Touch-Simply/src/components/NavBar.jsx
 import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
 import {
   Menu,
@@ -16,40 +17,23 @@ import { getWalletBalance } from "../services/walletService";
 
 const NavBar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
   const [credits, setCredits] = useState(null);
   const [createOpen, setCreateOpen] = useState(false);
   const location = useLocation();
+  const { user, authLoading } = useAuth();
 
-  // Load user from localStorage
-  useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      try {
-        setUser(JSON.parse(userData));
-      } catch (e) {
-        setUser(null);
-      }
-    }
-  }, []);
-
-  // Load wallet balance
   useEffect(() => {
     const refresh = async () => {
-      if (!localStorage.getItem("token")) return;
+      if (!user || authLoading) return;
       try {
         const w = await getWalletBalance();
         setCredits(w.data?.balance ?? 0);
-      } catch {
-        // ignore
+      } catch (error) {
+        console.error(error);
       }
     };
     refresh();
-
-    window.addEventListener("touchsimply:balance-changed", refresh);
-    return () =>
-      window.removeEventListener("touchsimply:balance-changed", refresh);
-  }, []);
+  }, [authLoading]);
 
   const navLinks = [
     { name: "Home", path: "/" },
