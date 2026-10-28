@@ -9,7 +9,7 @@ import {
   getWalletBalance,
 } from "../services/walletService";
 
-// Conversion: 1 credit = ₹7 (matches "28 Rupees ~ 4 credits" in diagram → ₹7/credit)
+// Conversion: 1 credit = ₹7
 const RATE_PER_CREDIT = 7;
 
 const PACKS = [
@@ -57,6 +57,8 @@ const BuyCredits = () => {
             toast.success(
               `Credits added! New balance: ${w.data?.balance}`
             );
+            // Notify navbar to refresh balance
+            window.dispatchEvent(new Event("touchsimply:balance-changed"));
             navigate(location.state?.from || "/dashboard");
           } catch {
             toast.error("Payment verification failed");

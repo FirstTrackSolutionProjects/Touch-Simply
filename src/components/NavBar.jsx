@@ -11,6 +11,7 @@ import {
   Briefcase,
   Presentation,
   Zap,
+  FolderOpen,
 } from "lucide-react";
 import UserAvatar from "./UserAvatar";
 import { getWalletBalance } from "../services/walletService";
@@ -33,13 +34,16 @@ const NavBar = () => {
       }
     };
     refresh();
-  }, [authLoading]);
+    // Listen for balance changes from other components (e.g. after recharge)
+    window.addEventListener("touchsimply:balance-changed", refresh);
+    return () => window.removeEventListener("touchsimply:balance-changed", refresh);
+  }, [user, authLoading]);
 
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "About", path: "/about" },
     { name: "Templates", path: "/templates" },
-    { name: "Library", path: "/library" },
+    { name: "Projects", path: "/library" }, // Added Projects link
     { name: "Slides", path: "/presentation" },
     { name: "Contact", path: "/contact" },
     { name: "Chat", path: "/chat" },
@@ -95,12 +99,15 @@ const NavBar = () => {
             {/* User Avatar / Credits / Create */}
             {user ? (
               <div className="flex items-center gap-3">
-                {/* Credits badge */}
-                <div className="hidden md:flex items-center gap-1 text-xs bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-full">
+                {/* Credits badge - clickable to buy credits */}
+                <Link
+                  to="/credits/buy"
+                  className="hidden md:flex items-center gap-1 text-xs bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-full hover:bg-amber-100 transition"
+                >
                   <Zap size={12} className="text-amber-500" />
                   <span className="font-bold">{credits ?? "—"}</span>
                   <span>credits</span>
-                </div>
+                </Link>
 
                 {/* CREATE dropdown */}
                 <div className="relative">
@@ -202,11 +209,15 @@ const NavBar = () => {
 
           {user ? (
             <>
-              <div className="flex items-center gap-2 text-xs bg-amber-900/40 border border-amber-700/50 text-amber-200 px-3 py-2 rounded-lg">
+              <Link
+                to="/credits/buy"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 text-xs bg-amber-900/40 border border-amber-700/50 text-amber-200 px-3 py-2 rounded-lg"
+              >
                 <Zap size={12} />
                 <span className="font-bold">{credits ?? "—"}</span>
                 <span>credits</span>
-              </div>
+              </Link>
 
               <Link
                 to="/dashboard"

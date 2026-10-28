@@ -1,7 +1,8 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import ToolCard from "../components/ToolCard";
+import { getWalletBalance } from "../services/walletService";
 
 import {
   FileText,
@@ -27,6 +28,7 @@ import {
   Star,
   Settings,
   Crown,
+  CreditCard,
 } from "lucide-react";
 
 const Dashboard = () => {
@@ -36,7 +38,23 @@ const Dashboard = () => {
 
   const [mobileMenu, setMobileMenu] = useState(false);
   const [search, setSearch] = useState("");
+  const [credits, setCredits] = useState(null);
   const isAdmin = user?.role === "admin";
+
+  const RATE_PER_CREDIT = 7; // Conversion rate: 1 credit = ₹7
+
+  // Fetch wallet balance
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const w = await getWalletBalance();
+        setCredits(w.data?.balance ?? 0);
+      } catch (err) {
+        console.error("Failed to fetch balance", err);
+      }
+    };
+    if (user) fetchBalance();
+  }, [user]);
 
   // ================= TOOLS =================
   const tools = [
@@ -89,7 +107,7 @@ const Dashboard = () => {
     },
     {
       title: "AI Credits",
-      value: "120",
+      value: credits !== null ? String(credits) : "—",
       icon: <Zap size={22} />,
     },
   ];
@@ -429,6 +447,35 @@ const Dashboard = () => {
                   <h3 className="text-2xl font-bold">18+</h3>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ================= RECHARGE CREDITS SECTION ================= */}
+        <div className="px-4 sm:px-6 lg:px-10 pb-6">
+          <div className="bg-gradient-to-r from-amber-600/20 to-yellow-600/10 border border-amber-500/20 rounded-3xl p-6 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex items-start gap-4">
+                <div className="w-14 h-14 shrink-0 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 flex items-center justify-center">
+                  <Zap size={26} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl md:text-2xl font-bold text-white">Recharge Credits</h3>
+                  <p className="text-gray-300 mt-1 text-sm md:text-base">
+                    You currently have <span className="font-bold text-amber-400">{credits ?? "—"} credits</span>.
+                  </p>
+                  <p className="text-gray-400 mt-1 text-sm">
+                    Conversion rate: <span className="font-semibold text-white">1 Credit = ₹{RATE_PER_CREDIT}</span> (e.g., 4 credits = ₹{4 * RATE_PER_CREDIT})
+                  </p>
+                </div>
+              </div>
+              <Link
+                to="/credits/buy"
+                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold px-8 py-3.5 rounded-xl hover:scale-105 transition shadow-lg shadow-amber-500/25"
+              >
+                <CreditCard size={18} />
+                Buy Credits
+              </Link>
             </div>
           </div>
         </div>
