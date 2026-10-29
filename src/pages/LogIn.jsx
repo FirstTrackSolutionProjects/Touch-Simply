@@ -25,12 +25,14 @@ const Login = () => {
     try {
       const data = await loginUser(form);
 
-      await login(data.data?.tokens?.accessToken);
-      alert("Login Successful 🚀");
+      const user = await login(data.data?.tokens?.accessToken);
+      if (!user) {
+        throw new Error("Could not verify your login. Please try again.");
+      }
 
       navigate("/dashboard");
     } catch (error) {
-      setError(error?.response?.data?.message || "Login Failed");
+      setError(error?.response?.data?.message || error.message || "Login Failed");
     } finally {
       setLoading(false);
     }
@@ -193,7 +195,7 @@ const Login = () => {
                       await login(data.data?.tokens?.accessToken);
                       navigate("/dashboard");
                     } catch (error) {
-                      setError(error?.response?.data?.message || "Google Login Failed");
+                      setError(error?.response?.data?.message || error.message || "Google Login Failed");
                     }
                   }}
                   onError={() => {

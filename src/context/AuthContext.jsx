@@ -25,17 +25,27 @@ export const AuthProvider = ({
       if (token) {
         const data = await checkAuthService();
         setUser(data.data);
+        return data.data;
       }
+
+      setUser(null);
+      return null;
     } catch (error) {
       console.error(error);
+      setUser(null);
+      throw error;
     } finally {
       setAuthLoading(false);
     }
   };
 
   const login = async (token) => {
+    if (!token) {
+      throw new Error("Login response did not include an access token");
+    }
+
     localStorage.setItem("token", token);
-    await checkAuth();
+    return checkAuth();
   };
 
   const logout = () => {
