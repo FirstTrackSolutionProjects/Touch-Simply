@@ -25,7 +25,10 @@ const Login = () => {
     try {
       const data = await loginUser(form);
 
-      const user = await login(data.data?.tokens?.accessToken);
+      const user = await login(
+        data.token || data.data?.tokens?.accessToken,
+        data.user || data.data?.user
+      );
       if (!user) {
         throw new Error("Could not verify your login. Please try again.");
       }
@@ -192,7 +195,10 @@ const Login = () => {
                   onSuccess={async (credentialResponse) => {
                     try {
                       const data = await googleLoginUser(credentialResponse.credential);
-                      await login(data.data?.tokens?.accessToken);
+                      await login(
+                        data.token || data.data?.tokens?.accessToken,
+                        data.user || data.data?.user
+                      );
                       navigate("/dashboard");
                     } catch (error) {
                       setError(error?.response?.data?.message || error.message || "Google Login Failed");
