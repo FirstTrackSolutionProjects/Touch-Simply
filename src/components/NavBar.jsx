@@ -12,6 +12,7 @@ import {
   Presentation,
   Zap,
   FolderOpen,
+  ShieldCheck,
 } from "lucide-react";
 import UserAvatar from "./UserAvatar";
 import { getWalletBalance } from "../services/walletService";
@@ -99,6 +100,14 @@ const NavBar = () => {
             {/* User Avatar / Credits / Create */}
             {user ? (
               <div className="flex items-center gap-3">
+                {user.role === "ADMIN" && (
+                  <Link
+                    to="/admin/dashboard"
+                    className="hidden lg:flex items-center gap-1.5 text-sm text-white/90 hover:text-white"
+                  >
+                    <ShieldCheck size={16} /> Admin
+                  </Link>
+                )}
                 {/* Credits badge - clickable to buy credits */}
                 <Link
                   to="/credits/buy"
@@ -209,6 +218,15 @@ const NavBar = () => {
 
           {user ? (
             <>
+              {user.role === "ADMIN" && (
+                <Link
+                  to="/admin/dashboard"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-900/50 text-purple-100 hover:bg-purple-800/60"
+                >
+                  <ShieldCheck size={16} /> Admin panel
+                </Link>
+              )}
               <Link
                 to="/credits/buy"
                 onClick={() => setMenuOpen(false)}

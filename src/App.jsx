@@ -26,6 +26,7 @@ import DataSecurity from "./pages/DataSecurity";
 import LegalPolicy from "./pages/LegalPolicy";
 import ChatBox from "./pages/ChatBox";
 import Dashboard from "./pages/Dashboard";
+import AdminPanel from "./pages/AdminPanel";
 import BuyCredits from "./pages/BuyCredits";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -36,6 +37,8 @@ function App() {
 
   const hideFooterRoutes = ["/login", "/register"];
   const hideFooter = hideFooterRoutes.includes(pathname);
+
+  const isAdminRoute = pathname.startsWith("/admin");
 
   const hideBottomNavRoutes = ["/login", "/register", "/dashboard"];
   const hideBottomNav = hideBottomNavRoutes.includes(pathname);
@@ -57,8 +60,7 @@ function App() {
     <div id="main-scroll" className="h-screen overflow-y-auto">
       <ToastContainer />
 
-      {/* ALWAYS SHOW NAVBAR */}
-      <NavBar />
+      {!isAdminRoute && <NavBar />}
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -100,7 +102,7 @@ function App() {
           path="/admin/dashboard"
           element={
             <AdminRoute>
-              <Dashboard />
+              <AdminPanel />
             </AdminRoute>
           }
         />
@@ -114,8 +116,8 @@ function App() {
         />
       </Routes>
 
-      {!hideBottomNav && <BottomNav />}
-      {!hideFooter && <Footer />}
+      {!hideBottomNav && !isAdminRoute && <BottomNav />}
+      {!hideFooter && !isAdminRoute && <Footer />}
     </div>
   );
 }
