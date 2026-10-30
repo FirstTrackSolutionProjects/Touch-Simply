@@ -27,6 +27,7 @@ import LegalPolicy from "./pages/LegalPolicy";
 import ChatBox from "./pages/ChatBox";
 import Dashboard from "./pages/Dashboard";
 import AdminPanel from "./pages/AdminPanel";
+import AccountSecurity from "./pages/AccountSecurity";
 import BuyCredits from "./pages/BuyCredits";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -35,12 +36,12 @@ import { ToastContainer } from "react-toastify";
 function App() {
   const { pathname } = useLocation();
 
-  const hideFooterRoutes = ["/login", "/register"];
+  const hideFooterRoutes = ["/login", "/register", "/settings"];
   const hideFooter = hideFooterRoutes.includes(pathname);
 
   const isAdminRoute = pathname.startsWith("/admin");
 
-  const hideBottomNavRoutes = ["/login", "/register", "/dashboard"];
+  const hideBottomNavRoutes = ["/login", "/register", "/dashboard", "/settings"];
   const hideBottomNav = hideBottomNavRoutes.includes(pathname);
 
   useEffect(() => {
@@ -79,6 +80,7 @@ function App() {
         <Route path="/presentation" element={<Presentation />} />
         <Route path="/login" element={<LogIn />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/settings" element={<ProtectedRoute><AccountSecurity /></ProtectedRoute>} />
         <Route path="/about" element={<About />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />

@@ -26,3 +26,8 @@ export const checkAuthService = async () => {
   const res = await API.get("/auth/check");
   return res.data;
 }
+
+export const setAccountPassword = async (passwordData) => {
+  const res = await API.patch("/auth/password", passwordData);
+  return res.data;
+};
