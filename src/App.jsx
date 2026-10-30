@@ -28,6 +28,7 @@ import ChatBox from "./pages/ChatBox";
 import Dashboard from "./pages/Dashboard";
 import BuyCredits from "./pages/BuyCredits";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 import { ToastContainer } from "react-toastify";
 
 function App() {
@@ -98,9 +99,9 @@ function App() {
         <Route
           path="/admin/dashboard"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <Dashboard />
-            </ProtectedRoute>
+            </AdminRoute>
           }
         />
         <Route

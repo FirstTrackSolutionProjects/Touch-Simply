@@ -39,7 +39,7 @@ const Dashboard = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [search, setSearch] = useState("");
   const [credits, setCredits] = useState(null);
-  const isAdmin = user?.role === "admin";
+  const isAdmin = String(user?.role || "").toUpperCase() === "ADMIN";
 
   const RATE_PER_CREDIT = 7; // Conversion rate: 1 credit = ₹7
 
