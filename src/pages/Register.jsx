@@ -31,8 +31,9 @@ const Register = () => {
   };
 
   const checks = {
-    length: form.password.length >= 6,
+    length: form.password.length >= 8,
     uppercase: /[A-Z]/.test(form.password),
+    lowercase: /[a-z]/.test(form.password),
     number: /[0-9]/.test(form.password),
     special: /[^A-Za-z0-9]/.test(form.password),
   };
@@ -46,19 +47,19 @@ const Register = () => {
 
   const getStrengthWidth = () => {
     const passed = Object.values(checks).filter(Boolean).length;
-    return (passed / 4) * 100;
+    return (passed / 5) * 100;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!checks.length) {
-      setError("Password must be at least 6 characters");
+      setError("Password must be at least 8 characters");
       return;
     }
 
-    if (!checks.uppercase || !checks.number) {
-      setError("Add uppercase & number");
+    if (!checks.uppercase || !checks.lowercase || !checks.number) {
+      setError("Add uppercase, lowercase & number");
       return;
     }
 
@@ -71,11 +72,16 @@ const Register = () => {
     setError("");
 
     try {
+      const nameParts = form.name.trim().split(/\s+/).filter(Boolean);
+      const first_name = nameParts.shift() || "";
+      const last_name = nameParts.pop() || "";
       const userData = {
-        name: form.name,
+        first_name,
+        middle_name: nameParts.join(" "),
+        last_name,
         email: form.email,
         password: form.password,
-        phone: form.phone,
+        confirm_password: form.confirmPassword,
       };
 
       await registerUser(userData);
@@ -253,8 +259,9 @@ const Register = () => {
                     </div>
                     
                     <div className="grid grid-cols-2 gap-0.5 md:gap-1 mt-1 md:mt-2">
-                      <Rule ok={checks.length} text="Min 6 characters" />
+                      <Rule ok={checks.length} text="Min 8 characters" />
                       <Rule ok={checks.uppercase} text="Uppercase letter" />
+                      <Rule ok={checks.lowercase} text="Lowercase letter" />
                       <Rule ok={checks.number} text="One number" />
                       <Rule ok={checks.special} text="Special character" />
                     </div>
