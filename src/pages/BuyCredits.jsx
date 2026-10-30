@@ -32,6 +32,11 @@ const BuyCredits = () => {
   const handleBuy = async () => {
     setLoading(true);
     try {
+      const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
+      if (!razorpayKeyId) {
+        throw new Error("Payment is not configured yet");
+      }
+
       const orderRes = await createRechargeOrder({
         paymentGatewayID: "razorpay",
         amount: priceINR,
@@ -41,7 +46,7 @@ const BuyCredits = () => {
       if (!orderId) throw new Error("Failed to create order");
 
       const rzp = new window.Razorpay({
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "test",
+        key: razorpayKeyId,
         amount: priceINR * 100,
         currency: "INR",
         name: "Touch Simply",
