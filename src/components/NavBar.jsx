@@ -13,6 +13,7 @@ import {
   Zap,
   FolderOpen,
   ShieldCheck,
+  ReceiptText,
 } from "lucide-react";
 import UserAvatar from "./UserAvatar";
 import { getWalletBalance } from "../services/walletService";
@@ -119,6 +120,7 @@ const NavBar = () => {
                   <span className="font-bold">{credits ?? "—"}</span>
                   <span>credits</span>
                 </Link>
+                <Link to="/transactions" className="hidden lg:flex items-center gap-1.5 text-sm text-white/90 hover:text-white"><ReceiptText size={16} /> History</Link>
 
                 {/* CREATE dropdown */}
                 <div className="relative">
@@ -238,6 +240,7 @@ const NavBar = () => {
                 <span className="font-bold">{credits ?? "—"}</span>
                 <span>credits</span>
               </Link>
+              <Link to="/transactions" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 text-sm text-gray-200"><ReceiptText size={16} /> Payment history</Link>
 
               <Link
                 to="/dashboard"

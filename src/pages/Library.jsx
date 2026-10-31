@@ -16,11 +16,15 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { getWalletBalance } from "../services/walletService";
+
+const DOWNLOAD_RESUME_CREDIT_COST = 4;
 
 const Library = () => {
   const [items, setItems] =
     useState([]);
   const [loading, setLoading] = useState(true);
+  const [balance, setBalance] = useState(null);
 
   const [search, setSearch] =
     useState("");
@@ -28,6 +32,7 @@ const Library = () => {
   // ================= LOAD =================
   useEffect(() => {
     loadLibrary();
+    getWalletBalance().then((response) => setBalance(Number(response?.data?.balance ?? 0))).catch(() => setBalance(null));
   }, []);
 
   const loadLibrary = async () => {
@@ -56,6 +61,10 @@ const Library = () => {
   // ================= REDOWNLOAD =================
   const handleRedownload = async (downloadId) => {
     try {
+      if (balance !== null && balance < DOWNLOAD_RESUME_CREDIT_COST) {
+        toast.warn("Download locked. Add at least 4 credits to your wallet first.");
+        return;
+      }
       const res = await redownloadFromLibrary(downloadId);
       const url = res?.data?.downloadUrl;
       if (url) {
@@ -65,7 +74,8 @@ const Library = () => {
         toast.error("No download URL returned");
       }
     } catch (err) {
-      toast.error("Failed to redownload");
+      if (err.response?.status === 402) toast.error("Download locked: insufficient credits. Please recharge your wallet.");
+      else toast.error(err.response?.data?.message || "Failed to redownload");
     }
   };
 
@@ -162,6 +172,7 @@ const Library = () => {
                 handleDelete
               }
               onRedownload={() => handleRedownload(item.id)}
+              downloadLocked={balance !== null && balance < DOWNLOAD_RESUME_CREDIT_COST}
             />
           ))}
 

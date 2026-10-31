@@ -11,7 +11,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-const LibraryCard = ({ item, onDelete, onRedownload }) => {
+const LibraryCard = ({ item, onDelete, onRedownload, downloadLocked = false }) => {
   const [showDownloads, setShowDownloads] = useState(false);
 
   // ================= ICON =================
@@ -54,10 +54,13 @@ const LibraryCard = ({ item, onDelete, onRedownload }) => {
       return (
         <button
           onClick={() => {
+            if (downloadLocked) return;
             onRedownload();
             setShowDownloads(false);
           }}
-          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+          disabled={downloadLocked}
+          title={downloadLocked ? "Insufficient credits. Buy credits to download." : "Download this saved resume"}
+          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition disabled:cursor-not-allowed disabled:opacity-50"
         >
           Download PDF
         </button>
@@ -147,7 +150,7 @@ const LibraryCard = ({ item, onDelete, onRedownload }) => {
               <button
                 onClick={() => setShowDownloads(!showDownloads)}
                 className="w-12 h-11 flex items-center justify-center bg-black text-white rounded-xl hover:bg-gray-900 transition-all hover:scale-105"
-                title="Download Options"
+                title={downloadLocked ? "Download locked: insufficient credits" : "Download Options"}
               >
                 <Download size={18} />
               </button>
@@ -176,6 +179,7 @@ const LibraryCard = ({ item, onDelete, onRedownload }) => {
               </button>
             )}
           </div>
+          {downloadLocked && <Link to="/credits/buy" className="text-center text-xs font-semibold text-amber-700 hover:text-amber-900">Download locked — buy credits</Link>}
         </div>
 
         <p className="text-[10px] text-gray-400 mt-4 text-center">

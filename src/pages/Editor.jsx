@@ -443,7 +443,8 @@ const Editor = () => {
             compiling={compiling}
             onCompile={doCompile}
             onDownload={handleDownload}
-            downloadDisabled={downloading || previewImageUrls.length === 0}
+            downloadDisabled={downloading || previewImageUrls.length === 0 || (balance !== null && balance < DOWNLOAD_RESUME_CREDIT_COST)}
+            downloadLocked={balance !== null && balance < DOWNLOAD_RESUME_CREDIT_COST}
             autoCompileEnabled={autoCompile}
             onToggleAutoCompile={() => setAutoCompile((v) => !v)}
           />

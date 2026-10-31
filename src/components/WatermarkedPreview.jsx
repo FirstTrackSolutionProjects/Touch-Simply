@@ -9,6 +9,7 @@ const WatermarkedPreview = ({
   onCompile,
   onDownload,
   downloadDisabled,
+  downloadLocked,
   autoCompileEnabled,
   onToggleAutoCompile,
 }) => {
@@ -48,9 +49,10 @@ const WatermarkedPreview = ({
           disabled={downloadDisabled}
           className="flex items-center gap-1.5 bg-black text-white text-xs font-semibold px-3 py-2 rounded-lg hover:bg-gray-800 disabled:opacity-50"
         >
-          <Download size={14} /> Download
+          <Download size={14} /> {downloadLocked ? "Locked" : "Download"}
         </button>
       </div>
+      {downloadLocked && <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900"><span>Download locked. You need 4 credits; your balance is too low.</span><a href="/credits/buy" className="shrink-0 font-bold underline">Buy credits</a></div>}
 
       {/* PREVIEW AREA */}
       <div className="flex-1 overflow-y-auto bg-gray-100 rounded-xl p-3 border border-gray-200">
