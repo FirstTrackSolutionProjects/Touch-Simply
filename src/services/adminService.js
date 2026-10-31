@@ -1,6 +1,12 @@
 import API from "../api/api";
 
 export const getAdminOverview = async () => (await API.get("/admin/overview")).data;
+export const getAdminAccess = async () => (await API.get("/admin/access")).data;
+export const getAdminTeams = async () => (await API.get("/admin/teams")).data;
+export const getAdminTeamEmployees = async () => (await API.get("/admin/team-employees")).data;
+export const createAdminTeam = async (team) => (await API.post("/admin/teams", team)).data;
+export const updateAdminTeam = async (id, team) => (await API.patch(`/admin/teams/${id}`, team)).data;
+export const deleteAdminTeam = async (id) => (await API.delete(`/admin/teams/${id}`)).data;
 export const getAdminUsers = async (params) => (await API.get("/admin/users", { params })).data;
 export const createAdminUser = async (user) => (await API.post("/admin/users", user)).data;
 export const getAdminUserProfile = async (id) => (await API.get(`/admin/users/${id}/profile`)).data;

@@ -4,11 +4,12 @@ import { toast } from "react-toastify";
 import {
   Activity, ArrowDownLeft, ArrowUpRight, Bell, BookOpen, ChevronLeft, ChevronRight,
   CreditCard, FileText, LayoutDashboard, LoaderCircle, LogOut,
-  Eye, Menu, Package, Pencil, Plus, Search, Send, ShieldCheck, ShieldOff, Trash2, Users, UserPlus, Wallet, X,
+  Eye, Menu, Package, Pencil, Plus, Search, Send, ShieldCheck, ShieldOff, Trash2, Users, UserPlus, UsersRound, Wallet, X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import {
   adjustAdminCredits, broadcastAdminNotification, createAdminPlan, createAdminTemplate, deleteAdminPlan, deleteAdminResume, deleteAdminTemplate,
+  createAdminTeam, deleteAdminTeam, getAdminAccess, getAdminTeamEmployees, getAdminTeams, updateAdminTeam,
   getAdminOverview, getAdminPlans, getAdminResumes, getAdminTemplates,
   createAdminUser, getAdminTransactions, getAdminUsers, getAdminNotifications, getAdminUserProfile, setAdminUserRole, setAdminUserStatus, updateAdminPlan, updateAdminResume, updateAdminTemplate, updateAdminUser,
 } from "../services/adminService";
@@ -21,6 +22,7 @@ const navItems = [
   { id: "templates", label: "Templates", icon: BookOpen },
   { id: "plans", label: "Credit plans", icon: Package },
   { id: "notifications", label: "Announcements", icon: Bell },
+  { id: "teams", label: "Teams & access", icon: UsersRound, ownerOnly: true },
 ];
 
 const money = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}`;
@@ -31,6 +33,7 @@ function AdminPanel() {
   const { user, logout } = useAuth();
   const isOwner = String(user?.role || "").toUpperCase() === "OWNER";
   const [section, setSection] = useState("overview");
+  const [accessPermissions, setAccessPermissions] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [overview, setOverview] = useState(null);
   const [rows, setRows] = useState([]);
@@ -97,11 +100,31 @@ function AdminPanel() {
   }, [loadOverview]);
 
   useEffect(() => {
+    let active = true;
+    getAdminAccess().then(({ data }) => {
+      if (!active) return;
+      setAccessPermissions(data.permissions || []);
+      const available = data.permissions || [];
+      setSection((current) => available.includes(current) ? current : available[0] || "no-access");
+    }).catch((error) => {
+      if (!active) return;
+      setAccessPermissions([]);
+      setSection("no-access");
+      toast.error(error?.response?.data?.message || "Could not load your panel access");
+    });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!accessPermissions) return;
+    if (section === "teams" || section === "no-access") return;
+    if (!accessPermissions.includes(section)) return;
     const timer = window.setTimeout(() => loadSection(section, page, search), search ? 250 : 0);
     return () => window.clearTimeout(timer);
-  }, [section, page, search, loadSection]);
+  }, [section, page, search, loadSection, accessPermissions]);
 
-  const title = navItems.find((item) => item.id === section)?.label || "Overview";
+  const title = navItems.find((item) => item.id === section)?.label || (section === "no-access" ? "Access required" : "Overview");
+  const visibleNavItems = navItems.filter((item) => item.ownerOnly ? isOwner : accessPermissions?.includes(item.id));
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const filteredLocalRows = useMemo(() => {
     if (section !== "templates" && section !== "plans") return rows;
@@ -326,7 +349,7 @@ function AdminPanel() {
         </div>
         <div className="px-5 pt-7 pb-2 text-[10px] font-bold uppercase tracking-[.18em] text-slate-500">Workspace</div>
         <nav className="space-y-1 px-3">
-          {navItems.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => selectSection(id)} className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition ${section === id ? "bg-violet-600 text-white shadow-lg shadow-violet-950/30" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}><Icon size={18} /><span>{label}</span></button>)}
+          {visibleNavItems.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => selectSection(id)} className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition ${section === id ? "bg-violet-600 text-white shadow-lg shadow-violet-950/30" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}><Icon size={18} /><span>{label}</span></button>)}
         </nav>
         <div className="mt-auto border-t border-white/10 p-4">
           <div className="mb-4 flex items-center gap-3 rounded-xl bg-white/[.04] p-3"><div className="grid h-9 w-9 place-items-center rounded-full bg-violet-500/20 text-sm font-bold text-violet-200">{(user?.first_name || "A").slice(0, 1).toUpperCase()}</div><div className="min-w-0"><div className="truncate text-sm font-semibold">{nameOf(user)}</div><div className="truncate text-xs text-slate-500">{isOwner ? "Owner" : "Administrator"}</div></div></div>
@@ -344,11 +367,13 @@ function AdminPanel() {
         <div className="mx-auto max-w-[1500px] p-4 md:p-8">
           <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div><p className="text-sm font-medium text-violet-600">{isOwner ? "Owner workspace" : "Admin workspace"}</p><h2 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">{section === "overview" ? "Good to see you, " + (user?.first_name || (isOwner ? "Owner" : "Admin")) : title}</h2><p className="mt-1 text-sm text-slate-500">Manage Touch Simply users, content, and credits.</p></div>
-            {section !== "overview" && <div className="flex w-full gap-2 md:w-auto">{isOwner && section === "users" && <button onClick={() => setAddUserOpen(true)} className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-violet-600 px-3 py-2 text-sm font-semibold text-white hover:bg-violet-700"><UserPlus size={16} />Add user</button>}<label className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm md:w-[320px]"><Search size={17} className="text-slate-400" /><input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder={`Search ${title.toLowerCase()}...`} className="w-full bg-transparent text-sm outline-none" /></label>{section !== "notifications" && <button onClick={exportCurrentPage} className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:border-violet-300 hover:text-violet-700">Export page</button>}</div>}
+            {section !== "overview" && section !== "teams" && section !== "no-access" && <div className="flex w-full gap-2 md:w-auto">{isOwner && section === "users" && <button onClick={() => setAddUserOpen(true)} className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-violet-600 px-3 py-2 text-sm font-semibold text-white hover:bg-violet-700"><UserPlus size={16} />Add user</button>}<label className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm md:w-[320px]"><Search size={17} className="text-slate-400" /><input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder={`Search ${title.toLowerCase()}...`} className="w-full bg-transparent text-sm outline-none" /></label>{section !== "notifications" && <button onClick={exportCurrentPage} className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:border-violet-300 hover:text-violet-700">Export page</button>}</div>}
           </div>
 
           {section === "overview" && <Overview data={overview} loading={loading} onOpen={selectSection} />}
-          {section !== "overview" && loading && <div className="grid min-h-[300px] place-items-center"><LoaderCircle className="animate-spin text-violet-600" size={32} /></div>}
+          {section !== "overview" && section !== "teams" && section !== "no-access" && loading && <div className="grid min-h-[300px] place-items-center"><LoaderCircle className="animate-spin text-violet-600" size={32} /></div>}
+          {section === "teams" && isOwner && <TeamManagement />}
+          {section === "no-access" && <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900">Your account does not currently have access to any admin panel sections. Ask the Owner to add you to a team and grant the access you need.</div>}
           {!loading && section === "users" && <UsersTable rows={rows} busyKey={busyKey} isOwner={isOwner} selfId={user?.id} selfEmail={user?.email} onBlock={handleBlock} onCredits={(person) => setCreditTarget(person)} onEdit={editUser} onRole={changeRole} onView={viewUserProfile} />}
           {!loading && section === "resumes" && <ResumesTable rows={rows} busyKey={busyKey} onDelete={removeResume} onEdit={editResume} />}
           {!loading && section === "transactions" && <TransactionsTable rows={rows} />}
@@ -369,6 +394,64 @@ function AdminPanel() {
       {templateModalOpen && <Modal title={templateTarget ? "Edit template" : "Add template"} onClose={() => { setTemplateModalOpen(false); setTemplateTarget(null); }}><form onSubmit={saveTemplate} className="max-h-[75vh] space-y-3 overflow-y-auto pr-1">{[["title", "Template name", 100], ["type", "Type", 100], ["author_name", "Author", 100], ["short_description", "Short description", 100]].map(([key, label, max]) => <label key={key} className="block text-sm font-medium">{label}<input required maxLength={max} value={templateForm[key]} onChange={(event) => setTemplateForm((form) => ({ ...form, [key]: event.target.value }))} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5" /></label>)}<label className="block text-sm font-medium">Full description<textarea maxLength="20000" rows="3" value={templateForm.long_description} onChange={(event) => setTemplateForm((form) => ({ ...form, long_description: event.target.value }))} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5" /></label>{!templateTarget && <label className="block text-sm font-medium">S3 folder key<input required value={templateForm.s3_key} onChange={(event) => setTemplateForm((form) => ({ ...form, s3_key: event.target.value }))} placeholder="Existing template asset folder in S3" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5" /></label>}<div className="grid grid-cols-2 gap-3"><label className="block text-sm font-medium">Engine<select value={templateForm.engine} onChange={(event) => setTemplateForm((form) => ({ ...form, engine: event.target.value }))} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5"><option value="LATEX">LaTeX</option><option value="XELATEX">XeLaTeX</option></select></label><label className="flex items-center gap-2 pt-6 text-sm"><input type="checkbox" checked={templateForm.simple_mode} onChange={(event) => setTemplateForm((form) => ({ ...form, simple_mode: event.target.checked }))} /> Simple mode</label></div><div className="flex justify-end gap-2 pt-2"><button type="button" onClick={() => { setTemplateModalOpen(false); setTemplateTarget(null); }} className="rounded-xl px-4 py-2 text-sm">Cancel</button><button disabled={busyKey === "template"} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white">Save template</button></div></form></Modal>}
     </div>
   );
+}
+
+function TeamManagement() {
+  const permissionOptions = navItems.filter((item) => !item.ownerOnly).map(({ id, label }) => ({ id, label }));
+  const [teams, setTeams] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [form, setForm] = useState({ name: "", description: "", member_ids: [], permissions: [] });
+  const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [teamResponse, employeeResponse] = await Promise.all([getAdminTeams(), getAdminTeamEmployees()]);
+      setTeams(teamResponse.data?.teams || []);
+      setEmployees(employeeResponse.data || []);
+    } catch (error) { toast.error(error?.response?.data?.message || "Team data load nahi hua"); }
+    finally { setLoading(false); }
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const reset = () => { setEditingId(null); setForm({ name: "", description: "", member_ids: [], permissions: [] }); };
+  const editTeam = (team) => {
+    setEditingId(team.id);
+    setForm({ name: team.name, description: team.description || "", member_ids: team.member_ids || [], permissions: team.permissions || [] });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  const toggle = (key, value) => setForm((current) => ({ ...current, [key]: current[key].includes(value) ? current[key].filter((item) => item !== value) : [...current[key], value] }));
+  const save = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    try {
+      if (editingId) await updateAdminTeam(editingId, form);
+      else await createAdminTeam(form);
+      toast.success(editingId ? "Team access updated" : "Team created and access assigned");
+      reset();
+      await load();
+    } catch (error) { toast.error(error?.response?.data?.message || "Team save nahi hui"); }
+    finally { setSaving(false); }
+  };
+  const remove = async (team) => {
+    if (!window.confirm(`Delete team “${team.name}”? Its panel access will be revoked.`)) return;
+    try { await deleteAdminTeam(team.id); toast.success("Team deleted and access revoked"); await load(); if (editingId === team.id) reset(); }
+    catch (error) { toast.error(error?.response?.data?.message || "Team delete nahi hui"); }
+  };
+
+  return <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+    <form onSubmit={save} className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+      <div><p className="text-xs font-semibold uppercase tracking-wide text-violet-600">Owner controls</p><h3 className="mt-1 text-xl font-bold">{editingId ? "Edit team access" : "Create a team"}</h3><p className="mt-1 text-sm text-slate-500">Employees see only the panel sections selected below. Access is also enforced on the backend.</p></div>
+      <label className="block text-sm font-medium">Team name<input required maxLength="100" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5" placeholder="e.g. Content team" /></label>
+      <label className="block text-sm font-medium">Description <span className="font-normal text-slate-400">(optional)</span><textarea maxLength="500" rows="2" value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5" placeholder="What this team is responsible for" /></label>
+      <fieldset><legend className="mb-2 text-sm font-semibold">Panel sections this team can access</legend><div className="grid gap-2 sm:grid-cols-2">{permissionOptions.map(({ id, label }) => <label key={id} className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-100 p-2.5 text-sm hover:bg-violet-50"><input type="checkbox" checked={form.permissions.includes(id)} onChange={() => toggle("permissions", id)} className="accent-violet-600" />{label}</label>)}</div></fieldset>
+      <fieldset><legend className="mb-2 text-sm font-semibold">Add employee admins</legend>{employees.length ? <div className="max-h-52 space-y-1 overflow-y-auto rounded-xl border border-slate-200 p-2">{employees.map((employee) => <label key={employee.id} className={`flex cursor-pointer items-center gap-3 rounded-lg p-2 text-sm hover:bg-slate-50 ${employee.is_blocked ? "opacity-50" : ""}`}><input type="checkbox" disabled={employee.is_blocked} checked={form.member_ids.includes(employee.id)} onChange={() => toggle("member_ids", employee.id)} className="accent-violet-600" /><span><span className="block font-medium">{nameOf(employee)}</span><span className="block text-xs text-slate-500">{employee.email}{employee.is_blocked ? " · Blocked" : ""}</span></span></label>)}</div> : <p className="rounded-xl bg-slate-50 p-3 text-sm text-slate-500">No employee Admin accounts yet. Create an account from Users and give it ADMIN access first.</p>}</fieldset>
+      <div className="flex justify-end gap-2">{editingId && <button type="button" onClick={reset} className="rounded-xl px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100">Cancel</button>}<button disabled={saving} className="rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{saving ? "Saving..." : editingId ? "Save team access" : "Create team"}</button></div>
+    </form>
+    <section className="space-y-3"><div className="flex items-center justify-between"><h3 className="text-xl font-bold">Teams</h3><button onClick={load} className="text-sm font-semibold text-violet-700">Refresh</button></div>{loading ? <div className="grid min-h-40 place-items-center"><LoaderCircle className="animate-spin text-violet-600" /></div> : teams.length ? teams.map((team) => <article key={team.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-start justify-between gap-4"><div><h4 className="font-bold">{team.name}</h4>{team.description && <p className="mt-1 text-sm text-slate-500">{team.description}</p>}</div><div className="flex gap-1"><button onClick={() => editTeam(team)} className="rounded-lg px-3 py-2 text-sm font-semibold text-violet-700 hover:bg-violet-50">Edit</button><button onClick={() => remove(team)} className="rounded-lg p-2 text-rose-600 hover:bg-rose-50" aria-label={`Delete ${team.name}`}><Trash2 size={16} /></button></div></div><p className="mt-4 text-xs font-semibold uppercase text-slate-400">Members · {team.members?.length || 0}</p><div className="mt-1 text-sm text-slate-700">{team.members?.length ? team.members.map((member) => member.email).join(", ") : "No employees assigned"}</div><p className="mt-4 text-xs font-semibold uppercase text-slate-400">Granted sections</p><div className="mt-2 flex flex-wrap gap-1.5">{(team.permissions || []).length ? team.permissions.map((permission) => <span key={permission} className="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700">{permissionOptions.find((item) => item.id === permission)?.label || permission}</span>) : <span className="text-sm text-slate-500">No sections granted</span>}</div></article>) : <div className="rounded-2xl border border-dashed border-slate-300 p-6 text-sm text-slate-500">No teams yet. Create a team and assign employees and panel sections.</div>}</section>
+  </div>;
 }
 
 function Overview({ data, loading, onOpen }) {
@@ -405,7 +488,7 @@ function UsersTable({ rows, busyKey, isOwner, selfId, selfEmail, onBlock, onCred
         <td className="px-5 py-4"><div className="flex items-center gap-3"><Avatar label={nameOf(person)} /><div><div className="flex items-center gap-2"><p className="font-semibold">{nameOf(person)}</p>{isSelf && <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700">You</span>}</div><p className="text-xs text-slate-500">{person.email}</p></div></div></td>
         <td className="px-5 py-4">{canChangeRole ? <select disabled={busyKey === `user-${person.id}`} aria-label={`Role for ${person.email}`} value={person.role} onChange={(event) => onRole(person, event.target.value)} className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"><option value="USER">USER</option><option value="ADMIN">ADMIN</option></select> : <span className={`inline-flex rounded-lg border px-3 py-1.5 text-xs font-semibold ${isProtectedOwner ? "border-violet-200 bg-violet-50 text-violet-700" : "border-slate-200 bg-slate-100 text-slate-600"}`}>{isProtectedOwner ? "OWNER" : person.role}</span>}</td>
         <td className="px-5 py-4 font-medium">{Number(person.wallet_balance || 0).toLocaleString()} cr</td><td className="px-5 py-4 text-slate-500">{date(person.created_at)}</td><td className="px-5 py-4"><Status blocked={person.is_blocked} /></td>
-        <td className="px-5 py-4"><div className="flex items-center gap-2">{isOwner && <button disabled={busyKey === `profile-${person.id}`} title="View full profile" onClick={() => onView(person)} className="rounded-lg p-2 text-violet-600 hover:bg-violet-50"><Eye size={16} /></button>}{!isSelf && !isProtectedOwner && <><button title="Edit profile" onClick={() => onEdit(person)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><Pencil size={16} /></button><button onClick={() => onCredits(person)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:border-violet-300 hover:text-violet-700">Credits</button><button disabled={busyKey === `user-${person.id}`} title={person.is_blocked ? "Unblock" : "Block"} onClick={() => onBlock(person)} className={`rounded-lg p-2 ${person.is_blocked ? "text-emerald-600 hover:bg-emerald-50" : "text-rose-500 hover:bg-rose-50"}`}>{person.is_blocked ? <ShieldCheck size={17} /> : <ShieldOff size={17} />}</button></>}{!isOwner && isSelf && <span className="text-xs text-slate-400">Current account</span>}{!isOwner && isProtectedOwner && <span className="text-xs text-slate-400">Protected owner</span>}</div></td>
+        <td className="px-5 py-4"><div className="flex items-center gap-2"><button disabled={busyKey === `profile-${person.id}`} title="View full profile" onClick={() => onView(person)} className="rounded-lg p-2 text-violet-600 hover:bg-violet-50"><Eye size={16} /></button>{!isSelf && !isProtectedOwner && <><button title="Edit profile" onClick={() => onEdit(person)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><Pencil size={16} /></button><button onClick={() => onCredits(person)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:border-violet-300 hover:text-violet-700">Credits</button><button disabled={busyKey === `user-${person.id}`} title={person.is_blocked ? "Unblock" : "Block"} onClick={() => onBlock(person)} className={`rounded-lg p-2 ${person.is_blocked ? "text-emerald-600 hover:bg-emerald-50" : "text-rose-500 hover:bg-rose-50"}`}>{person.is_blocked ? <ShieldCheck size={17} /> : <ShieldOff size={17} />}</button></>}{!isOwner && isSelf && <span className="text-xs text-slate-400">Current account</span>}{!isOwner && isProtectedOwner && <span className="text-xs text-slate-400">Protected owner</span>}</div></td>
       </tr>;
     })}
   </DataTable>;
