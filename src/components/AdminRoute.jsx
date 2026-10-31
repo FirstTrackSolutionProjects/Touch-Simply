@@ -6,7 +6,7 @@ const AdminRoute = ({ children }) => {
 
   if (authLoading) return <div>Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
-  if (String(user.role || "").toUpperCase() !== "ADMIN") {
+  if (!["ADMIN", "OWNER"].includes(String(user.role || "").toUpperCase())) {
     return <Navigate to="/dashboard" replace />;
   }
 

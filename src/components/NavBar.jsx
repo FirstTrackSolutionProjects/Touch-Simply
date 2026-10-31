@@ -23,6 +23,8 @@ const NavBar = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const location = useLocation();
   const { user, authLoading } = useAuth();
+  const hasAdminAccess = ["ADMIN", "OWNER"].includes(String(user?.role || "").toUpperCase());
+  const adminLinkLabel = String(user?.role || "").toUpperCase() === "OWNER" ? "Owner panel" : "Admin";
 
   useEffect(() => {
     const refresh = async () => {
@@ -100,12 +102,12 @@ const NavBar = () => {
             {/* User Avatar / Credits / Create */}
             {user ? (
               <div className="flex items-center gap-3">
-                {user.role === "ADMIN" && (
+                {hasAdminAccess && (
                   <Link
                     to="/admin/dashboard"
                     className="hidden lg:flex items-center gap-1.5 text-sm text-white/90 hover:text-white"
                   >
-                    <ShieldCheck size={16} /> Admin
+                    <ShieldCheck size={16} /> {adminLinkLabel}
                   </Link>
                 )}
                 {/* Credits badge - clickable to buy credits */}
@@ -218,13 +220,13 @@ const NavBar = () => {
 
           {user ? (
             <>
-              {user.role === "ADMIN" && (
+              {hasAdminAccess && (
                 <Link
                   to="/admin/dashboard"
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-900/50 text-purple-100 hover:bg-purple-800/60"
                 >
-                  <ShieldCheck size={16} /> Admin panel
+                  <ShieldCheck size={16} /> {adminLinkLabel}
                 </Link>
               )}
               <Link
