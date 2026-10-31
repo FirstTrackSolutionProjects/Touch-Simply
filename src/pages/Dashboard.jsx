@@ -13,6 +13,7 @@ import {
   FolderOpen,
   LogOut,
   User,
+  UserRound,
   Home,
   Layers3,
   Wand2,
@@ -221,6 +222,9 @@ const Dashboard = () => {
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-[0.2em] px-3 mb-3">Account</p>
               <div className="space-y-3">
+                <Link to="/profile" className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition">
+                  <UserRound size={20} /> My profile
+                </Link>
                 <Link to="/settings" className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition">
                   <Settings size={20} /> Settings
                 </Link>
@@ -319,6 +323,9 @@ const Dashboard = () => {
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-[0.2em] px-3 mb-3">Account</p>
               <div className="space-y-3">
+                <Link to="/profile" className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition">
+                  <UserRound size={20} /> My profile
+                </Link>
                 <Link to="/settings" className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white/5 transition">
                   <Settings size={20} /> Settings
                 </Link>

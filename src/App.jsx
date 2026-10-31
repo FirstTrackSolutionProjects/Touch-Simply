@@ -28,6 +28,7 @@ import ChatBox from "./pages/ChatBox";
 import Dashboard from "./pages/Dashboard";
 import AdminPanel from "./pages/AdminPanel";
 import AccountSecurity from "./pages/AccountSecurity";
+import MyProfile from "./pages/MyProfile";
 import BuyCredits from "./pages/BuyCredits";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -81,6 +82,7 @@ function App() {
         <Route path="/login" element={<LogIn />} />
         <Route path="/register" element={<Register />} />
         <Route path="/settings" element={<ProtectedRoute><AccountSecurity /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><MyProfile /></ProtectedRoute>} />
         <Route path="/about" element={<About />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
