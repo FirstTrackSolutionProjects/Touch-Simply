@@ -1,4 +1,4 @@
-// Touch-Simply/src/App.jsx
+﻿// Touch-Simply/src/App.jsx
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Routes, Route } from "react-router-dom";
@@ -26,13 +26,13 @@ import DataSecurity from "./pages/DataSecurity";
 import LegalPolicy from "./pages/LegalPolicy";
 import ChatBox from "./pages/ChatBox";
 import Dashboard from "./pages/Dashboard";
-import AdminPanel from "./pages/AdminPanel";
+import AdminPanel from "./admin/AdminPanel";
 import AccountSecurity from "./pages/AccountSecurity";
 import MyProfile from "./pages/MyProfile";
 import BuyCredits from "./pages/BuyCredits";
 import TransactionHistory from "./pages/TransactionHistory";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AdminRoute from "./components/AdminRoute";
+import AdminRoute from "./admin/AdminRoute";
 import { ToastContainer } from "react-toastify";
 
 function App() {
@@ -129,3 +129,4 @@ function App() {
 }
 
 export default App;
+
