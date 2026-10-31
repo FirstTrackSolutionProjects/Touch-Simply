@@ -92,7 +92,7 @@ function AdminPanel() {
         setTotal(response.data?.length || 0);
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Admin data load nahi ho paya");
+      toast.error(error?.response?.data?.message || "Could not load admin data");
       setRows([]);
     } finally {
       setLoading(false);
@@ -144,7 +144,7 @@ function AdminPanel() {
 
   const exportCurrentPage = () => {
     const data = ["templates", "plans"].includes(section) ? filteredLocalRows : rows;
-    if (!data.length) return toast.info("Export karne ke liye data nahi hai");
+    if (!data.length) return toast.info("No data available to export");
     const keys = Object.keys(data[0]);
     const csv = [keys.join(","), ...data.map((row) => keys.map((key) => `"${String(row[key] ?? "").replaceAll('"', '""')}"`).join(","))].join("\r\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
@@ -157,14 +157,14 @@ function AdminPanel() {
 
   const handleBlock = async (person) => {
     const action = person.is_blocked ? "unblock" : "block";
-    if (!window.confirm(`${nameOf(person)} ko ${action} karna hai?`)) return;
+    if (!window.confirm(`${action === "block" ? "Block" : "Unblock"} ${nameOf(person)}?`)) return;
     setBusyKey(`user-${person.id}`);
     try {
       await setAdminUserStatus(person.id, !person.is_blocked);
       toast.success(person.is_blocked ? "User unblocked" : "User blocked");
       await refresh();
     } catch (error) {
-      toast.error(error?.response?.data?.message || "User status update nahi hua");
+      toast.error(error?.response?.data?.message || "Could not update user status");
     } finally { setBusyKey(""); }
   };
 
@@ -199,7 +199,7 @@ function AdminPanel() {
       toast.success("User profile updated");
       setUserTarget(null);
       await refresh();
-    } catch (error) { toast.error(error?.response?.data?.message || "Profile update nahi hua"); }
+    } catch (error) { toast.error(error?.response?.data?.message || "Could not update profile"); }
     finally { setBusyKey(""); }
   };
 
@@ -217,13 +217,13 @@ function AdminPanel() {
   };
 
   const changeRole = async (person, role) => {
-    if (role === person.role || !window.confirm(`${nameOf(person)} ka role ${role} karna hai?`)) return;
+    if (role === person.role || !window.confirm(`Change ${nameOf(person)}'s role to ${role}?`)) return;
     setBusyKey(`user-${person.id}`);
     try {
       await setAdminUserRole(person.id, role);
       toast.success("User role updated");
       await refresh();
-    } catch (error) { toast.error(error?.response?.data?.message || "Role change nahi hua"); }
+    } catch (error) { toast.error(error?.response?.data?.message || "Could not change user role"); }
     finally { setBusyKey(""); }
   };
 
@@ -234,23 +234,23 @@ function AdminPanel() {
     try {
       const amount = Number(creditForm.amount);
       await adjustAdminCredits(creditTarget.id, creditForm.operation, amount);
-      toast.success("Wallet update ho gaya");
+      toast.success("Wallet updated");
       setCreditTarget(null);
       setCreditForm({ operation: "CREDIT", amount: "" });
       await refresh();
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Wallet update nahi hua");
+      toast.error(error?.response?.data?.message || "Could not update wallet");
     } finally { setBusyKey(""); }
   };
 
   const removeResume = async (resume) => {
-    if (!window.confirm(`“${resume.title}” resume permanently delete karna hai?`)) return;
+    if (!window.confirm(`Permanently delete the resume “${resume.title}”?`)) return;
     setBusyKey(`resume-${resume.id}`);
     try {
       await deleteAdminResume(resume.id);
-      toast.success("Resume delete ho gaya");
+      toast.success("Resume deleted");
       await refresh();
-    } catch (error) { toast.error(error?.response?.data?.message || "Resume delete nahi hua"); }
+    } catch (error) { toast.error(error?.response?.data?.message || "Could not delete resume"); }
     finally { setBusyKey(""); }
   };
 
@@ -268,7 +268,7 @@ function AdminPanel() {
       toast.success("Resume details updated");
       setResumeTarget(null);
       await refresh();
-    } catch (error) { toast.error(error?.response?.data?.message || "Resume update nahi hua"); }
+    } catch (error) { toast.error(error?.response?.data?.message || "Could not update resume"); }
     finally { setBusyKey(""); }
   };
 
@@ -290,14 +290,14 @@ function AdminPanel() {
       setTemplateTarget(null);
       setTemplateModalOpen(false);
       await refresh();
-    } catch (error) { toast.error(error?.response?.data?.message || "Template save nahi hua"); }
+    } catch (error) { toast.error(error?.response?.data?.message || "Could not save template"); }
     finally { setBusyKey(""); }
   };
 
   const removeTemplate = async (template) => {
-    if (!window.confirm(`“${template.title}” template delete karna hai?`)) return;
+    if (!window.confirm(`Delete the template “${template.title}”?`)) return;
     try { await deleteAdminTemplate(template.id); toast.success("Template deleted"); await refresh(); }
-    catch (error) { toast.error(error?.response?.data?.message || "Template delete nahi hua; ho sakta hai koi resume ise use kar raha ho"); }
+    catch (error) { toast.error(error?.response?.data?.message || "Could not delete template. It may be used by a saved resume."); }
   };
 
   const sendAnnouncement = async (event) => {
@@ -305,10 +305,10 @@ function AdminPanel() {
     setBusyKey("announcement");
     try {
       const response = await broadcastAdminNotification(noticeForm);
-      toast.success(`Announcement ${response.data?.recipientCount ?? 0} users ko bheja`);
+      toast.success(`Announcement sent to ${response.data?.recipientCount ?? 0} users`);
       setNoticeForm({ title: "", message: "" });
       await refresh();
-    } catch (error) { toast.error(error?.response?.data?.message || "Announcement nahi bheja ja saka"); }
+    } catch (error) { toast.error(error?.response?.data?.message || "Could not send announcement"); }
     finally { setBusyKey(""); }
   };
 
@@ -325,18 +325,18 @@ function AdminPanel() {
     try {
       if (planTarget) await updateAdminPlan(planTarget.id, payload);
       else await createAdminPlan(payload);
-      toast.success(planTarget ? "Plan update ho gaya" : "Plan create ho gaya");
+      toast.success(planTarget ? "Plan updated" : "Plan created");
       setPlanTarget(null);
       setPlanModalOpen(false);
       await refresh();
-    } catch (error) { toast.error(error?.response?.data?.message || "Plan save nahi hua"); }
+    } catch (error) { toast.error(error?.response?.data?.message || "Could not save plan"); }
     finally { setBusyKey(""); }
   };
 
   const removePlan = async (plan) => {
-    if (!window.confirm(`“${plan.title}” plan delete karna hai?`)) return;
-    try { await deleteAdminPlan(plan.id); toast.success("Plan delete ho gaya"); await refresh(); }
-    catch (error) { toast.error(error?.response?.data?.message || "Plan delete nahi hua"); }
+    if (!window.confirm(`Delete the plan “${plan.title}”?`)) return;
+    try { await deleteAdminPlan(plan.id); toast.success("Plan deleted"); await refresh(); }
+    catch (error) { toast.error(error?.response?.data?.message || "Could not delete plan"); }
   };
 
   return (
@@ -411,7 +411,7 @@ function TeamManagement() {
       const [teamResponse, employeeResponse] = await Promise.all([getAdminTeams(), getAdminTeamEmployees()]);
       setTeams(teamResponse.data?.teams || []);
       setEmployees(employeeResponse.data || []);
-    } catch (error) { toast.error(error?.response?.data?.message || "Team data load nahi hua"); }
+    } catch (error) { toast.error(error?.response?.data?.message || "Could not load team data"); }
     finally { setLoading(false); }
   }, []);
   useEffect(() => { load(); }, [load]);
@@ -432,13 +432,13 @@ function TeamManagement() {
       toast.success(editingId ? "Team access updated" : "Team created and access assigned");
       reset();
       await load();
-    } catch (error) { toast.error(error?.response?.data?.message || "Team save nahi hui"); }
+    } catch (error) { toast.error(error?.response?.data?.message || "Could not save team"); }
     finally { setSaving(false); }
   };
   const remove = async (team) => {
     if (!window.confirm(`Delete team “${team.name}”? Its panel access will be revoked.`)) return;
     try { await deleteAdminTeam(team.id); toast.success("Team deleted and access revoked"); await load(); if (editingId === team.id) reset(); }
-    catch (error) { toast.error(error?.response?.data?.message || "Team delete nahi hui"); }
+    catch (error) { toast.error(error?.response?.data?.message || "Could not delete team"); }
   };
 
   return <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
