@@ -243,7 +243,7 @@ function TeamManagement() {
 
       {/* ---------------- RIGHT: PREVIEW + TEAMS ---------------- */}
       <div className="space-y-6">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-500 via-violet-600 to-violet-700 p-6 text-white shadow-xl shadow-violet-200">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-500 via-violet-600 to-violet-700 p-6 text-white">
           <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10" />
           <div className="pointer-events-none absolute -bottom-14 -left-8 h-36 w-36 rounded-full bg-white/10" />
           <div className="relative">
