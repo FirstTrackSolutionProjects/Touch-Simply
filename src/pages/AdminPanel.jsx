@@ -4,13 +4,13 @@ import { toast } from "react-toastify";
 import {
   Activity, ArrowDownLeft, ArrowUpRight, Bell, BookOpen, ChevronLeft, ChevronRight,
   CreditCard, FileText, LayoutDashboard, LoaderCircle, LogOut,
-  Menu, Package, Pencil, Plus, Search, Send, ShieldCheck, ShieldOff, Trash2, Users, Wallet, X,
+  Eye, Menu, Package, Pencil, Plus, Search, Send, ShieldCheck, ShieldOff, Trash2, Users, UserPlus, Wallet, X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import {
   adjustAdminCredits, broadcastAdminNotification, createAdminPlan, createAdminTemplate, deleteAdminPlan, deleteAdminResume, deleteAdminTemplate,
   getAdminOverview, getAdminPlans, getAdminResumes, getAdminTemplates,
-  getAdminTransactions, getAdminUsers, getAdminNotifications, setAdminUserRole, setAdminUserStatus, updateAdminPlan, updateAdminResume, updateAdminTemplate, updateAdminUser,
+  createAdminUser, getAdminTransactions, getAdminUsers, getAdminNotifications, getAdminUserProfile, setAdminUserRole, setAdminUserStatus, updateAdminPlan, updateAdminResume, updateAdminTemplate, updateAdminUser,
 } from "../services/adminService";
 
 const navItems = [
@@ -45,7 +45,10 @@ function AdminPanel() {
   const [planModalOpen, setPlanModalOpen] = useState(false);
   const [planForm, setPlanForm] = useState({ title: "", coins: "", cost: "" });
   const [userTarget, setUserTarget] = useState(null);
-  const [userForm, setUserForm] = useState({ first_name: "", middle_name: "", last_name: "" });
+  const [userForm, setUserForm] = useState({ first_name: "", middle_name: "", last_name: "", phone: "" });
+  const [addUserOpen, setAddUserOpen] = useState(false);
+  const [newUserForm, setNewUserForm] = useState({ first_name: "", middle_name: "", last_name: "", email: "", phone: "", role: "USER" });
+  const [profileTarget, setProfileTarget] = useState(null);
   const [resumeTarget, setResumeTarget] = useState(null);
   const [resumeForm, setResumeForm] = useState({ title: "", description: "" });
   const [templateTarget, setTemplateTarget] = useState(null);
@@ -142,9 +145,25 @@ function AdminPanel() {
     } finally { setBusyKey(""); }
   };
 
-  const editUser = (person) => {
-    setUserTarget(person);
-    setUserForm({ first_name: person.first_name || "", middle_name: person.middle_name || "", last_name: person.last_name || "" });
+  const editUser = async (person) => {
+    let target = person;
+    if (isOwner && person.phone === undefined) {
+      setBusyKey(`profile-${person.id}`);
+      try { target = (await getAdminUserProfile(person.id)).data; }
+      catch (error) { toast.error(error?.response?.data?.message || "Could not load profile for editing"); return; }
+      finally { setBusyKey(""); }
+    }
+    setUserTarget(target);
+    setUserForm({ first_name: target.first_name || "", middle_name: target.middle_name || "", last_name: target.last_name || "", phone: target.phone || "" });
+  };
+
+  const viewUserProfile = async (person) => {
+    setBusyKey(`profile-${person.id}`);
+    try {
+      const response = await getAdminUserProfile(person.id);
+      setProfileTarget(response.data);
+    } catch (error) { toast.error(error?.response?.data?.message || "Could not load user profile"); }
+    finally { setBusyKey(""); }
   };
 
   const saveUser = async (event) => {
@@ -152,11 +171,25 @@ function AdminPanel() {
     if (!userTarget) return;
     setBusyKey("user-edit");
     try {
-      await updateAdminUser(userTarget.id, userForm);
+      const payload = isOwner ? userForm : { first_name: userForm.first_name, middle_name: userForm.middle_name, last_name: userForm.last_name };
+      await updateAdminUser(userTarget.id, payload);
       toast.success("User profile updated");
       setUserTarget(null);
       await refresh();
     } catch (error) { toast.error(error?.response?.data?.message || "Profile update nahi hua"); }
+    finally { setBusyKey(""); }
+  };
+
+  const submitNewUser = async (event) => {
+    event.preventDefault();
+    setBusyKey("user-create");
+    try {
+      await createAdminUser({ ...newUserForm, email: newUserForm.email.trim().toLowerCase() });
+      toast.success("Account created. User can sign in with Google using this email.");
+      setNewUserForm({ first_name: "", middle_name: "", last_name: "", email: "", phone: "", role: "USER" });
+      setAddUserOpen(false);
+      await refresh();
+    } catch (error) { toast.error(error?.response?.data?.message || "Could not create account"); }
     finally { setBusyKey(""); }
   };
 
@@ -311,12 +344,12 @@ function AdminPanel() {
         <div className="mx-auto max-w-[1500px] p-4 md:p-8">
           <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div><p className="text-sm font-medium text-violet-600">{isOwner ? "Owner workspace" : "Admin workspace"}</p><h2 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">{section === "overview" ? "Good to see you, " + (user?.first_name || (isOwner ? "Owner" : "Admin")) : title}</h2><p className="mt-1 text-sm text-slate-500">Manage Touch Simply users, content, and credits.</p></div>
-            {section !== "overview" && <div className="flex w-full gap-2 md:w-auto"><label className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm md:w-[320px]"><Search size={17} className="text-slate-400" /><input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder={`Search ${title.toLowerCase()}...`} className="w-full bg-transparent text-sm outline-none" /></label>{section !== "notifications" && <button onClick={exportCurrentPage} className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:border-violet-300 hover:text-violet-700">Export page</button>}</div>}
+            {section !== "overview" && <div className="flex w-full gap-2 md:w-auto">{isOwner && section === "users" && <button onClick={() => setAddUserOpen(true)} className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-violet-600 px-3 py-2 text-sm font-semibold text-white hover:bg-violet-700"><UserPlus size={16} />Add user</button>}<label className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm md:w-[320px]"><Search size={17} className="text-slate-400" /><input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder={`Search ${title.toLowerCase()}...`} className="w-full bg-transparent text-sm outline-none" /></label>{section !== "notifications" && <button onClick={exportCurrentPage} className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:border-violet-300 hover:text-violet-700">Export page</button>}</div>}
           </div>
 
           {section === "overview" && <Overview data={overview} loading={loading} onOpen={selectSection} />}
           {section !== "overview" && loading && <div className="grid min-h-[300px] place-items-center"><LoaderCircle className="animate-spin text-violet-600" size={32} /></div>}
-          {!loading && section === "users" && <UsersTable rows={rows} busyKey={busyKey} isOwner={isOwner} selfId={user?.id} selfEmail={user?.email} onBlock={handleBlock} onCredits={(person) => setCreditTarget(person)} onEdit={editUser} onRole={changeRole} />}
+          {!loading && section === "users" && <UsersTable rows={rows} busyKey={busyKey} isOwner={isOwner} selfId={user?.id} selfEmail={user?.email} onBlock={handleBlock} onCredits={(person) => setCreditTarget(person)} onEdit={editUser} onRole={changeRole} onView={viewUserProfile} />}
           {!loading && section === "resumes" && <ResumesTable rows={rows} busyKey={busyKey} onDelete={removeResume} onEdit={editResume} />}
           {!loading && section === "transactions" && <TransactionsTable rows={rows} />}
           {!loading && section === "templates" && <TemplatesTable rows={filteredLocalRows} onAdd={() => editTemplate()} onEdit={editTemplate} onDelete={removeTemplate} />}
@@ -329,7 +362,9 @@ function AdminPanel() {
 
       {creditTarget && <Modal title={`Adjust credits · ${nameOf(creditTarget)}`} onClose={() => setCreditTarget(null)}><form onSubmit={submitCreditAdjustment} className="space-y-4"><p className="text-sm text-slate-500">Current balance: <b className="text-slate-800">{Number(creditTarget.wallet_balance || 0).toLocaleString()} credits</b></p><label className="block text-sm font-medium">Action<select value={creditForm.operation} onChange={(event) => setCreditForm((form) => ({ ...form, operation: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5"><option value="CREDIT">Add credits</option><option value="DEBIT">Deduct credits</option></select></label><label className="block text-sm font-medium">Credits<input required min="1" max="1000000" type="number" step="1" value={creditForm.amount} onChange={(event) => setCreditForm((form) => ({ ...form, amount: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5" placeholder="e.g. 10" /></label><div className="flex justify-end gap-2 pt-2"><button type="button" onClick={() => setCreditTarget(null)} className="rounded-xl px-4 py-2 text-sm text-slate-600 hover:bg-slate-100">Cancel</button><button disabled={busyKey === "credit"} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{busyKey === "credit" ? "Saving…" : "Confirm adjustment"}</button></div></form></Modal>}
       {planModalOpen && <Modal title={planTarget ? "Edit credit plan" : "Create credit plan"} onClose={() => { setPlanModalOpen(false); setPlanTarget(null); }}><form onSubmit={submitPlan} className="space-y-4"><label className="block text-sm font-medium">Plan name<input required maxLength="100" value={planForm.title} onChange={(event) => setPlanForm((form) => ({ ...form, title: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5" placeholder="Starter" /></label><div className="grid grid-cols-2 gap-3"><label className="block text-sm font-medium">Credits<input required type="number" min="1" step="1" value={planForm.coins} onChange={(event) => setPlanForm((form) => ({ ...form, coins: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5" /></label><label className="block text-sm font-medium">Price (INR)<input required type="number" min="0" step="1" value={planForm.cost} onChange={(event) => setPlanForm((form) => ({ ...form, cost: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5" /></label></div><div className="flex justify-end gap-2 pt-2"><button type="button" onClick={() => { setPlanModalOpen(false); setPlanTarget(null); }} className="rounded-xl px-4 py-2 text-sm text-slate-600 hover:bg-slate-100">Cancel</button><button disabled={busyKey === "plan"} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{busyKey === "plan" ? "Saving…" : "Save plan"}</button></div></form></Modal>}
-      {userTarget && <Modal title={`Edit user · ${userTarget.email}`} onClose={() => setUserTarget(null)}><form onSubmit={saveUser} className="space-y-4">{[["first_name", "First name"], ["middle_name", "Middle name"], ["last_name", "Last name"]].map(([key, label]) => <label key={key} className="block text-sm font-medium">{label}<input required={key !== "middle_name"} maxLength="100" value={userForm[key]} onChange={(event) => setUserForm((form) => ({ ...form, [key]: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5" /></label>)}<div className="flex justify-end gap-2"><button type="button" onClick={() => setUserTarget(null)} className="rounded-xl px-4 py-2 text-sm">Cancel</button><button disabled={busyKey === "user-edit"} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white">Save user</button></div></form></Modal>}
+      {addUserOpen && <Modal title="Add user account" onClose={() => setAddUserOpen(false)}><form onSubmit={submitNewUser} className="max-h-[75vh] space-y-4 overflow-y-auto pr-1"><p className="rounded-xl bg-blue-50 p-3 text-sm leading-5 text-blue-900">The account will be created without a password. The user can sign in with Google using this email, then set an account password in Security settings.</p>{[["first_name", "First name", true], ["middle_name", "Middle name", false], ["last_name", "Last name", true], ["email", "Email address", true], ["phone", "Phone number (optional)", false]].map(([key, label, required]) => <label key={key} className="block text-sm font-medium">{label}<input required={required} type={key === "email" ? "email" : key === "phone" ? "tel" : "text"} maxLength={key === "email" ? 255 : key === "phone" ? 20 : 100} value={newUserForm[key]} onChange={(event) => setNewUserForm((form) => ({ ...form, [key]: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5" /></label>)}<label className="block text-sm font-medium">Access role<select value={newUserForm.role} onChange={(event) => setNewUserForm((form) => ({ ...form, role: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5"><option value="USER">USER</option><option value="ADMIN">ADMIN</option></select></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setAddUserOpen(false)} className="rounded-xl px-4 py-2 text-sm">Cancel</button><button disabled={busyKey === "user-create"} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{busyKey === "user-create" ? "Creating..." : "Create account"}</button></div></form></Modal>}
+      {profileTarget && <Modal title="User profile" onClose={() => setProfileTarget(null)}><div className="max-h-[75vh] space-y-4 overflow-y-auto"><div className="flex items-center gap-4">{profileTarget.avatar_url ? <img src={profileTarget.avatar_url} alt="" className="h-16 w-16 rounded-full object-cover" /> : <Avatar label={nameOf(profileTarget)} />}<div><p className="text-lg font-bold">{nameOf(profileTarget)}</p><p className="text-sm text-slate-500">{profileTarget.email}</p></div></div><div className="grid gap-3 rounded-xl bg-slate-50 p-4 text-sm sm:grid-cols-2"><ProfileDetail label="Role" value={profileTarget.role} /><ProfileDetail label="Phone" value={profileTarget.phone || "Not provided"} /><ProfileDetail label="Status" value={profileTarget.is_blocked ? "Blocked" : "Active"} /><ProfileDetail label="Sign-in method" value={profileTarget.sign_in_method} /><ProfileDetail label="Joined" value={date(profileTarget.created_at)} /><ProfileDetail label="Wallet" value={`${Number(profileTarget.wallet_balance || 0).toLocaleString()} credits`} /></div><div className="flex justify-end gap-2"><button onClick={() => setProfileTarget(null)} className="rounded-xl px-4 py-2 text-sm">Close</button>{profileTarget.role !== "OWNER" && profileTarget.id !== user?.id && <button onClick={() => { editUser(profileTarget); setProfileTarget(null); }} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white">Edit profile</button>}</div></div></Modal>}
+      {userTarget && <Modal title={`Edit user · ${userTarget.email}`} onClose={() => setUserTarget(null)}><form onSubmit={saveUser} className="space-y-4">{[["first_name", "First name"], ["middle_name", "Middle name"], ["last_name", "Last name"]].map(([key, label]) => <label key={key} className="block text-sm font-medium">{label}<input required={key !== "middle_name"} maxLength="100" value={userForm[key]} onChange={(event) => setUserForm((form) => ({ ...form, [key]: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5" /></label>)}{isOwner && <label className="block text-sm font-medium">Phone number<input type="tel" maxLength="20" value={userForm.phone} onChange={(event) => setUserForm((form) => ({ ...form, phone: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5" placeholder="Optional" /></label>}<div className="flex justify-end gap-2"><button type="button" onClick={() => setUserTarget(null)} className="rounded-xl px-4 py-2 text-sm">Cancel</button><button disabled={busyKey === "user-edit"} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white">Save user</button></div></form></Modal>}
       {resumeTarget && <Modal title="Edit resume details" onClose={() => setResumeTarget(null)}><form onSubmit={saveResume} className="space-y-4"><label className="block text-sm font-medium">Title<input required maxLength="100" value={resumeForm.title} onChange={(event) => setResumeForm((form) => ({ ...form, title: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5" /></label><label className="block text-sm font-medium">Description<textarea maxLength="255" rows="3" value={resumeForm.description} onChange={(event) => setResumeForm((form) => ({ ...form, description: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5" /></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setResumeTarget(null)} className="rounded-xl px-4 py-2 text-sm">Cancel</button><button disabled={busyKey === `resume-${resumeTarget.id}`} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white">Save resume</button></div></form></Modal>}
       {templateModalOpen && <Modal title={templateTarget ? "Edit template" : "Add template"} onClose={() => { setTemplateModalOpen(false); setTemplateTarget(null); }}><form onSubmit={saveTemplate} className="max-h-[75vh] space-y-3 overflow-y-auto pr-1">{[["title", "Template name", 100], ["type", "Type", 100], ["author_name", "Author", 100], ["short_description", "Short description", 100]].map(([key, label, max]) => <label key={key} className="block text-sm font-medium">{label}<input required maxLength={max} value={templateForm[key]} onChange={(event) => setTemplateForm((form) => ({ ...form, [key]: event.target.value }))} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5" /></label>)}<label className="block text-sm font-medium">Full description<textarea maxLength="20000" rows="3" value={templateForm.long_description} onChange={(event) => setTemplateForm((form) => ({ ...form, long_description: event.target.value }))} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5" /></label>{!templateTarget && <label className="block text-sm font-medium">S3 folder key<input required value={templateForm.s3_key} onChange={(event) => setTemplateForm((form) => ({ ...form, s3_key: event.target.value }))} placeholder="Existing template asset folder in S3" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5" /></label>}<div className="grid grid-cols-2 gap-3"><label className="block text-sm font-medium">Engine<select value={templateForm.engine} onChange={(event) => setTemplateForm((form) => ({ ...form, engine: event.target.value }))} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5"><option value="LATEX">LaTeX</option><option value="XELATEX">XeLaTeX</option></select></label><label className="flex items-center gap-2 pt-6 text-sm"><input type="checkbox" checked={templateForm.simple_mode} onChange={(event) => setTemplateForm((form) => ({ ...form, simple_mode: event.target.checked }))} /> Simple mode</label></div><div className="flex justify-end gap-2 pt-2"><button type="button" onClick={() => { setTemplateModalOpen(false); setTemplateTarget(null); }} className="rounded-xl px-4 py-2 text-sm">Cancel</button><button disabled={busyKey === "template"} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white">Save template</button></div></form></Modal>}
     </div>
@@ -360,15 +395,24 @@ function Overview({ data, loading, onOpen }) {
   </>;
 }
 
-function UsersTable({ rows, busyKey, isOwner, selfId, selfEmail, onBlock, onCredits, onEdit, onRole }) {
+function UsersTable({ rows, busyKey, isOwner, selfId, selfEmail, onBlock, onCredits, onEdit, onRole, onView }) {
   return <DataTable headers={["User", "Role", "Wallet", "Joined", "Status", "Actions"]} empty="No users match this search">
     {rows.map((person) => {
       const isSelf = (selfId !== undefined && selfId !== null && String(person.id) === String(selfId)) || Boolean(selfEmail && person.email?.toLowerCase() === selfEmail.toLowerCase());
       const isProtectedOwner = String(person.role || "").toUpperCase() === "OWNER";
       const canChangeRole = isOwner && !isSelf && !isProtectedOwner;
-      return <tr key={person.id} className="border-t border-slate-100 hover:bg-slate-50/70"><td className="px-5 py-4"><div className="flex items-center gap-3"><Avatar label={nameOf(person)} /><div><div className="flex items-center gap-2"><p className="font-semibold">{nameOf(person)}</p>{isSelf && <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700">You</span>}</div><p className="text-xs text-slate-500">{person.email}</p></div></div></td><td className="px-5 py-4">{canChangeRole ? <select disabled={busyKey === `user-${person.id}`} aria-label={`Role for ${person.email}`} value={person.role} onChange={(event) => onRole(person, event.target.value)} className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"><option value="USER">USER</option><option value="ADMIN">ADMIN</option></select> : <span className={`inline-flex rounded-lg border px-3 py-1.5 text-xs font-semibold ${isProtectedOwner ? "border-violet-200 bg-violet-50 text-violet-700" : "border-slate-200 bg-slate-100 text-slate-600"}`}>{isProtectedOwner ? "OWNER" : person.role}</span>}</td><td className="px-5 py-4 font-medium">{Number(person.wallet_balance || 0).toLocaleString()} cr</td><td className="px-5 py-4 text-slate-500">{date(person.created_at)}</td><td className="px-5 py-4"><Status blocked={person.is_blocked} /></td><td className="px-5 py-4">{isSelf || isProtectedOwner ? <span className="text-xs text-slate-400">{isSelf ? "Current account" : "Protected owner account"}</span> : <div className="flex items-center gap-2"><button title="Edit profile" onClick={() => onEdit(person)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><Pencil size={16} /></button><button onClick={() => onCredits(person)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:border-violet-300 hover:text-violet-700">Credits</button><button disabled={busyKey === `user-${person.id}`} title={person.is_blocked ? "Unblock" : "Block"} onClick={() => onBlock(person)} className={`rounded-lg p-2 ${person.is_blocked ? "text-emerald-600 hover:bg-emerald-50" : "text-rose-500 hover:bg-rose-50"}`}>{person.is_blocked ? <ShieldCheck size={17} /> : <ShieldOff size={17} />}</button></div>}</td></tr>;
+      return <tr key={person.id} className="border-t border-slate-100 hover:bg-slate-50/70">
+        <td className="px-5 py-4"><div className="flex items-center gap-3"><Avatar label={nameOf(person)} /><div><div className="flex items-center gap-2"><p className="font-semibold">{nameOf(person)}</p>{isSelf && <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700">You</span>}</div><p className="text-xs text-slate-500">{person.email}</p></div></div></td>
+        <td className="px-5 py-4">{canChangeRole ? <select disabled={busyKey === `user-${person.id}`} aria-label={`Role for ${person.email}`} value={person.role} onChange={(event) => onRole(person, event.target.value)} className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"><option value="USER">USER</option><option value="ADMIN">ADMIN</option></select> : <span className={`inline-flex rounded-lg border px-3 py-1.5 text-xs font-semibold ${isProtectedOwner ? "border-violet-200 bg-violet-50 text-violet-700" : "border-slate-200 bg-slate-100 text-slate-600"}`}>{isProtectedOwner ? "OWNER" : person.role}</span>}</td>
+        <td className="px-5 py-4 font-medium">{Number(person.wallet_balance || 0).toLocaleString()} cr</td><td className="px-5 py-4 text-slate-500">{date(person.created_at)}</td><td className="px-5 py-4"><Status blocked={person.is_blocked} /></td>
+        <td className="px-5 py-4"><div className="flex items-center gap-2">{isOwner && <button disabled={busyKey === `profile-${person.id}`} title="View full profile" onClick={() => onView(person)} className="rounded-lg p-2 text-violet-600 hover:bg-violet-50"><Eye size={16} /></button>}{!isSelf && !isProtectedOwner && <><button title="Edit profile" onClick={() => onEdit(person)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><Pencil size={16} /></button><button onClick={() => onCredits(person)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:border-violet-300 hover:text-violet-700">Credits</button><button disabled={busyKey === `user-${person.id}`} title={person.is_blocked ? "Unblock" : "Block"} onClick={() => onBlock(person)} className={`rounded-lg p-2 ${person.is_blocked ? "text-emerald-600 hover:bg-emerald-50" : "text-rose-500 hover:bg-rose-50"}`}>{person.is_blocked ? <ShieldCheck size={17} /> : <ShieldOff size={17} />}</button></>}{!isOwner && isSelf && <span className="text-xs text-slate-400">Current account</span>}{!isOwner && isProtectedOwner && <span className="text-xs text-slate-400">Protected owner</span>}</div></td>
+      </tr>;
     })}
   </DataTable>;
+}
+
+function ProfileDetail({ label, value }) {
+  return <div><p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p><p className="mt-1 break-words font-semibold text-slate-700">{value || "—"}</p></div>;
 }
 
 function ResumesTable({ rows, busyKey, onDelete, onEdit }) {

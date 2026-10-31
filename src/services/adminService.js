@@ -2,6 +2,8 @@ import API from "../api/api";
 
 export const getAdminOverview = async () => (await API.get("/admin/overview")).data;
 export const getAdminUsers = async (params) => (await API.get("/admin/users", { params })).data;
+export const createAdminUser = async (user) => (await API.post("/admin/users", user)).data;
+export const getAdminUserProfile = async (id) => (await API.get(`/admin/users/${id}/profile`)).data;
 export const updateAdminUser = async (id, profile) => (await API.patch(`/admin/users/${id}`, profile)).data;
 export const setAdminUserRole = async (id, role) => (await API.patch(`/admin/users/${id}/role`, { role })).data;
 export const setAdminUserStatus = async (id, is_blocked) => (await API.patch(`/admin/users/${id}/status`, { is_blocked })).data;
