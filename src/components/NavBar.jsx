@@ -29,12 +29,13 @@ const NavBar = () => {
 
   useEffect(() => {
     const refresh = async () => {
-      if (!user || authLoading) return;
+      if (!user || authLoading) { setCredits(null); return; }
       try {
         const w = await getWalletBalance();
         setCredits(w.data?.balance ?? 0);
       } catch (error) {
-        console.error(error);
+        if (error?.response?.status === 401) setCredits(null);
+        else console.error(error);
       }
     };
     refresh();

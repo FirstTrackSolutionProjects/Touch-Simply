@@ -51,7 +51,7 @@ const Dashboard = () => {
         const w = await getWalletBalance();
         setCredits(w.data?.balance ?? 0);
       } catch (err) {
-        console.error("Failed to fetch balance", err);
+        if (err?.response?.status !== 401) console.error("Failed to fetch balance", err);
       }
     };
     if (user) fetchBalance();

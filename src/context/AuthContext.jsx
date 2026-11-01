@@ -24,6 +24,15 @@ export const AuthProvider = ({
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      setUser(null);
+      setAuthLoading(false);
+    };
+    window.addEventListener("touchsimply:auth-expired", handleAuthExpired);
+    return () => window.removeEventListener("touchsimply:auth-expired", handleAuthExpired);
+  }, []);
+
   const checkAuth = async () => {
     setAuthLoading(true);
     const token = localStorage.getItem("token");

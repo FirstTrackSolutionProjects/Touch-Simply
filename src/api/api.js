@@ -14,4 +14,16 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && localStorage.getItem("token")) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.dispatchEvent(new Event("touchsimply:auth-expired"));
+    }
+    return Promise.reject(error);
+  },
+);
+
 export default API;
