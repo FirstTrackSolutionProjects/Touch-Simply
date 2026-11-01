@@ -13,7 +13,7 @@ const permissionOptions = [
   { id: "notifications", label: "Announcements", desc: "Send updates to users", icon: Bell },
 ];
 
-const emptyForm = { name: "", description: "", member_ids: [], permissions: [] };
+const emptyForm = { name: "", description: "", member_ids: [], permissions: [], new_employee: { first_name: "", middle_name: "", last_name: "", email: "", password: "", confirm_password: "" } };
 const nameOf = (person) => [person?.first_name, person?.middle_name, person?.last_name].filter(Boolean).join(" ") || "User";
 const initials = (text) => (text || "?").trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
 const inputCls = "mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-3 text-sm outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-violet-400 focus:bg-white focus:ring-4 focus:ring-violet-100";
@@ -81,7 +81,7 @@ function TeamManagement() {
   const reset = () => { setEditingId(null); setForm(emptyForm); };
   const editTeam = (team) => {
     setEditingId(team.id);
-    setForm({ name: team.name, description: team.description || "", member_ids: team.member_ids || [], permissions: team.permissions || [] });
+    setForm({ ...emptyForm, name: team.name, description: team.description || "", member_ids: team.member_ids || [], permissions: team.permissions || [] });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const toggle = (key, value) => setForm((current) => ({ ...current, [key]: current[key].includes(value) ? current[key].filter((item) => item !== value) : [...current[key], value] }));
@@ -134,6 +134,35 @@ function TeamManagement() {
                 <textarea maxLength="500" rows="3" value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} className={`${inputCls} resize-none`} placeholder="What this team is responsible for" />
               </label>
             </div>
+            {!editingId && (
+              <div className="mt-5 rounded-2xl border border-violet-100 bg-violet-50/60 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-violet-700 shadow-sm"><UserPlus size={17} /></div>
+                  <div>
+                    <h5 className="text-sm font-bold text-slate-900">Create an employee login (optional)</h5>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-600">Create an individual admin account and add it to this team. Share its login details directly with that employee. Never reuse one password across a team.</p>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <label className="block text-sm font-semibold">First name
+                    <input value={form.new_employee.first_name} onChange={(e) => setForm((v) => ({ ...v, new_employee: { ...v.new_employee, first_name: e.target.value } }))} className={inputCls} maxLength="100" autoComplete="off" placeholder="First name" />
+                  </label>
+                  <label className="block text-sm font-semibold">Last name
+                    <input value={form.new_employee.last_name} onChange={(e) => setForm((v) => ({ ...v, new_employee: { ...v.new_employee, last_name: e.target.value } }))} className={inputCls} maxLength="100" autoComplete="off" placeholder="Last name" />
+                  </label>
+                  <label className="block text-sm font-semibold sm:col-span-2">Work email
+                    <input type="email" value={form.new_employee.email} onChange={(e) => setForm((v) => ({ ...v, new_employee: { ...v.new_employee, email: e.target.value } }))} className={inputCls} autoComplete="off" placeholder="name@company.com" />
+                  </label>
+                  <label className="block text-sm font-semibold">Initial password
+                    <input type="password" value={form.new_employee.password} onChange={(e) => setForm((v) => ({ ...v, new_employee: { ...v.new_employee, password: e.target.value } }))} className={inputCls} autoComplete="new-password" placeholder="At least 8 characters" />
+                  </label>
+                  <label className="block text-sm font-semibold">Confirm password
+                    <input type="password" value={form.new_employee.confirm_password} onChange={(e) => setForm((v) => ({ ...v, new_employee: { ...v.new_employee, confirm_password: e.target.value } }))} className={inputCls} autoComplete="new-password" placeholder="Re-enter password" />
+                  </label>
+                </div>
+                <p className="mt-2 text-xs text-slate-500">Use uppercase, lowercase, a number, and a special character. The password is stored as a secure hash; the employee can change it in Account security after signing in.</p>
+              </div>
+            )}
           </section>
 
           {/* Step 2 */}
@@ -265,7 +294,7 @@ function TeamManagement() {
               </div>
               <div className="rounded-2xl bg-white/15 p-3">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-violet-100">Members</p>
-                <div className="mt-1 flex items-center gap-2"><span className="text-2xl font-bold">{form.member_ids.length}</span><AvatarStack people={selectedMembers} max={3} onDark /></div>
+                <div className="mt-1 flex items-center gap-2"><span className="text-2xl font-bold">{form.member_ids.length + (form.new_employee.email.trim() ? 1 : 0)}</span><AvatarStack people={selectedMembers} max={3} onDark /></div>
               </div>
             </div>
             <div className="mt-4 flex flex-wrap gap-1.5">
