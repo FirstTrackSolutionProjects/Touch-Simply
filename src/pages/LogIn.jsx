@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa";
 import { loginUser, googleLoginUser } from "../services/authServices";
 import { GoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -33,7 +34,8 @@ const Login = () => {
         throw new Error("Could not verify your login. Please try again.");
       }
 
-      navigate("/dashboard");
+      const destination = location.state?.from;
+      navigate(destination?.pathname || "/dashboard", { state: destination?.state });
     } catch (error) {
       setError(error?.response?.data?.message || error.message || "Login Failed");
     } finally {
@@ -100,6 +102,12 @@ const Login = () => {
                 <h2 className="text-2xl font-bold text-gray-800">Login</h2>
                 <p className="text-gray-500 mt-1 text-sm">Access your account to continue</p>
               </div>
+
+              {location.state?.from && (
+                <p className="mt-4 rounded-xl border border-purple-100 bg-purple-50 p-3 text-sm text-purple-700">
+                  Log in to continue with your selected template.
+                </p>
+              )}
               
               {error && (
                 <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex items-center gap-2">
@@ -199,7 +207,8 @@ const Login = () => {
                         data.token || data.data?.tokens?.accessToken,
                         data.user || data.data?.user
                       );
-                      navigate("/dashboard");
+                      const destination = location.state?.from;
+                      navigate(destination?.pathname || "/dashboard", { state: destination?.state });
                     } catch (error) {
                       setError(error?.response?.data?.message || error.message || "Google Login Failed");
                     }

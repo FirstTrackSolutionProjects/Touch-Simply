@@ -48,7 +48,7 @@ const NavBar = () => {
     { name: "Home", path: "/" },
     { name: "About", path: "/about" },
     { name: "Templates", path: "/templates" },
-    { name: "Projects", path: "/library" }, // Added Projects link
+    { name: "My Library", path: "/library" },
     { name: "Slides", path: "/presentation" },
     { name: "Contact", path: "/contact" },
     { name: "Chat", path: "/chat" },

@@ -66,6 +66,11 @@ useEffect(() => {
         animate="show"
         className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
       >
+        {data.length === 0 && (
+          <p className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-8 text-center text-sm text-gray-300">
+            No templates available yet. Please check back soon.
+          </p>
+        )}
         {data.slice(0, visible).map((t) => (
           <motion.div
             key={t.key}

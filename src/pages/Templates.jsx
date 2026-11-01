@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import TemplateSection from "../components/TemplateSection";
 import { getResumeTemplates } from "../services/resumeService";
+import { useAuth } from "../context/AuthContext";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -22,6 +23,7 @@ const stagger = {
 
 const Templates = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [resumeTemplates, setResumeTemplates] = useState([]);
 
   // Fetch real resume templates (with UUIDs) from backend
@@ -115,20 +117,28 @@ const Templates = () => {
   ];
 
   const handleUseTemplate = (key, type) => {
+    let destination;
     if (type === "resume") {
       const template = resumeTemplates.find((t) => t.key === key);
-      navigate("/editor", {
+      destination = {
+        pathname: "/editor",
         state: {
           templateId: key,
           templateTitle: template?.name || "Resume",
         },
-      });
+      };
     }
-    if (type === "logo") navigate("/logo", { state: { templateId: key } });
-    if (type === "portfolio")
-      navigate("/portfolio", { state: { templateId: key } });
-    if (type === "presentation")
-      navigate("/presentation", { state: { templateId: key } });
+    if (type === "logo") destination = { pathname: "/logo", state: { templateId: key } };
+    if (type === "portfolio") destination = { pathname: "/portfolio", state: { templateId: key } };
+    if (type === "presentation") destination = { pathname: "/presentation", state: { templateId: key } };
+
+    if (!destination) return;
+    if (!user) {
+      toast.info("Please log in to use this template.");
+      navigate("/login", { state: { from: destination } });
+      return;
+    }
+    navigate(destination.pathname, { state: destination.state });
   };
 
   return (
