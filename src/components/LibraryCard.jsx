@@ -1,190 +1,66 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  Trash2,
-  Download,
-  FileText,
-  Image as ImageIcon,
-  Presentation,
-  Briefcase,
-  Pencil,
-  ChevronDown,
-} from "lucide-react";
+import React from "react";
+import { Download, FileText, Image as ImageIcon, Presentation, Briefcase, Pencil } from "lucide-react";
 
-const LibraryCard = ({ item, onDelete, onRedownload, downloadLocked = false }) => {
-  const [showDownloads, setShowDownloads] = useState(false);
+const LibraryCard = ({ item, onRedownload, onModify, downloadLocked = false }) => {
 
-  // ================= ICON =================
   const getIcon = () => {
     switch (item.type) {
-      case "resume":
-        return <FileText size={18} />;
-      case "portfolio":
-        return <Briefcase size={18} />;
+      case "resume": return <FileText size={18} />;
+      case "portfolio": return <Briefcase size={18} />;
       case "presentation":
-      case "ppt":
-        return <Presentation size={18} />;
-      case "logo":
-        return <ImageIcon size={18} />;
-      default:
-        return <FileText size={18} />;
+      case "ppt": return <Presentation size={18} />;
+      case "logo": return <ImageIcon size={18} />;
+      default: return <FileText size={18} />;
     }
   };
 
-  // ================= EDIT LINK =================
-  const getEditLink = () => {
-    switch (item.type) {
-      case "resume":
-        return "/editor";
-      case "portfolio":
-        return "/portfolio";
-      case "logo":
-        return "/logo";
-      case "presentation":
-      case "ppt":
-        return "/presentation";
-      default:
-        return "/";
-    }
-  };
-
-  // ================= DOWNLOAD OPTIONS =================
-  const getDownloadOptions = () => {
-    if (onRedownload) {
-      return (
-        <button
-          onClick={() => {
-            if (downloadLocked) return;
-            onRedownload();
-            setShowDownloads(false);
-          }}
-          disabled={downloadLocked}
-          title={downloadLocked ? "Insufficient credits. Buy credits to download." : "Download this saved resume"}
-          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Download PDF
-        </button>
-      );
-    }
-
-    const baseLink = getEditLink();
-    const formats = [];
-
-    if (item.type === "resume") {
-      formats.push({ label: "PDF", format: "pdf" });
-      formats.push({ label: "PNG", format: "png" });
-      formats.push({ label: "DOCX", format: "docx" });
-    } else if (item.type === "portfolio") {
-      formats.push({ label: "PDF", format: "pdf" });
-      formats.push({ label: "PNG", format: "png" });
-      formats.push({ label: "DOCX", format: "docx" });
-    } else if (item.type === "logo") {
-      formats.push({ label: "PNG Light", format: "png-light" });
-      formats.push({ label: "PNG Dark", format: "png-dark" });
-      formats.push({ label: "PDF", format: "pdf" });
-    } else if (item.type === "presentation" || item.type === "ppt") {
-      formats.push({ label: "PPTX", format: "pptx" });
-      formats.push({ label: "PDF", format: "pdf" });
-    }
-
-    return formats.map((f) => (
-      <Link
-        key={f.format}
-        to={`${baseLink}?download=${f.format}`}
-        state={{ editData: item }}
-        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
-      >
-        Download as {f.label}
-      </Link>
-    ));
-  };
-
-  // ================= FALLBACK IMAGE =================
-  const fallbackImage = "https://placehold.co/600x400?text=No+Preview";
+  const fallbackImage = "https://placehold.co/600x400/e2e8f0/a4b1c2?text=Preview+Unavailable";
 
   return (
-    <div className="group bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-      {/* ================= THUMBNAIL ================= */}
-      <div className="relative w-full h-56 bg-gray-100 overflow-hidden">
+    <div className="group bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200/80 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+      <div className="relative w-full h-48 bg-gray-100 overflow-hidden">
         <img
           src={item.thumbnail || fallbackImage}
           alt={item.title || "File"}
-          className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
-          onError={(e) => {
-            e.target.src = fallbackImage;
-          }}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          onError={(e) => { e.target.src = fallbackImage; }}
         />
-        <div className="absolute top-3 right-3 bg-purple-600/90 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-          PROJECT
+        <div className="absolute top-3 right-3 bg-brand-purple/90 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow">
+          {item.type}
         </div>
       </div>
 
-      {/* ================= CONTENT ================= */}
-      <div className="p-5">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="text-purple-600">{getIcon()}</div>
-          <h2 className="text-lg font-bold text-gray-800 truncate">
+      <div className="p-4 flex flex-col flex-grow">
+        <div className="flex items-start gap-2 mb-2">
+          <div className="text-brand-purple mt-0.5">{getIcon()}</div>
+          <h2 className="text-base font-bold text-gray-800 truncate flex-1" title={item.title}>
             {item.title || "Untitled"}
           </h2>
         </div>
 
-        <p className="text-xs text-gray-500 uppercase mb-4 tracking-wide font-medium">
-          {item.type}
-        </p>
-
-        {/* ================= BUTTONS ================= */}
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2">
-            {/* EDIT */}
-            <Link
-              to={getEditLink()}
-              state={{ editData: item }}
-              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2.5 rounded-xl font-medium hover:scale-[1.02] transition-all"
-            >
-              <Pencil size={18} />
-              Edit
-            </Link>
-
-            {/* DOWNLOAD DROPDOWN TOGGLE */}
-            <div className="relative">
-              <button
-                onClick={() => setShowDownloads(!showDownloads)}
-                className="w-12 h-11 flex items-center justify-center bg-black text-white rounded-xl hover:bg-gray-900 transition-all hover:scale-105"
-                title={downloadLocked ? "Download locked: insufficient credits" : "Download Options"}
-              >
-                <Download size={18} />
-              </button>
-
-              {showDownloads && (
-                <>
-                  <div 
-                    className="fixed inset-0 z-10" 
-                    onClick={() => setShowDownloads(false)} 
-                  />
-                  <div className="absolute bottom-full mb-2 right-0 w-48 bg-white border border-gray-100 rounded-xl shadow-2xl z-20 py-2 overflow-hidden">
-                    <p className="px-4 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b mb-1">Export As</p>
-                    {getDownloadOptions()}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* DELETE */}
-            {onDelete && (
-              <button
-                onClick={() => onDelete(item.id)}
-                className="w-12 h-11 flex items-center justify-center bg-red-500/10 text-red-500 border border-red-100 rounded-xl hover:bg-red-500 hover:text-white transition-all hover:scale-105"
-              >
-                <Trash2 size={18} />
-              </button>
-            )}
-          </div>
-          {downloadLocked && <Link to="/credits/buy" className="text-center text-xs font-semibold text-amber-700 hover:text-amber-900">Download locked — buy credits</Link>}
-        </div>
-
-        <p className="text-[10px] text-gray-400 mt-4 text-center">
+        <p className="text-[11px] text-gray-400 mt-auto pt-2">
           Last updated: {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : new Date(item.createdAt).toLocaleDateString()}
         </p>
+
+        <div className="flex items-center gap-2 mt-3">
+          <button
+            onClick={onModify}
+            className="flex-1 flex items-center justify-center gap-2 bg-gray-100 text-gray-700 text-sm font-semibold py-2.5 rounded-lg hover:bg-gray-200 transition-colors"
+            title="Modify this project"
+          >
+            <Pencil size={15} />
+            Modify
+          </button>
+          <button
+            onClick={onRedownload}
+            disabled={downloadLocked}
+            className="flex items-center justify-center gap-2 bg-black text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            title={downloadLocked ? "Insufficient credits" : "Download this version"}
+          >
+            <Download size={15} />
+            Download
+          </button>
+        </div>
       </div>
     </div>
   );

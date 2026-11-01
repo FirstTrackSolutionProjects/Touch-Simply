@@ -1,19 +1,9 @@
-// Touch-Simply/src/components/NavBar.jsx
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Menu,
-  X,
-  ChevronDown,
-  FileText,
-  Palette,
-  Briefcase,
-  Presentation,
-  Zap,
-  FolderOpen,
-  ShieldCheck,
-  ReceiptText,
+  Menu, X, ChevronDown, FileText, Palette, Briefcase, Presentation,
+  Zap, ShieldCheck, ReceiptText, LogIn,
 } from "lucide-react";
 import UserAvatar from "./UserAvatar";
 import { getWalletBalance } from "../services/walletService";
@@ -25,7 +15,11 @@ const NavBar = () => {
   const location = useLocation();
   const { user, authLoading } = useAuth();
   const hasAdminAccess = ["ADMIN", "OWNER"].includes(String(user?.role || "").toUpperCase());
-  const adminLinkLabel = String(user?.role || "").toUpperCase() === "OWNER" ? "Owner panel" : "Admin";
+  const adminLinkLabel = String(user?.role || "").toUpperCase() === "OWNER" ? "Owner Panel" : "Admin";
+
+  useEffect(() => {
+    if (!user && !authLoading) setCreateOpen(false);
+  }, [user, authLoading]);
 
   useEffect(() => {
     const refresh = async () => {
@@ -35,24 +29,21 @@ const NavBar = () => {
         setCredits(w.data?.balance ?? 0);
       } catch (error) {
         if (error?.response?.status === 401) setCredits(null);
-        else console.error(error);
       }
     };
     refresh();
-    // Listen for balance changes from other components (e.g. after recharge)
     window.addEventListener("touchsimply:balance-changed", refresh);
     return () => window.removeEventListener("touchsimply:balance-changed", refresh);
   }, [user, authLoading]);
 
   const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "About", path: "/about" },
     { name: "Templates", path: "/templates" },
-    { name: "My Library", path: "/library" },
     { name: "Slides", path: "/presentation" },
+    { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
-    { name: "Chat", path: "/chat" },
   ];
+
+  if (user) navLinks.splice(2, 0, { name: "My Library", path: "/library" });
 
   const createItems = [
     { label: "Resume", icon: <FileText size={15} />, to: "/templates?type=resume" },
@@ -63,88 +54,71 @@ const NavBar = () => {
 
   return (
     <>
-      {/* Navbar */}
-      <nav className="w-full bg-gradient-to-r from-indigo-300 via-purple-800 to-gray-900 backdrop-blur-md shadow-md sticky top-0 z-50">
-        <div className="w-full flex items-center justify-between h-16 px-4 md:px-12 lg:px-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+      <nav className="w-full bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-neutral-border">
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-16 sm:h-20 px-4 sm:px-6 lg:px-8">
+          
+          {/* 1. Left Side: Logo & Branding (Desktop) */}
+          <Link to="/" className="flex items-center gap-3 group" aria-label="Touch Simply Home">
             <img
               src="/images/logo.png"
-              className="h-12 w-12 md:h-16 md:w-16 object-contain transition-transform duration-300 group-hover:scale-105"
-              alt="logo"
+              className="h-12 sm:h-20 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              alt="Touch Simply logo"
             />
-            <span className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent tracking-wide">
-              Touch Simply
+            {/* Desktop Branding Text */}
+            <span className="text-2xl md:text-3xl font-extrabold tracking-tight hidden sm:block">
+              <span className="text-brand-red">Touch</span>
+              <span className="text-neutral-text-primary"> Simply</span>
             </span>
           </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-8 text-white font-medium">
+          {/* 2. Center: Mobile Branding Text (Hidden on Desktop) */}
+          <div className="sm:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+            <span className="text-xl font-extrabold tracking-tight">
+              <span className="text-brand-red">Touch</span>
+              <span className="text-neutral-text-primary"> Simply</span>
+            </span>
+          </div>
+
+          {/* 3. Right Side: Desktop Menu (Hidden on Mobile) */}
+          <div className="hidden md:flex items-center gap-6 text-neutral-text-primary font-medium">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
-                className={`relative transition duration-300 ${
-                  location.pathname === link.path
-                    ? "text-blue-400"
-                    : "hover:text-blue-400"
+                className={`relative py-2 text-sm transition-colors duration-300 group ${
+                  location.pathname.startsWith(link.path) ? "text-brand-red" : "hover:text-brand-red"
                 }`}
               >
                 {link.name}
                 <span
-                  className={`absolute left-0 -bottom-1 h-[2px] bg-blue-400 transition-all duration-300 ${
-                    location.pathname === link.path
-                      ? "w-full"
-                      : "w-0"
+                  className={`absolute bottom-0 left-0 h-0.5 bg-brand-red rounded-full transition-all duration-300 ${
+                    location.pathname.startsWith(link.path) ? "w-full" : "w-0 group-hover:w-full"
                   }`}
                 ></span>
               </Link>
             ))}
-
-            {/* User Avatar / Credits / Create */}
             {user ? (
               <div className="flex items-center gap-3">
                 {hasAdminAccess && (
-                  <Link
-                    to="/admin/dashboard"
-                    className="hidden lg:flex items-center gap-1.5 text-sm text-white/90 hover:text-white"
-                  >
+                  <Link to="/admin/dashboard" className="flex items-center gap-1.5 text-sm text-neutral-text-secondary hover:text-brand-red transition">
                     <ShieldCheck size={16} /> {adminLinkLabel}
                   </Link>
                 )}
-                {/* Credits badge - clickable to buy credits */}
-                <Link
-                  to="/credits/buy"
-                  className="hidden md:flex items-center gap-1 text-xs bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-full hover:bg-amber-100 transition"
-                >
-                  <Zap size={12} className="text-amber-500" />
+                <Link to="/credits/buy" className="flex items-center gap-1 text-xs bg-brand-red/5 border border-brand-red/20 text-brand-red px-3 py-1.5 rounded-full hover:bg-brand-red/10 transition">
+                  <Zap size={12} />
                   <span className="font-bold">{credits ?? "—"}</span>
                   <span>credits</span>
                 </Link>
-                <Link to="/transactions" className="hidden lg:flex items-center gap-1.5 text-sm text-white/90 hover:text-white"><ReceiptText size={16} /> History</Link>
-
-                {/* CREATE dropdown */}
                 <div className="relative">
-                  <button
-                    onClick={() => setCreateOpen((v) => !v)}
-                    className="flex items-center gap-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg"
-                  >
-                    Create <ChevronDown size={14} />
+                  <button onClick={() => setCreateOpen((v) => !v)} className="flex items-center gap-1 bg-brand-black hover:bg-black text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors duration-300">
+                    Create <ChevronDown size={14} className={`transition-transform ${createOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {createOpen && (
                     <>
-                      <div
-                        className="fixed inset-0 z-10"
-                        onClick={() => setCreateOpen(false)}
-                      />
-                      <div className="absolute right-0 mt-2 w-56 bg-white border rounded-xl shadow-2xl z-20 py-2">
+                      <div className="fixed inset-0 z-10" onClick={() => setCreateOpen(false)} />
+                      <div className="absolute right-0 mt-2 w-56 bg-white border border-neutral-border rounded-xl shadow-xl z-20 py-2 animate-fade-in-down">
                         {createItems.map((item) => (
-                          <Link
-                            key={item.label}
-                            to={item.to}
-                            onClick={() => setCreateOpen(false)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                          >
+                          <Link key={item.label} to={item.to} onClick={() => setCreateOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-text-primary hover:bg-brand-red/5 hover:text-brand-red transition-colors">
                             {item.icon} {item.label}
                           </Link>
                         ))}
@@ -152,115 +126,69 @@ const NavBar = () => {
                     </>
                   )}
                 </div>
-
-                {/* Avatar */}
-                <Link
-                  to="/dashboard"
-                  className="hover:scale-105 transition"
-                >
+                <Link to="/dashboard" className="hover:scale-110 transition-transform ml-1">
                   <UserAvatar user={user} size="sm" />
                 </Link>
               </div>
             ) : (
-              <Link
-                to="/login"
-                className="px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 transition"
-              >
+              <Link to="/login" className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-brand-red text-white hover:bg-brand-red-hover transition-colors text-sm font-semibold shadow-md shadow-brand-red/10">
+                <LogIn size={16} />
                 Login
               </Link>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMenuOpen(true)}
-            className="md:hidden text-white"
-          >
-            <Menu size={25} />
-          </button>
+          {/* 4. Far Right: Mobile Menu Button with balancing Ghost */}
+          <div className="flex md:hidden items-center">
+            <button onClick={() => setMenuOpen(true)} className="text-neutral-text-primary p-2 -mr-2">
+              <Menu size={28} />
+            </button>
+          </div>
+
         </div>
       </nav>
 
-      {/* Overlay */}
-      <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition ${
-          menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
-        onClick={() => setMenuOpen(false)}
-      />
-
       {/* Mobile Drawer */}
-      <div
-        className={`fixed top-0 right-0 h-full w-60 bg-gray-900 border-l border-white/10 z-50 shadow-2xl transform transition-all duration-300 ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <h2 className="text-white font-semibold">Menu</h2>
-          <button
-            onClick={() => setMenuOpen(false)}
-            className="text-white"
-          >
-            <X size={22} />
-          </button>
+      <div className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300 ${menuOpen ? "opacity-100 visible" : "opacity-0 invisible"}`} onClick={() => setMenuOpen(false)} />
+      <div className={`fixed top-0 right-0 h-full w-72 bg-white z-50 shadow-2xl transform transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"}`}>
+        <div className="flex items-center justify-between p-5 border-b border-neutral-border">
+          <div className="flex items-center gap-2">
+             <img src="/images/logo.png" alt="Touch Simply" className="h-10 w-auto" />
+             <span className="text-lg font-extrabold tracking-tight">
+              <span className="text-brand-red">Touch</span>
+              <span className="text-neutral-text-primary"> Simply</span>
+            </span>
+          </div>
+          <button onClick={() => setMenuOpen(false)} className="text-neutral-text-secondary hover:text-neutral-text-primary"><X size={24} /></button>
         </div>
-
-        <div className="flex flex-col gap-5 p-6 text-gray-300">
+        <div className="flex flex-col p-4 space-y-2 text-neutral-text-primary">
           {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              to={link.path}
-              onClick={() => setMenuOpen(false)}
-              className={`transition ${
-                location.pathname === link.path
-                  ? "text-blue-400"
-                  : "hover:text-purple-400"
-              }`}
-            >
+            <Link key={link.name} to={link.path} onClick={() => setMenuOpen(false)} className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${location.pathname.startsWith(link.path) ? "text-brand-red bg-brand-red/5" : "hover:bg-neutral-bg"}`}>
               {link.name}
             </Link>
           ))}
-
-          {user ? (
-            <>
-              {hasAdminAccess && (
-                <Link
-                  to="/admin/dashboard"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-900/50 text-purple-100 hover:bg-purple-800/60"
-                >
-                  <ShieldCheck size={16} /> {adminLinkLabel}
+          <div className="pt-4 mt-4 border-t border-neutral-border">
+            {user ? (
+              <div className="space-y-3">
+                {hasAdminAccess && (
+                  <Link to="/admin/dashboard" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 px-4 py-3 rounded-lg bg-brand-black/5 text-brand-black hover:bg-brand-black/10 transition">
+                    <ShieldCheck size={18} /> {adminLinkLabel}
+                  </Link>
+                )}
+                <Link to="/credits/buy" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 px-4 py-3 text-base bg-brand-red/10 text-brand-red rounded-lg hover:bg-brand-red/20 transition font-medium">
+                  <Zap size={14} /> <span className="font-bold">{credits ?? "—"}</span> credits
                 </Link>
-              )}
-              <Link
-                to="/credits/buy"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 text-xs bg-amber-900/40 border border-amber-700/50 text-amber-200 px-3 py-2 rounded-lg"
-              >
-                <Zap size={12} />
-                <span className="font-bold">{credits ?? "—"}</span>
-                <span>credits</span>
+                <Link to="/transactions" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 px-4 py-3 rounded-lg text-base hover:bg-neutral-bg"><ReceiptText size={18} /> Payment History</Link>
+                <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg bg-neutral-bg hover:bg-neutral-border/50 transition">
+                  <UserAvatar user={user} size="sm" /> <span className="font-medium">Dashboard</span>
+                </Link>
+              </div>
+            ) : (
+              <Link to="/login" onClick={() => setMenuOpen(false)} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-brand-red text-white hover:bg-brand-red-hover transition font-semibold">
+                <LogIn size={18} /> Login
               </Link>
-              <Link to="/transactions" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 text-sm text-gray-200"><ReceiptText size={16} /> Payment history</Link>
-
-              <Link
-                to="/dashboard"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 mt-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
-              >
-                <UserAvatar user={user} size="sm" />
-                <span>Dashboard</span>
-              </Link>
-            </>
-          ) : (
-            <Link
-              to="/login"
-              onClick={() => setMenuOpen(false)}
-              className="mt-4 px-4 py-2 rounded-lg bg-white/10 text-center hover:bg-white/20 transition"
-            >
-              Login
-            </Link>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </>

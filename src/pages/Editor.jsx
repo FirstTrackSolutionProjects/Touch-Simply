@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Loader2, Copy, ArrowLeft } from "lucide-react";
+import { Loader2, Copy, ArrowLeft, AlertTriangle } from "lucide-react";
 
 import {
   createResumeFromTemplate,
@@ -63,15 +63,16 @@ const Editor = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Passed from Templates page
-  const { templateId, templateTitle } = location.state || {};
+  // Passed from Templates page or Library
+  const { templateId, templateTitle, resumeId: existingResumeId } = location.state || {};
 
-  const [resumeId, setResumeId] = useState(null);
+  const [resumeId, setResumeId] = useState(existingResumeId || null);
   const [config, setConfig] = useState(null);
   const [previewImageUrls, setPreviewImageUrls] = useState([]);
   const [balance, setBalance] = useState(null);
+  const [isDirty, setIsDirty] = useState(false);
 
-  const [creating, setCreating] = useState(true);
+  const [creating, setCreating] = useState(!existingResumeId);
   const [compiling, setCompiling] = useState(false);
   const [saving, setSaving] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -82,15 +83,51 @@ const Editor = () => {
   configRef.current = config;
 
   // ─────────────────────────────────────────────
-  // BOOTSTRAP: create resume + load config
+  // BOOTSTRAP: create or load resume + load config
   // ─────────────────────────────────────────────
   useEffect(() => {
+    let cancelled = false;
+
+    const fetchBalance = async () => {
+      try {
+        const w = await getWalletBalance();
+        if (!cancelled) setBalance(w.data?.balance ?? 0);
+      } catch {
+        if (!cancelled) setBalance(null);
+      }
+    };
+
+    const loadExisting = async (id) => {
+      try {
+        setCreating(true);
+        const ws = await getSimpleWorkspace(id);
+        const configUrl = ws.data?.configJsonUrl;
+        if (!configUrl) throw new Error("Workspace is missing a config file.");
+        const cfg = await loadConfigJson(configUrl);
+        if (cancelled) return;
+        setConfig(cfg);
+        setResumeId(id);
+        await fetchBalance();
+      } catch (err) {
+        if (cancelled) return;
+        toast.error(err.message || "Failed to open resume from library.");
+        navigate("/library");
+      } finally {
+        if (!cancelled) setCreating(false);
+      }
+    };
+
+    if (existingResumeId) {
+      loadExisting(existingResumeId);
+      return () => { cancelled = true; };
+    }
+
     if (!templateId) {
       toast.error("No template selected. Redirecting...");
       navigate("/templates");
       return;
     }
-    let cancelled = false;
+
     const sessionKey = `${EDITOR_SESSION_KEY}-${templateId}`;
 
     (async () => {
@@ -100,25 +137,16 @@ const Editor = () => {
         // 0. Check session storage for existing resume
         const saved = sessionStorage.getItem(sessionKey);
         if (saved) {
-          const { resumeId: savedId, templateId: savedTemplate } =
-            JSON.parse(saved);
+          const { resumeId: savedId, templateId: savedTemplate } = JSON.parse(saved);
           if (savedTemplate === templateId) {
-            setResumeId(savedId);
             const ws = await getSimpleWorkspace(savedId);
             const configUrl = ws.data?.configJsonUrl;
             if (configUrl) {
               const cfg = await loadConfigJson(configUrl);
+              if (cancelled) return;
+              setResumeId(savedId);
               setConfig(cfg);
-
-              // Wallet balance
-              try {
-                const w = await getWalletBalance();
-                setBalance(w.data?.balance ?? 0);
-              } catch {
-                setBalance(null);
-              }
-
-              setCreating(false);
+              await fetchBalance();
               return;
             }
           }
@@ -136,14 +164,7 @@ const Editor = () => {
         if (!resume?.id) throw new Error("Backend did not return resume id");
         setResumeId(resume.id);
 
-        // Save to session
-        sessionStorage.setItem(
-          sessionKey,
-          JSON.stringify({
-            resumeId: resume.id,
-            templateId,
-          })
-        );
+        sessionStorage.setItem(sessionKey, JSON.stringify({ resumeId: resume.id, templateId }));
 
         // 2. Load config JSON
         let configJsonUrl = createRes.data?.configJsonUrl;
@@ -151,24 +172,14 @@ const Editor = () => {
           const ws = await getSimpleWorkspace(resume.id);
           configJsonUrl = ws.data?.configJsonUrl;
         }
+        if (!configJsonUrl) throw new Error("Backend did not return configJsonUrl — template config not available");
 
-        if (!configJsonUrl) {
-          throw new Error(
-            "Backend did not return configJsonUrl — template config not available"
-          );
-        }
         const cfg = await loadConfigJson(configJsonUrl);
         if (cancelled) return;
-
         setConfig(cfg);
 
         // 3. Wallet balance
-        try {
-          const w = await getWalletBalance();
-          setBalance(w.data?.balance ?? 0);
-        } catch {
-          setBalance(null);
-        }
+        await fetchBalance();
       } catch (err) {
         if (cancelled) return;
         toast.error(err.message || "Failed to prepare editor");
@@ -177,10 +188,9 @@ const Editor = () => {
         if (!cancelled) setCreating(false);
       }
     })();
-    return () => {
-      cancelled = true;
-    };
-  }, [templateId, templateTitle, navigate]);
+
+    return () => { cancelled = true; };
+  }, [templateId, templateTitle, existingResumeId, navigate]);
 
   // ─────────────────────────────────────────────
   // PERSIST CONFIG JSON
@@ -203,20 +213,14 @@ const Editor = () => {
     setCompiling(true);
     try {
       await persistConfig();
-
       const res = await compileResume(resumeId);
       const images = res.data?.images || [];
-      // Convert base64 PNG buffers to data URLs
       const urls = images.map((b64) => `data:image/png;base64,${b64}`);
       setPreviewImageUrls(urls);
-
-      if (urls.length === 0) {
-        toast.warn("Compile succeeded but returned no pages");
-      }
+      setIsDirty(false); // Compiled state matches saved state
+      if (urls.length === 0) toast.warn("Compile succeeded but returned no pages");
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || err.message || "Compile failed"
-      );
+      toast.error(err.response?.data?.message || err.message || "Compile failed");
     } finally {
       setCompiling(false);
     }
@@ -225,18 +229,15 @@ const Editor = () => {
   const scheduleAutoCompile = useCallback(() => {
     if (!autoCompile) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      doCompile();
-    }, AUTO_COMPILE_MS);
+    debounceRef.current = setTimeout(() => { doCompile(); }, AUTO_COMPILE_MS);
   }, [autoCompile, doCompile]);
 
   // ─────────────────────────────────────────────
   // FORM CHANGE HANDLERS
   // ─────────────────────────────────────────────
   const handleChange = (path, value) => {
-    setConfig((prev) =>
-      setValueAtPath(prev, [...path, "current_value"], value)
-    );
+    setConfig((prev) => setValueAtPath(prev, [...path, "current_value"], value));
+    setIsDirty(true);
     scheduleAutoCompile();
   };
 
@@ -244,11 +245,9 @@ const Editor = () => {
     setConfig((prev) => {
       const items = getValueAtPath(prev, path);
       if (!Array.isArray(items) || items.length === 0) return prev;
-      return setValueAtPath(prev, path, [
-        ...items,
-        createEmptyConfigNode(items[0]),
-      ]);
+      return setValueAtPath(prev, path, [...items, createEmptyConfigNode(items[0])]);
     });
+    setIsDirty(true);
     scheduleAutoCompile();
   };
 
@@ -256,17 +255,14 @@ const Editor = () => {
     setConfig((prev) => {
       const items = getValueAtPath(prev, path);
       if (!Array.isArray(items) || items.length <= 1) return prev;
-      return setValueAtPath(
-        prev,
-        path,
-        items.filter((_, itemIndex) => itemIndex !== index)
-      );
+      return setValueAtPath(prev, path, items.filter((_, itemIndex) => itemIndex !== index));
     });
+    setIsDirty(true);
     scheduleAutoCompile();
   };
 
   // ─────────────────────────────────────────────
-  // DOWNLOAD (credit deduction on first download)
+  // DOWNLOAD with confirmation & conditional cost
   // ─────────────────────────────────────────────
   const handleDownload = async () => {
     if (!resumeId) return;
@@ -275,29 +271,36 @@ const Editor = () => {
       return;
     }
 
+    const firstDownload = !isAlreadyDownloaded(resumeId);
+    const needsCredits = isDirty || firstDownload;
+
+    if (needsCredits) {
+      if (balance !== null && balance < DOWNLOAD_RESUME_CREDIT_COST) {
+        toast.error(`Insufficient credits. ${DOWNLOAD_RESUME_CREDIT_COST} credits needed.`);
+        navigate("/credits/buy", { state: { from: "/editor", needed: DOWNLOAD_RESUME_CREDIT_COST } });
+        return;
+      }
+      const message = isDirty
+        ? `This resume has been modified. Downloading it will cost ${DOWNLOAD_RESUME_CREDIT_COST} credits. Continue?`
+        : `Downloading this resume for the first time will cost ${DOWNLOAD_RESUME_CREDIT_COST} credits. Continue?`;
+      if (!window.confirm(message)) {
+        return;
+      }
+    }
+
     setDownloading(true);
     try {
       const res = await downloadResume(resumeId);
       const downloadUrlOrBase64 = res.data?.downloadUrl;
-
       if (!downloadUrlOrBase64) throw new Error("No download payload returned");
 
-      // Heuristic: if it looks like a base64 PDF (starts with JVBER which is "%PDF"), decode it.
-      if (
-        downloadUrlOrBase64.startsWith("JVBER") ||
-        (downloadUrlOrBase64.length > 2000 &&
-          !downloadUrlOrBase64.startsWith("http"))
-      ) {
-        // Decode base64 → Blob → trigger download
+      if (downloadUrlOrBase64.startsWith("JVBER") || (downloadUrlOrBase64.length > 2000 && !downloadUrlOrBase64.startsWith("http"))) {
         const byteChars = atob(downloadUrlOrBase64);
         const byteNumbers = new Array(byteChars.length);
-        for (let i = 0; i < byteChars.length; i++) {
-          byteNumbers[i] = byteChars.charCodeAt(i);
-        }
+        for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: "application/pdf" });
         const url = URL.createObjectURL(blob);
-
         const a = document.createElement("a");
         a.href = url;
         a.download = `${templateTitle || "resume"}.pdf`;
@@ -306,35 +309,26 @@ const Editor = () => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       } else {
-        // It's an actual URL — open in new tab
         window.open(downloadUrlOrBase64, "_blank");
       }
 
-      try {
-        const w = await getWalletBalance();
-        setBalance(w.data?.balance ?? 0);
-        // Notify navbar
-        window.dispatchEvent(new Event("touchsimply:balance-changed"));
-      } catch {
-        // ignore
+      if (needsCredits) {
+        try {
+          const w = await getWalletBalance();
+          setBalance(w.data?.balance ?? 0);
+          window.dispatchEvent(new Event("touchsimply:balance-changed"));
+        } catch { /* ignore */ }
+        markDownloaded(resumeId);
+        toast.success(`Downloaded (${DOWNLOAD_RESUME_CREDIT_COST} credits deducted)`);
+      } else {
+        toast.success("Downloaded");
       }
-
-      const firstTime = !isAlreadyDownloaded(resumeId);
-      markDownloaded(resumeId);
-      toast.success(
-        firstTime
-          ? `Downloaded (${DOWNLOAD_RESUME_CREDIT_COST} credits deducted)`
-          : "Downloaded"
-      );
+      setIsDirty(false);
     } catch (err) {
       const status = err.response?.status;
       if (status === 402 || status === 400) {
-        toast.error(
-          `Insufficient credits. ${DOWNLOAD_RESUME_CREDIT_COST} credits needed. Redirecting...`
-        );
-        navigate("/credits/buy", {
-          state: { from: "/editor", needed: DOWNLOAD_RESUME_CREDIT_COST },
-        });
+        toast.error(`Insufficient credits. ${DOWNLOAD_RESUME_CREDIT_COST} credits needed. Redirecting...`);
+        navigate("/credits/buy", { state: { from: "/editor", needed: DOWNLOAD_RESUME_CREDIT_COST } });
       } else {
         toast.error(err.response?.data?.message || "Download failed");
       }
@@ -352,12 +346,8 @@ const Editor = () => {
       const res = await cloneResume(templateId, templateTitle || "Resume");
       const newId = res.data?.resume?.id;
       if (!newId) throw new Error("Clone did not return new resume");
-      // Clear the session key so bootstrap creates a fresh entry for the clone
       sessionStorage.removeItem(`${EDITOR_SESSION_KEY}-${templateId}`);
-      // Seed the session with the new resumeId
-      sessionStorage.setItem(`${EDITOR_SESSION_KEY}-${templateId}`, JSON.stringify({
-        resumeId: newId, templateId,
-      }));
+      sessionStorage.setItem(`${EDITOR_SESSION_KEY}-${templateId}`, JSON.stringify({ resumeId: newId, templateId }));
       toast.success("Cloned! Opening new resume...");
       navigate("/editor", {
         state: { templateId, templateTitle: `${templateTitle} (Clone)` },
@@ -382,16 +372,13 @@ const Editor = () => {
     );
   }
 
+  const downloadLocked = balance !== null && balance < DOWNLOAD_RESUME_CREDIT_COST;
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* TOP BAR */}
       <div className="flex items-center justify-between px-4 py-3 bg-white border-b shadow-sm">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate("/templates")}
-            className="p-2 hover:bg-gray-100 rounded-lg"
-            title="Back to templates"
-          >
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-lg" title="Go back">
             <ArrowLeft size={18} />
           </button>
           <div>
@@ -400,6 +387,7 @@ const Editor = () => {
             </h1>
             <p className="text-[11px] text-gray-500">
               {resumeId ? `ID: ${resumeId.slice(0, 8)}…` : ""}
+              {isDirty && <span className="ml-2 text-amber-600 font-medium">• Unsaved changes</span>}
             </p>
           </div>
         </div>
@@ -408,21 +396,22 @@ const Editor = () => {
             <span className="font-bold">{balance ?? "—"}</span>
             <span>credits</span>
           </div>
-          <button
-            onClick={handleClone}
-            className="flex items-center gap-1 text-xs bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50"
-          >
+          <button onClick={handleClone} className="flex items-center gap-1 text-xs bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50">
             <Copy size={13} /> Clone
           </button>
-          {saving && (
-            <span className="text-[11px] text-gray-400">Saving…</span>
-          )}
+          {saving && <span className="text-[11px] text-gray-400">Saving…</span>}
         </div>
       </div>
 
-      {/* SPLIT PANES */}
+      {downloadLocked && (
+        <div className="flex items-center justify-center gap-2 bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-900">
+          <AlertTriangle size={14} />
+          You need {DOWNLOAD_RESUME_CREDIT_COST} credits to download. Your balance is low.
+          <button onClick={() => navigate("/credits/buy")} className="font-bold underline">Buy credits</button>
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        {/* LEFT: form */}
         <div className="w-full md:w-1/2 overflow-y-auto p-4 md:p-6">
           {config ? (
             <DynamicForm
@@ -436,15 +425,14 @@ const Editor = () => {
           )}
         </div>
 
-        {/* RIGHT: preview */}
         <div className="w-full md:w-1/2 p-4 md:p-6 border-t md:border-t-0 md:border-l bg-white">
           <WatermarkedPreview
             previewImageUrls={previewImageUrls}
             compiling={compiling}
             onCompile={doCompile}
             onDownload={handleDownload}
-            downloadDisabled={downloading || previewImageUrls.length === 0 || (balance !== null && balance < DOWNLOAD_RESUME_CREDIT_COST)}
-            downloadLocked={balance !== null && balance < DOWNLOAD_RESUME_CREDIT_COST}
+            downloadDisabled={downloading || previewImageUrls.length === 0 || downloadLocked}
+            downloadLocked={downloadLocked}
             autoCompileEnabled={autoCompile}
             onToggleAutoCompile={() => setAutoCompile((v) => !v)}
           />

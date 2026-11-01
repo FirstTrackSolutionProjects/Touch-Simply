@@ -2,18 +2,21 @@ import React from "react";
 import { FaUser } from "react-icons/fa";
 
 const UserAvatar = ({ user, size = "md", className = "" }) => {
-  // Get user data from props
-  const { name = "", picture = null } = user || {};
+  // Support different user data structures:
+  // 1. From `checkAuth`: `user` object has first_name, last_name, avatar_url
+  // 2. From `login` direct response: `user` object has `name`, `picture`
+  const displayName = user?.first_name
+    ? `${user.first_name} ${user.last_name || ""}`.trim()
+    : user?.name || "User";
+  const picture = user?.avatar_url || user?.picture;
 
-  // Get initials from name
   const getInitials = () => {
-    if (!name) return "U";
-    const nameParts = name.trim().split(" ");
+    if (!displayName) return "U";
+    const nameParts = displayName.trim().split(/\s+/);
     if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
     return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
   };
 
-  // Size classes
   const sizeClasses = {
     xs: "w-6 h-6 text-xs",
     sm: "w-8 h-8 text-sm",
@@ -24,32 +27,27 @@ const UserAvatar = ({ user, size = "md", className = "" }) => {
 
   const sizeClass = sizeClasses[size] || sizeClasses.md;
 
-  // If picture exists, show image
   if (picture) {
     return (
       <img
         src={picture}
-        alt={name || "User"}
+        alt={displayName}
         className={`rounded-full object-cover border-2 border-white/50 ${sizeClass} ${className}`}
         onError={(e) => {
-          // If image fails to load, show initials instead
           e.target.style.display = "none";
           const parent = e.target.parentElement;
           const fallback = parent.querySelector(".avatar-fallback");
-          if (fallback) {
-            fallback.style.display = "flex";
-          }
+          if (fallback) fallback.style.display = "flex";
         }}
       />
     );
   }
 
-  // Fallback: Show initials or default icon
   return (
     <div
-      className={`rounded-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold ${sizeClass} ${className} avatar-fallback`}
+      className={`rounded-full flex items-center justify-center bg-gradient-to-r from-brand-purple to-brand-indigo text-white font-semibold ${sizeClass} ${className} avatar-fallback`}
     >
-      {name ? getInitials() : <FaUser size={size === "xs" ? 10 : 14} />}
+      {displayName ? getInitials() : <FaUser size={size === "xs" ? 10 : 14} />}
     </div>
   );
 };

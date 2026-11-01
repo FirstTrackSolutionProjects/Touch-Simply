@@ -1,4 +1,3 @@
-// Touch-Simply/src/pages/BuyCredits.jsx
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -9,11 +8,11 @@ import {
   getWalletBalance,
 } from "../services/walletService";
 
-// Conversion: 1 credit = ₹7
 const RATE_PER_CREDIT = 7;
+const MIN_CREDITS_PURCHASE = 4;
 
 const PACKS = [
-  { credits: 4, label: "Starter" },
+  { credits: MIN_CREDITS_PURCHASE, label: "Starter" },
   { credits: 10, label: "Popular" },
   { credits: 25, label: "Pro" },
   { credits: 50, label: "Business" },
@@ -22,14 +21,18 @@ const PACKS = [
 const BuyCredits = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [selected, setSelected] = useState(4);
+  const [selected, setSelected] = useState(MIN_CREDITS_PURCHASE);
   const [custom, setCustom] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const credits = custom ? Math.max(1, parseInt(custom) || 1) : selected;
-  const priceINR = credits * RATE_PER_CREDIT;
+  const credits = custom ? parseInt(custom, 10) : selected;
+  const priceINR = credits > 0 ? credits * RATE_PER_CREDIT : 0;
 
   const handleBuy = async () => {
+    if (isNaN(credits) || credits < MIN_CREDITS_PURCHASE) {
+        toast.error(`You must purchase a minimum of ${MIN_CREDITS_PURCHASE} credits.`);
+        return;
+    }
     setLoading(true);
     try {
       const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
@@ -62,7 +65,6 @@ const BuyCredits = () => {
             toast.success(
               `Credits added! New balance: ${w.data?.balance}`
             );
-            // Notify navbar to refresh balance
             window.dispatchEvent(new Event("touchsimply:balance-changed"));
             navigate(location.state?.from || "/dashboard");
           } catch {
@@ -82,6 +84,16 @@ const BuyCredits = () => {
       setLoading(false);
     }
   };
+  
+  const handleCustomChange = (e) => {
+    const value = e.target.value;
+    setCustom(value);
+    if (value === "") {
+      setSelected(MIN_CREDITS_PURCHASE);
+    } else {
+      setSelected(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6">
@@ -94,7 +106,6 @@ const BuyCredits = () => {
           {4 * RATE_PER_CREDIT}).
         </p>
 
-        {/* Packs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           {PACKS.map((p) => (
             <button
@@ -118,26 +129,27 @@ const BuyCredits = () => {
           ))}
         </div>
 
-        {/* Custom amount */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Or enter custom credits
+            Or enter a custom amount (min. {MIN_CREDITS_PURCHASE})
           </label>
           <input
             type="number"
-            min={1}
+            min={MIN_CREDITS_PURCHASE}
             value={custom}
-            onChange={(e) => setCustom(e.target.value)}
-            placeholder="e.g. 15"
+            onChange={handleCustomChange}
+            placeholder={`e.g. 15`}
             className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 outline-none"
           />
+          {custom && credits < MIN_CREDITS_PURCHASE && (
+            <p className="text-xs text-red-500 mt-2">Minimum purchase is {MIN_CREDITS_PURCHASE} credits.</p>
+          )}
         </div>
 
-        {/* Total */}
         <div className="flex items-center justify-between bg-gray-50 rounded-xl p-4 mb-6">
           <div>
             <p className="text-xs text-gray-500">You will receive</p>
-            <p className="text-lg font-bold">{credits} credits</p>
+            <p className="text-lg font-bold">{isNaN(credits) || credits < MIN_CREDITS_PURCHASE ? "—" : credits} credits</p>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-500">Total</p>
@@ -149,7 +161,7 @@ const BuyCredits = () => {
 
         <button
           onClick={handleBuy}
-          disabled={loading}
+          disabled={loading || isNaN(credits) || credits < MIN_CREDITS_PURCHASE}
           className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3.5 rounded-xl font-semibold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {loading ? (

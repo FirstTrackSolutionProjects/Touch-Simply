@@ -1,397 +1,141 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  Send,
-  Sparkles,
-  User,
-  ArrowLeft,
-  MoreVertical,
-  Paperclip,
-  Mic,
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { LifeBuoy, Send, ChevronLeft, CheckCircle2, Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext";
 
-const BOT_DELAY = 600;
+const TicketCategory = ({ name, icon: Icon, isSelected, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
+      isSelected ? "border-brand-secondary bg-brand-secondary/10 shadow-inner" : "border-neutral-border hover:border-brand-secondary/50 hover:bg-neutral-bg"
+    }`}
+  >
+    <div className={`p-2 rounded-full ${isSelected ? 'bg-brand-secondary/20 text-brand-secondary' : 'bg-neutral-bg text-neutral-text-secondary'}`}>
+      <Icon size={22} />
+    </div>
+    <span className={`text-sm font-semibold ${isSelected ? "text-brand-secondary" : "text-neutral-text-primary"}`}>{name}</span>
+  </button>
+);
 
-const OPTIONS = {
-  Resume: [
-    "Create Resume",
-    "ATS Resume",
-    "Modern Templates",
-    "Download PDF",
-  ],
+const SupportPage = () => {
+  const { user } = useAuth();
+  const [category, setCategory] = useState(null);
+  const [subject, setSubject] = useState("");
+  const [description, setDescription] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  Portfolio: [
-    "Create Portfolio",
-    "Portfolio Templates",
-    "Customize Portfolio",
-  ],
+  const categories = [
+    { name: "Account & Login", icon: LifeBuoy },
+    { name: "Payments & Credits", icon: LifeBuoy },
+    { name: "Bug Report", icon: LifeBuoy },
+    { name: "Feature Request", icon: LifeBuoy },
+    { name: "Other", icon: LifeBuoy },
+  ];
 
-  Presentation: [
-    "Create PPT",
-    "Export PPT",
-    "Themes",
-  ],
-
-  Account: [
-    "Login Issue",
-    "Payment Issue",
-    "Subscription",
-  ],
-};
-
-export default function ChatBox() {
-  const navigate = useNavigate();
-
-  const bottomRef = useRef(null);
-
-  const [messages, setMessages] = useState([]);
-  const [options, setOptions] = useState([]);
-  const [step, setStep] = useState("MAIN");
-  const [input, setInput] = useState("");
-
-  // =========================
-  // SCROLL TO TOP WHEN PAGE LOAD
-  // =========================
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-  // =========================
-  // ADD BOT MESSAGE
-  // =========================
-  const addBot = (text) => {
-    setMessages((prev) => [
-      ...prev,
-      {
-        from: "bot",
-        text,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!category || !subject.trim() || !description.trim()) {
+      toast.error("Please select a category and fill in all fields.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setSubmitted(true);
+      toast.success("Your support ticket has been created!");
+    } catch (error) {
+      toast.error("Failed to submit ticket. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // =========================
-  // ADD USER MESSAGE
-  // =========================
-  const addUser = (text) => {
-    setMessages((prev) => [
-      ...prev,
-      {
-        from: "user",
-        text,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
-  };
-
-  // =========================
-  // AUTO SCROLL CHAT
-  // =========================
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
-  }, [messages, options]);
-
-  // =========================
-  // INITIAL BOT MESSAGE
-  // =========================
-  useEffect(() => {
-    const timer1 = setTimeout(() => {
-      addBot("👋 Welcome to Touch Simply AI");
-
-      const timer2 = setTimeout(() => {
-        addBot("How can I help you today?");
-
-        setOptions([
-          "Resume",
-          "Portfolio",
-          "Presentation",
-          "Account",
-          "Other",
-        ]);
-      }, BOT_DELAY);
-
-      return () => clearTimeout(timer2);
-    }, BOT_DELAY);
-
-    return () => clearTimeout(timer1);
-  }, []);
-
-  // =========================
-  // HANDLE OPTIONS
-  // =========================
-  const handleOption = (option) => {
-    addUser(option);
-
-    setOptions([]);
-
-    setTimeout(() => {
-      // MAIN MENU
-      if (step === "MAIN") {
-        if (option === "Other") {
-          addBot("Please type your question below.");
-
-          setStep("INPUT");
-        } else {
-          addBot(`Select ${option} option`);
-
-          setOptions(OPTIONS[option]);
-
-          setStep(option);
-        }
-      }
-
-      // SUB OPTIONS
-      else {
-        let reply =
-          `✨ ${option} feature is available in Touch Simply.`;
-
-        // CUSTOM REPLIES
-        if (option === "Create Resume") {
-          reply =
-            "You can create professional ATS friendly resumes easily.";
-        }
-
-        if (option === "Create Portfolio") {
-          reply =
-            "Portfolio builder helps you create modern portfolio websites.";
-        }
-
-        if (option === "Create PPT") {
-          reply =
-            "Presentation builder supports beautiful slides with export options.";
-        }
-
-        if (option === "Download PDF") {
-          reply =
-            "You can export your resume as high quality PDF instantly.";
-        }
-
-        addBot(reply);
-
-        setTimeout(() => {
-          addBot("Anything else?");
-
-          setOptions([
-            "Resume",
-            "Portfolio",
-            "Presentation",
-            "Account",
-            "Other",
-          ]);
-
-          setStep("MAIN");
-        }, BOT_DELAY);
-      }
-    }, BOT_DELAY);
-  };
-
-  // =========================
-  // SEND CUSTOM MESSAGE
-  // =========================
-  const sendMessage = () => {
-    if (!input.trim()) return;
-
-    addUser(input);
-
-    const text = input.toLowerCase();
-
-    setInput("");
-
-    setTimeout(() => {
-      if (text.includes("resume")) {
-        addBot(
-          "You can create ATS friendly resumes using modern templates."
-        );
-      } else if (text.includes("portfolio")) {
-        addBot(
-          "You can build beautiful portfolios very easily."
-        );
-      } else if (text.includes("presentation")) {
-        addBot(
-          "Presentation builder supports PPT and PDF export."
-        );
-      } else if (text.includes("payment")) {
-        addBot(
-          "Please check your payment/subscription section."
-        );
-      } else if (text.includes("template")) {
-        addBot(
-          "We provide modern, creative and ATS optimized templates."
-        );
-      } else {
-        addBot(
-          "Our support team will help you shortly 🚀"
-        );
-      }
-
-      setTimeout(() => {
-        addBot("Anything else?");
-
-        setOptions([
-          "Resume",
-          "Portfolio",
-          "Presentation",
-          "Account",
-          "Other",
-        ]);
-
-        setStep("MAIN");
-      }, BOT_DELAY);
-    }, BOT_DELAY);
-  };
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-neutral-bg flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-10 text-center border border-neutral-border">
+          <div className="mx-auto w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+            <CheckCircle2 size={32} />
+          </div>
+          <h1 className="text-2xl font-bold text-neutral-text-primary mt-4">Ticket Submitted!</h1>
+          <p className="text-neutral-text-secondary mt-2">We've received your request. Our support team will get back to you shortly at <span className="font-semibold text-neutral-text-primary">{user?.email}</span>.</p>
+          <Link to="/dashboard" className="mt-8 inline-block w-full bg-brand-secondary text-white font-semibold py-3 rounded-xl hover:bg-brand-secondary-dark transition-colors">
+            Back to Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="h-screen w-full bg-[#efeae2] flex flex-col overflow-hidden">
-
-      {/* ================= HEADER ================= */}
-      <div className="bg-[#075E54] text-white px-4 py-3 flex items-center justify-between shadow-md sticky top-0 z-20">
-
-        <div className="flex items-center gap-3">
-
-          {/* BACK BUTTON */}
-          <button
-            onClick={() => navigate(-1)}
-            className="hover:bg-white/10 p-2 rounded-full transition"
-          >
-            <ArrowLeft size={20} />
-          </button>
-
-          {/* LOGO */}
-          <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center">
-            <Sparkles size={20} />
-          </div>
-
-          {/* TITLE */}
-          <div>
-            <h2 className="font-semibold text-[15px]">
-              Touch Simply AI
-            </h2>
-
-            <p className="text-xs text-green-200">
-              online
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-neutral-bg via-brand-secondary/5 to-brand-primary/5 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-8">
+          <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm font-medium text-neutral-text-secondary hover:text-brand-secondary mb-4">
+            <ChevronLeft size={16} />
+            Back to Dashboard
+          </Link>
+          <div className="text-center">
+            <h1 className="text-3xl md:text-4xl font-bold text-neutral-text-primary">Support Center</h1>
+            <p className="mt-2 text-md text-neutral-text-secondary">How can we help you today? Submit a ticket below.</p>
           </div>
         </div>
 
-        {/* MENU */}
-        <button className="hover:bg-white/10 p-2 rounded-full transition">
-          <MoreVertical size={20} />
-        </button>
-      </div>
-
-      {/* ================= CHAT BODY ================= */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
-
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${
-              msg.from === "user"
-                ? "justify-end"
-                : "justify-start"
-            }`}
-          >
-            <div
-              className={`max-w-[82%] px-4 py-2 rounded-2xl shadow text-sm relative ${
-                msg.from === "user"
-                  ? "bg-[#dcf8c6] rounded-br-sm"
-                  : "bg-white rounded-bl-sm"
-              }`}
-            >
-              <div className="flex items-start gap-2">
-
-                {/* ICON */}
-                {msg.from === "bot" ? (
-                  <Sparkles
-                    size={15}
-                    className="text-purple-600 mt-1"
-                  />
-                ) : (
-                  <User
-                    size={15}
-                    className="text-gray-600 mt-1"
-                  />
-                )}
-
-                {/* TEXT */}
-                <div>
-                  <p className="text-gray-800">
-                    {msg.text}
-                  </p>
-
-                  <p className="text-[10px] text-gray-500 text-right mt-1">
-                    {msg.time}
-                  </p>
-                </div>
+        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-neutral-border/60">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div>
+              <label className="text-base font-semibold text-neutral-text-primary">1. Select a Topic</label>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-3">
+                {categories.map(c => (
+                  <TicketCategory key={c.name} name={c.name} icon={c.icon} isSelected={category === c.name} onClick={() => setCategory(c.name)} />
+                ))}
               </div>
             </div>
-          </div>
-        ))}
 
-        {/* ================= OPTIONS ================= */}
-        {options.length > 0 && (
-          <div className="flex flex-wrap gap-2 pt-2">
+            <div>
+              <label htmlFor="subject" className="text-base font-semibold text-neutral-text-primary">2. Subject</label>
+              <input
+                id="subject"
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="A short summary of your issue"
+                className="mt-2 w-full rounded-xl border border-neutral-border px-4 py-3 outline-none transition focus:border-brand-secondary focus:ring-2 focus:ring-brand-secondary/20"
+                maxLength={100}
+                required
+              />
+            </div>
 
-            {options.map((opt) => (
-              <button
-                key={opt}
-                onClick={() => handleOption(opt)}
-                className="bg-white border border-gray-300 px-4 py-2 rounded-full text-sm hover:bg-green-50 hover:border-green-400 transition"
-              >
-                {opt}
-              </button>
-            ))}
-          </div>
-        )}
+            <div>
+              <label htmlFor="description" className="text-base font-semibold text-neutral-text-primary">3. Describe Your Issue</label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Please provide as much detail as possible..."
+                rows={6}
+                className="mt-2 w-full rounded-xl border border-neutral-border px-4 py-3 outline-none transition focus:border-brand-secondary focus:ring-2 focus:ring-brand-secondary/20 resize-y"
+                maxLength={1000}
+                required
+              />
+            </div>
 
-        <div ref={bottomRef} />
-      </div>
-
-      {/* ================= INPUT AREA ================= */}
-      <div className="bg-[#f0f2f5] px-3 py-2 flex items-center gap-2 sticky bottom-0">
-
-        {/* ATTACH */}
-        <button className="text-gray-500 hover:text-gray-700">
-          <Paperclip size={22} />
-        </button>
-
-        {/* INPUT */}
-        <div className="flex-1 bg-white rounded-full flex items-center px-4 py-2 shadow-sm">
-
-          <input
-            value={input}
-            onChange={(e) =>
-              setInput(e.target.value)
-            }
-            onKeyDown={(e) =>
-              e.key === "Enter" &&
-              sendMessage()
-            }
-            placeholder="Type a message"
-            className="flex-1 outline-none text-sm bg-transparent"
-          />
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-brand-secondary to-brand-primary text-white font-semibold py-3.5 rounded-xl hover:scale-[1.02] transition-transform duration-200 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-brand-secondary/20"
+            >
+              {submitting ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
+              {submitting ? "Submitting Ticket..." : "Submit Ticket"}
+            </button>
+          </form>
         </div>
-
-        {/* SEND BUTTON */}
-        <button
-          onClick={sendMessage}
-          className="bg-[#075E54] text-white p-3 rounded-full hover:scale-105 transition"
-        >
-          {input ? (
-            <Send size={18} />
-          ) : (
-            <Mic size={18} />
-          )}
-        </button>
       </div>
     </div>
   );
-}
+};
+
+export default SupportPage;

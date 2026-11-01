@@ -1,58 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
-/* ================= SCROLLBAR STYLING ================= */
+@theme {
+  --font-sans: "Poppins", sans-serif;
 
-/* For Webkit browsers (Chrome, Safari, Edge) */
+  /* Brand Colors: Red and Black */
+  --color-brand-red: #E60000;      /* The vibrant red from the logo */
+  --color-brand-red-hover: #CC0000;
+  --color-brand-black: #0F0F0F;    /* Near black for softer contrast */
+  
+  /* Neutral palette */
+  --color-neutral-bg: #FAFAFA;
+  --color-neutral-white: #FFFFFF;
+  --color-neutral-text-primary: #111111;
+  --color-neutral-text-secondary: #555555;
+  --color-neutral-border: #E5E5E5;
+}
+
+/* ================= SCROLLBAR STYLING ================= */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
+  background: var(--color-neutral-bg);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #7c3aed, #4f46e5);
+  background: var(--color-brand-black);
   border-radius: 10px;
   transition: all 0.3s ease;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #6d28d9, #4338ca);
-  transform: scale(1.05);
-}
-
-/* For dark backgrounds */
-.dark-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.dark-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #8b5cf6, #6366f1);
-}
-
-/* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #7c3aed rgba(255, 255, 255, 0.05);
-}
-
-/* Firefox dark variant */
-.dark-scrollbar {
-  scrollbar-color: #8b5cf6 rgba(255, 255, 255, 0.03);
-}
-
-/* Hide scrollbar when not hovering (optional) */
-.hide-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-
-.hide-scrollbar::-webkit-scrollbar-thumb {
-  background: transparent;
-}
-
-.hide-scrollbar:hover::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #7c3aed, #4f46e5);
+  background: var(--color-brand-red);
 }

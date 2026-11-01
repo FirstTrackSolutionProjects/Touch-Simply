@@ -4,25 +4,21 @@ import { ArrowRight } from "lucide-react";
 
 const ToolCard = ({ tool }) => {
   return (
-    <div className="group relative overflow-hidden bg-white/[0.04] border border-white/10 rounded-3xl p-6 transition-all duration-300 hover:-translate-y-2 hover:border-purple-500/30 flex flex-col">
-      {/* ✅ Add pointer-events-none here */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition pointer-events-none"></div>
-
-      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${tool.gradient} flex items-center justify-center shrink-0`}>
+    <div className="group relative bg-white border border-neutral-border rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col">
+      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center text-white shrink-0 shadow-md`}>
         {tool.icon}
       </div>
 
-      <div className="mt-6 flex-1">
-        <h3 className="text-xl font-semibold">{tool.title}</h3>
-        <p className="text-gray-400 mt-3 leading-relaxed text-sm">{tool.desc}</p>
+      <div className="mt-5 flex-1">
+        <h3 className="text-lg font-bold text-neutral-text-primary">{tool.title}</h3>
+        <p className="text-neutral-text-secondary mt-2 text-sm leading-relaxed">{tool.desc}</p>
       </div>
 
       <Link
         to={tool.link}
-        className={`mt-8 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r ${tool.gradient} text-white font-medium shadow-lg hover:opacity-90 transition hover:scale-105 w-full sm:w-auto relative z-10`}
+        className="mt-6 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-bg text-neutral-text-primary font-semibold text-sm group-hover:bg-brand-black group-hover:text-white transition-colors duration-300 w-full"
       >
-        Open Tool
-        <ArrowRight size={18} />
+        Open Tool <ArrowRight size={16} />
       </Link>
     </div>
   );
