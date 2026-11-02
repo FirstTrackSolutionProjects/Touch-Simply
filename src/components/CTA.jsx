@@ -15,7 +15,7 @@ const CTA = () => {
           Create a job-winning resume in minutes with modern templates and real-time preview.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4 mt-10">
-          <Link to="/editor" className="group flex items-center justify-center gap-2 bg-brand-black text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:scale-105 transition-all">
+          <Link to="/templates?type=resume" className="group flex items-center justify-center gap-2 bg-brand-black text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:scale-105 transition-all">
             <FaRocket /> Start Building
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </Link>

@@ -39,7 +39,7 @@ const Dashboard = () => {
 
   // ================= TOOLS =================
   const tools = [
-    { title: "Resume Builder", desc: "Create ATS friendly resumes with modern templates.", icon: <FileText size={24} />, link: "/editor", gradient: "from-brand-black to-gray-800" },
+    { title: "Resume Builder", desc: "Create ATS friendly resumes with modern templates.", icon: <FileText size={24} />, link: "/templates?type=resume", gradient: "from-brand-black to-gray-800" },
     { title: "Portfolio Builder", desc: "Build beautiful personal portfolio websites.", icon: <Briefcase size={24} />, link: "/portfolio", gradient: "from-brand-red to-red-700" },
     { title: "Logo Maker", desc: "Design premium logos instantly.", icon: <Palette size={24} />, link: "/logo", gradient: "from-gray-700 to-gray-900" },
     { title: "Presentation Maker", desc: "Generate modern presentations easily.", icon: <Presentation size={24} />, link: "/presentation", gradient: "from-red-600 to-brand-red" },
@@ -55,7 +55,7 @@ const Dashboard = () => {
 
   // ================= RECENT =================
   const recent = [
-    { id: 1, title: "Modern Resume", type: "Resume", route: "/editor", image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80" },
+    { id: 1, title: "Modern Resume", type: "Resume", route: "/templates?type=resume", image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80" },
     { id: 2, title: "Creative Portfolio", type: "Portfolio", route: "/portfolio", image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80" },
     { id: 3, title: "Startup Logo", type: "Logo", route: "/logo", image: "https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=800&q=80" },
   ];
@@ -219,7 +219,7 @@ const Dashboard = () => {
               <Bell size={20} className="text-neutral-text-secondary" />
               <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-brand-red border-2 border-white"></span>
             </button>
-            <Link to="/editor" className="hidden sm:flex px-5 py-2.5 rounded-xl bg-brand-black text-white text-sm font-semibold hover:bg-black transition shadow-md">
+            <Link to="/templates?type=resume" className="hidden sm:flex px-5 py-2.5 rounded-xl bg-brand-black text-white text-sm font-semibold hover:bg-black transition shadow-md">
               Create
             </Link>
           </div>
@@ -248,7 +248,7 @@ const Dashboard = () => {
                   Create professional resumes, portfolios, logos and presentations with AI powered tools.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                  <Link to="/editor" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-brand-red text-white font-semibold hover:bg-brand-red-hover hover:-translate-y-0.5 transition-all shadow-lg shadow-brand-red/30">
+                  <Link to="/templates?type=resume" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-brand-red text-white font-semibold hover:bg-brand-red-hover hover:-translate-y-0.5 transition-all shadow-lg shadow-brand-red/30">
                     Create Resume <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
                   <Link to="/portfolio" className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl border border-white/20 bg-white/5 hover:bg-white/15 hover:-translate-y-0.5 backdrop-blur text-white font-semibold transition-all">

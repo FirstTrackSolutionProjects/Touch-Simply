@@ -124,7 +124,7 @@ const Editor = () => {
 
     if (!templateId) {
       toast.error("No template selected. Redirecting...");
-      navigate("/templates");
+      navigate("/templates?type=resume", { replace: true });
       return;
     }
 

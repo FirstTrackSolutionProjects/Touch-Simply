@@ -97,7 +97,7 @@ const TemplatesPreview = () => {
           </p>
         </div>
 
-        {renderSection("Resume Templates", resumeTemplates, "/editor")}
+        {renderSection("Resume Templates", resumeTemplates, "/templates?type=resume")}
         {renderSection("Logo Templates", logoTemplates, "/logo")}
         {renderSection("Portfolio Templates", portfolioTemplates, "/portfolio")}
       </div>

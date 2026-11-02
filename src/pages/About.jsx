@@ -205,7 +205,7 @@ const About = () => {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                to="/editor"
+                to="/templates?type=resume"
                 className="group inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-brand-red text-white font-semibold hover:bg-brand-red-hover hover:-translate-y-0.5 transition-all shadow-lg shadow-brand-red/30"
               >
                 Create Resume <FaArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
