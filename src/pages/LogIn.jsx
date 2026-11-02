@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa";
-import { loginUser, googleLoginUser } from "../services/authServices";
+import { getAuthResult, loginUser, googleLoginUser } from "../services/authServices";
 import { GoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
@@ -25,9 +25,10 @@ const Login = () => {
     setError("");
     try {
       const data = await loginUser(form);
+      const auth = getAuthResult(data);
       const user = await login(
-        data.token || data.data?.tokens?.accessToken,
-        data.user || data.data?.user
+        auth.token,
+        auth.user
       );
       if (!user) throw new Error("Could not verify your login. Please try again.");
       const destination = location.state?.from;
@@ -174,9 +175,10 @@ const Login = () => {
                   onSuccess={async (credentialResponse) => {
                     try {
                       const data = await googleLoginUser(credentialResponse.credential);
+                      const auth = getAuthResult(data);
                       await login(
-                        data.token || data.data?.tokens?.accessToken,
-                        data.user || data.data?.user
+                        auth.token,
+                        auth.user
                       );
                       const destination = location.state?.from;
                       navigate(destination?.pathname || "/dashboard", { state: destination?.state });
