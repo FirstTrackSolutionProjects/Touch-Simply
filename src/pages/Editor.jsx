@@ -123,7 +123,7 @@ const Editor = () => {
     }
 
     if (!templateId) {
-      toast.error("No template selected. Redirecting...");
+      toast.info("Choose a resume template to start.");
       navigate("/templates?type=resume", { replace: true });
       return;
     }
@@ -378,7 +378,7 @@ const Editor = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <div className="flex items-center justify-between px-4 py-3 bg-white border-b shadow-sm">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-lg" title="Go back" aria-label="Go back"><ArrowLeft size={18} /></button>
+          <button onClick={() => navigate("/templates?type=resume")} className="p-2 hover:bg-gray-100 rounded-lg" title="Back to resume templates" aria-label="Back to resume templates"><ArrowLeft size={18} /></button>
           <div>
             <h1 className="text-sm font-semibold text-gray-900">
               {templateTitle || "Resume Editor"}

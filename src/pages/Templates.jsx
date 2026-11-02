@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import TemplateSection from "../components/TemplateSection";
@@ -9,6 +9,8 @@ import { useAuth } from "../context/AuthContext";
 
 const Templates = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const typeFilter = searchParams.get("type");
   const { user } = useAuth();
   const [resumeTemplates, setResumeTemplates] = useState([]);
 
@@ -82,18 +84,18 @@ const Templates = () => {
         </div>
 
         <div className="space-y-16">
-          <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-neutral-border">
+          {(!typeFilter || typeFilter === "resume") && <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-neutral-border">
             <TemplateSection title="Resume Templates" data={resumeTemplates} type="resume" onUse={handleUseTemplate} />
-          </div>
-          <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-neutral-border">
+          </div>}
+          {(!typeFilter || typeFilter === "logo") && <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-neutral-border">
             <TemplateSection title="Logo Templates" data={logoTemplates} type="logo" onUse={handleUseTemplate} />
-          </div>
-          <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-neutral-border">
+          </div>}
+          {(!typeFilter || typeFilter === "portfolio") && <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-neutral-border">
             <TemplateSection title="Portfolio Templates" data={portfolioTemplates} type="portfolio" onUse={handleUseTemplate} />
-          </div>
-          <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-neutral-border">
+          </div>}
+          {(!typeFilter || typeFilter === "presentation") && <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-neutral-border">
             <TemplateSection title="Presentation Templates" data={presentationTemplates} type="presentation" onUse={handleUseTemplate} />
-          </div>
+          </div>}
         </div>
       </div>
     </section>
