@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
+import { KeyRound, ShieldCheck } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import { setAccountPassword } from "../services/authServices";
@@ -34,9 +33,6 @@ export default function AccountSecurity() {
   return (
     <main className="min-h-[calc(100vh-80px)] bg-neutral-bg px-4 py-10">
       <section className="mx-auto max-w-xl">
-        <Link to="/dashboard" className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-neutral-text-secondary hover:text-brand-red">
-          <ArrowLeft size={17} /> Back to dashboard
-        </Link>
         <div className="rounded-3xl border border-neutral-border bg-white p-6 shadow-sm sm:p-9">
           <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-red/10 text-brand-red">
             <KeyRound size={23} />

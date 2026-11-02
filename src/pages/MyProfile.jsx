@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, BadgeCheck, CalendarDays, Camera, LoaderCircle, Mail, Save, ShieldCheck, Trash2, UserRound, Phone } from "lucide-react";
+import { BadgeCheck, CalendarDays, Camera, LoaderCircle, Mail, Save, ShieldCheck, Trash2, UserRound, Phone } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import { getMyProfile, getProfileAvatarUploadUrl, updateMyProfile } from "../services/profileService";
@@ -70,7 +70,6 @@ export default function MyProfile() {
 
   return <main className="min-h-[calc(100vh-80px)] bg-neutral-bg px-4 py-10">
     <section className="mx-auto max-w-5xl">
-      <Link to="/dashboard" className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-neutral-text-secondary hover:text-brand-red"><ArrowLeft size={17} /> Back to dashboard</Link>
       <div className="overflow-hidden rounded-3xl border border-neutral-border bg-white shadow-sm">
         <div className="bg-brand-black px-6 py-8 text-white sm:px-9"><p className="text-sm font-semibold text-brand-red">Your account</p><h1 className="mt-1 text-3xl font-bold">My profile</h1><p className="mt-2 text-sm text-gray-400">Manage your personal details and profile photo.</p></div>
         {loading ? <div className="grid min-h-64 place-items-center"><LoaderCircle className="animate-spin text-brand-red" size={30} /></div> : <div className="grid gap-8 p-6 sm:p-9 lg:grid-cols-[250px_1fr]">

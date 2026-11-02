@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDownLeft, ArrowLeft, ArrowUpRight, CreditCard, ReceiptText } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, CreditCard, ReceiptText } from "lucide-react";
 import { getMyTransactions } from "../services/walletService";
 
 const date = (value) => value ? new Date(value).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—";
@@ -29,9 +29,6 @@ export default function TransactionHistory() {
     <main className="min-h-[75vh] bg-neutral-bg px-4 py-10 sm:px-6">
       <section className="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-neutral-border bg-white shadow-sm">
         <header className="bg-brand-black p-6 text-white sm:p-8">
-          <Link to="/profile" className="mb-5 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition">
-            <ArrowLeft size={16} /> My profile
-          </Link>
           <div className="flex items-center gap-3">
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/10 text-brand-red">
               <ReceiptText />

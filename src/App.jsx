@@ -1,7 +1,8 @@
 ﻿// Touch-Simply/src/App.jsx
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Routes, Route } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import NavBar from "./components/NavBar";
 import BottomNav from "./components/BottomNav";
 import Footer from "./components/Footer";
@@ -65,6 +66,8 @@ function App() {
 
       {!isAdminRoute && <NavBar />}
 
+      <PageBackButton pathname={pathname} />
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/templates" element={<Templates />} />
@@ -124,6 +127,26 @@ function App() {
 
       {!hideBottomNav && !isAdminRoute && <BottomNav />}
       {!hideFooter && !isAdminRoute && <Footer />}
+    </div>
+  );
+}
+
+function PageBackButton({ pathname }) {
+  const navigate = useNavigate();
+  const fallback = pathname.startsWith("/admin") ? "/dashboard" : pathname === "/login" || pathname === "/register" ? "/" : "/dashboard";
+
+  const goBack = () => {
+    if (window.history.state?.idx > 0) navigate(-1);
+    else navigate(fallback);
+  };
+
+  return (
+    <div className="bg-neutral-bg px-4 pt-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <button type="button" onClick={goBack} className="inline-flex items-center gap-2 rounded-lg border border-neutral-border bg-white px-3.5 py-2 text-sm font-medium text-neutral-text-secondary shadow-sm transition hover:border-brand-red/30 hover:text-brand-red" aria-label="Go back to the previous page">
+          <ArrowLeft size={17} /> Back
+        </button>
+      </div>
     </div>
   );
 }
