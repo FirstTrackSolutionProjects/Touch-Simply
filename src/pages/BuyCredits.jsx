@@ -104,7 +104,7 @@ const BuyCredits = () => {
   const customInvalid = customActive && (isNaN(credits) || credits < MIN_CREDITS_PURCHASE);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-neutral-bg px-4 py-8 sm:px-6 md:py-12">
+    <div className="relative min-h-screen overflow-hidden bg-neutral-bg px-4 pb-32 pt-6 sm:px-6 md:pt-12 lg:pb-14">
       {/* one quiet shape, nothing else */}
       <div
         className="pointer-events-none absolute -right-48 -top-48 h-[640px] w-[640px] rounded-full bg-red-50"
@@ -119,9 +119,9 @@ const BuyCredits = () => {
       >
         <PageBackButton className="mb-6" fallback="/dashboard" />
 
-        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
           {/* ───────── left: choose ───────── */}
-          <section>
+          <section className="min-w-0">
             <h1 className="text-4xl font-black leading-[1.05] tracking-tight text-neutral-text-primary sm:text-5xl">
               Top up your coins
             </h1>
@@ -143,14 +143,14 @@ const BuyCredits = () => {
                       setSelected(p.credits);
                       setCustom("");
                     }}
-                    className={`flex w-full items-center gap-4 rounded-2xl border-2 bg-white px-4 py-4 text-left transition sm:gap-5 sm:px-6 ${
+                    className={`flex w-full items-center gap-3 rounded-2xl border-2 bg-white px-3.5 py-3.5 text-left transition sm:gap-5 sm:px-6 sm:py-4 ${
                       active
                         ? "border-brand-red shadow-lg ring-4 ring-red-100"
                         : "border-white hover:border-neutral-border"
                     }`}
                   >
                     <span
-                      className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition ${
+                      className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 transition sm:h-6 sm:w-6 ${
                         active ? "border-brand-red bg-brand-red text-white" : "border-gray-300"
                       }`}
                       aria-hidden="true"
@@ -158,8 +158,8 @@ const BuyCredits = () => {
                       {active && <Check size={14} strokeWidth={3} />}
                     </span>
 
-                    <span className="w-20 shrink-0 sm:w-24">
-                      <span className="block text-4xl font-black leading-none tabular-nums text-neutral-text-primary">
+                    <span className="w-16 shrink-0 sm:w-24">
+                      <span className="block text-3xl font-black leading-none tabular-nums text-neutral-text-primary sm:text-4xl">
                         {p.credits}
                       </span>
                       <span className="text-xs font-medium text-neutral-text-secondary">coins</span>
@@ -169,17 +169,17 @@ const BuyCredits = () => {
                       <span className="flex flex-wrap items-center gap-2">
                         <span className="font-bold text-neutral-text-primary">{p.label}</span>
                         {p.badge && (
-                          <span className="rounded-full bg-brand-red px-2.5 py-0.5 text-[11px] font-bold text-white">
+                          <span className="rounded-full bg-brand-red px-2 py-0.5 text-[10px] font-bold text-white sm:px-2.5 sm:text-[11px]">
                             {p.badge}
                           </span>
                         )}
                       </span>
                       <span className="mt-0.5 block truncate text-sm text-neutral-text-secondary">
-                        {plural(downloadsFor(p.credits))} · {p.note}
+                        {plural(downloadsFor(p.credits))}<span className="hidden sm:inline"> · {p.note}</span>
                       </span>
                     </span>
 
-                    <span className="shrink-0 text-2xl font-extrabold tabular-nums text-neutral-text-primary">
+                    <span className="shrink-0 text-xl font-extrabold tabular-nums text-neutral-text-primary sm:text-2xl">
                       ₹{p.credits * RATE_PER_CREDIT}
                     </span>
                   </button>
@@ -188,7 +188,7 @@ const BuyCredits = () => {
 
               {/* custom amount row */}
               <label
-                className={`flex w-full cursor-text items-center gap-4 rounded-2xl border-2 bg-white px-4 py-4 transition sm:gap-5 sm:px-6 ${
+                className={`flex w-full cursor-text items-center gap-3 rounded-2xl border-2 bg-white px-3.5 py-3.5 transition sm:gap-5 sm:px-6 sm:py-4 ${
                   customInvalid
                     ? "border-brand-red"
                     : customActive
@@ -198,7 +198,7 @@ const BuyCredits = () => {
                 onClick={() => customRef.current?.focus()}
               >
                 <span
-                  className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition ${
+                  className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 transition sm:h-6 sm:w-6 ${
                     customActive && !customInvalid ? "border-brand-red bg-brand-red text-white" : "border-gray-300"
                   }`}
                   aria-hidden="true"
@@ -206,7 +206,7 @@ const BuyCredits = () => {
                   {customActive && !customInvalid && <Check size={14} strokeWidth={3} />}
                 </span>
 
-                <span className="w-20 shrink-0 sm:w-24">
+                <span className="w-16 shrink-0 sm:w-24">
                   <input
                     ref={customRef}
                     type="number"
@@ -216,7 +216,7 @@ const BuyCredits = () => {
                     onChange={handleCustomChange}
                     placeholder="15"
                     aria-label="Custom number of coins"
-                    className="w-full bg-transparent text-4xl font-black leading-none tabular-nums text-neutral-text-primary outline-none placeholder:text-gray-300 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="w-full bg-transparent text-3xl font-black leading-none tabular-nums text-neutral-text-primary sm:text-4xl outline-none placeholder:text-gray-300 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
                   <span className="text-xs font-medium text-neutral-text-secondary">coins</span>
                 </span>
@@ -236,7 +236,7 @@ const BuyCredits = () => {
                   </span>
                 </span>
 
-                <span className="shrink-0 text-2xl font-extrabold tabular-nums text-neutral-text-primary">
+                <span className="shrink-0 text-xl font-extrabold tabular-nums text-neutral-text-primary sm:text-2xl">
                   {customActive && !customInvalid ? `₹${priceINR}` : <Coins size={22} className="text-gray-300" />}
                 </span>
               </label>
@@ -246,11 +246,11 @@ const BuyCredits = () => {
           {/* ───────── right: receipt ───────── */}
           <aside className="lg:sticky lg:top-28">
             <div className="relative rounded-3xl bg-brand-black text-white shadow-2xl shadow-black/20">
-              <div className="p-7 pb-6">
+              <div className="p-5 pb-5 sm:p-7 sm:pb-6">
                 <p className="text-sm font-semibold text-gray-400">Your order</p>
 
                 <p className="mt-3 flex items-baseline gap-2">
-                  <span className="text-6xl font-black leading-none tracking-tight tabular-nums">
+                  <span className="text-5xl font-black leading-none tracking-tight tabular-nums sm:text-6xl">
                     {invalid ? "—" : credits}
                   </span>
                   <span className="text-lg font-semibold text-gray-400">coins</span>
@@ -282,10 +282,10 @@ const BuyCredits = () => {
                 <div className="mx-6 border-t-2 border-dashed border-white/20" />
               </div>
 
-              <div className="p-7 pt-6">
+              <div className="p-5 pt-5 sm:p-7 sm:pt-6">
                 <div className="flex items-end justify-between">
                   <span className="text-sm font-semibold text-gray-400">Total</span>
-                  <span className="text-5xl font-black leading-none tracking-tight tabular-nums text-brand-red">
+                  <span className="text-4xl font-black leading-none tracking-tight tabular-nums text-brand-red sm:text-5xl">
                     ₹{priceINR}
                   </span>
                 </div>
