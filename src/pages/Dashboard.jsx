@@ -15,7 +15,7 @@ const Dashboard = () => {
   const location = useLocation();
   const { user, logout, authVerified } = useAuth();
   const NAV_H = 100; // top navbar ki height (px), apne hisaab se adjust karo
-  const firstName = String(user?.name || user?.fullName || "").split(" ")[0];
+  const firstName = String(user?.first_name || user?.name || user?.fullName || "").split(" ")[0];
 
   const [mobileMenu, setMobileMenu] = useState(false);
   const [search, setSearch] = useState("");
@@ -195,7 +195,7 @@ const Dashboard = () => {
       {/* Main Content */}
      <main className="min-w-0 flex-1">
         {/* TOPBAR */}
-        <header className="sticky top-16 z-30 lg:top-[100px] bg-white/80 backdrop-blur-xl border-b border-neutral-border px-4 sm:px-8 py-4 flex items-center justify-between">
+       <header className="flex items-center justify-between gap-4 border-b border-neutral-border bg-white px-4 py-4 sm:px-8">
           <div className="flex items-center gap-4">
             <button className="lg:hidden p-1 text-neutral-text-primary" onClick={() => setMobileMenu(true)}><Menu size={24} /></button>
             <div>
