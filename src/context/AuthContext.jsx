@@ -19,6 +19,7 @@ export const AuthProvider = ({
     }
   });
   const [authLoading, setAuthLoading] = useState(true);
+  const [authVerified, setAuthVerified] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -27,6 +28,7 @@ export const AuthProvider = ({
   useEffect(() => {
     const handleAuthExpired = () => {
       setUser(null);
+      setAuthVerified(false);
       setAuthLoading(false);
     };
     window.addEventListener("touchsimply:auth-expired", handleAuthExpired);
@@ -35,17 +37,20 @@ export const AuthProvider = ({
 
   const checkAuth = async () => {
     setAuthLoading(true);
+    setAuthVerified(false);
     const token = localStorage.getItem("token");
     try{
       if (token) {
         const data = await checkAuthService();
         setUser(data.data);
         localStorage.setItem("user", JSON.stringify(data.data));
+        setAuthVerified(true);
         return data.data;
       }
 
       setUser(null);
       localStorage.removeItem("user");
+      setAuthVerified(true);
       return null;
     } catch (error) {
       console.error(error);
@@ -74,6 +79,7 @@ export const AuthProvider = ({
       };
       localStorage.setItem("user", JSON.stringify(normalizedUser));
       setUser(normalizedUser);
+      setAuthVerified(true);
       setAuthLoading(false);
       return normalizedUser;
     }
@@ -87,6 +93,7 @@ export const AuthProvider = ({
     );
     localStorage.removeItem("user");
     setUser(null);
+    setAuthVerified(false);
     setAuthLoading(false);
   };
 
@@ -97,6 +104,7 @@ export const AuthProvider = ({
         login,
         logout,
         authLoading,
+        authVerified,
         checkAuth,
       }}
     >

@@ -13,8 +13,8 @@ const NavBar = () => {
   const [credits, setCredits] = useState(null);
   const [createOpen, setCreateOpen] = useState(false);
   const location = useLocation();
-  const { user, authLoading } = useAuth();
-  const hasAdminAccess = ["ADMIN", "OWNER"].includes(String(user?.role || "").toUpperCase());
+  const { user, authLoading, authVerified } = useAuth();
+  const hasAdminAccess = authVerified && ["ADMIN", "OWNER"].includes(String(user?.role || "").toUpperCase());
   const adminLinkLabel = String(user?.role || "").toUpperCase() === "OWNER" ? "Owner Panel" : "Admin";
 
   useEffect(() => {

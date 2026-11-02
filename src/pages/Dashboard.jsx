@@ -13,14 +13,14 @@ import {
 const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, authVerified } = useAuth();
   const NAV_H = 100; // top navbar ki height (px), apne hisaab se adjust karo
   const firstName = String(user?.name || user?.fullName || "").split(" ")[0];
 
   const [mobileMenu, setMobileMenu] = useState(false);
   const [search, setSearch] = useState("");
   const [credits, setCredits] = useState(null);
-  const isAdmin = ["ADMIN", "OWNER"].includes(String(user?.role || "").toUpperCase());
+  const isAdmin = authVerified && ["ADMIN", "OWNER"].includes(String(user?.role || "").toUpperCase());
 
   const RATE_PER_CREDIT = 7;
 
