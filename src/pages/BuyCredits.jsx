@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import { CreditCard, Loader2 } from "lucide-react";
+import { ArrowLeft, CreditCard, Loader2 } from "lucide-react";
 import {
   createRechargeOrder,
   verifyRechargePayment,
@@ -98,6 +98,13 @@ const BuyCredits = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6">
       <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl p-8">
+        <button
+          type="button"
+          onClick={() => navigate(location.state?.from || "/dashboard")}
+          className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-purple-700"
+        >
+          <ArrowLeft size={17} /> Back
+        </button>
         <h1 className="text-2xl font-bold text-gray-900 mb-1">
           Buy Coins
         </h1>
