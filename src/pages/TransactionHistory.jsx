@@ -1,132 +1,135 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  ArrowDownLeft,
-  ArrowLeft,
-  ArrowUpRight,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Copy,
-  CreditCard,
-  FileDown,
-  Plus,
-  ReceiptText,
-  Wallet,
-} from "lucide-react";
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, Copy, Plus } from "lucide-react";
 import { getMyTransactions } from "../services/walletService";
 
 const LIMIT = 20;
 
-const timeOnly = (value) =>
-  value
-    ? new Date(value).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" })
-    : "—";
+const num = (n) => Number(n || 0).toLocaleString("en-IN");
 
-const sameDay = (a, b) =>
-  a.getFullYear() === b.getFullYear() &&
-  a.getMonth() === b.getMonth() &&
-  a.getDate() === b.getDate();
-
-const dayLabel = (value) => {
-  if (!value) return "Unknown date";
+const parts = (value) => {
+  if (!value) return { day: "—", month: "", year: "", time: "", key: "" };
   const d = new Date(value);
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-  if (sameDay(d, today)) return "Today";
-  if (sameDay(d, yesterday)) return "Yesterday";
-  return d.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  return {
+    day: d.toLocaleDateString("en-IN", { day: "2-digit" }),
+    month: d.toLocaleDateString("en-IN", { month: "short" }),
+    year: d.getFullYear(),
+    time: d.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" }),
+    key: d.toDateString(),
+  };
 };
-
-const FILTERS = [
-  { id: "all", label: "All" },
-  { id: "in", label: "Coins in" },
-  { id: "out", label: "Coins out" },
-];
 
 const describe = (item) => {
   const credit = item.type === "CREDIT";
-  const payment = credit && Boolean(item.payment_id);
-  if (payment) return { title: "Payment received", sub: "Wallet top-up successful", kind: "payment" };
-  if (credit) return { title: "Coins added", sub: "Added to your wallet", kind: "credit" };
-  return { title: "Resume download", sub: "Coins used for a PDF download", kind: "debit" };
+  if (credit && item.payment_id) return { title: "Payment received", sub: "Wallet top-up" };
+  if (credit) return { title: "Coins added", sub: "Credited to wallet" };
+  return { title: "Resume download", sub: "PDF download" };
 };
 
-function Stat({ label, value, tone = "default" }) {
-  const toneClass =
-    tone === "in" ? "text-emerald-400" : tone === "out" ? "text-red-400" : "text-white";
+const FILTERS = [
+  { id: "all", label: "All entries" },
+  { id: "in", label: "Credit" },
+  { id: "out", label: "Debit" },
+];
+
+/* grid shared by header, rows and totals so columns always line up */
+const COLS = "md:grid-cols-[96px_minmax(0,1fr)_110px_110px_120px]";
+
+function Stamp({ value }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-      <p className="text-xs text-gray-400">{label}</p>
-      <p className={`mt-1 text-xl font-bold tabular-nums ${toneClass}`}>{value}</p>
+    <div
+      className="flex h-[132px] w-[132px] shrink-0 -rotate-6 select-none items-center justify-center rounded-full border-[3px] border-brand-red text-brand-red"
+      aria-label={`Balance ${value ?? "unknown"} coins`}
+    >
+      <div className="flex h-[112px] w-[112px] flex-col items-center justify-center rounded-full border border-dashed border-brand-red">
+        <span className="text-[11px] font-semibold tracking-wide">Balance</span>
+        <span className="text-4xl font-extrabold leading-none tabular-nums">
+          {value === null ? "—" : num(value)}
+        </span>
+        <span className="mt-0.5 text-[11px] font-semibold">coins</span>
+      </div>
     </div>
   );
 }
 
-function Row({ item, copiedId, onCopy }) {
+function CopyRef({ id, text, copiedId, onCopy }) {
+  return (
+    <button
+      onClick={() => onCopy(id, text)}
+      title="Copy reference"
+      className="mt-1 inline-flex max-w-full items-center gap-1 text-[11px] text-neutral-text-secondary hover:text-brand-red"
+    >
+      <span className="truncate">Ref {text}</span>
+      {copiedId === id ? <Check size={11} className="shrink-0 text-emerald-600" /> : <Copy size={11} className="shrink-0" />}
+    </button>
+  );
+}
+
+function Entry({ item, showDate, copiedId, onCopy }) {
+  const p = parts(item.created_at);
   const info = describe(item);
-  const positive = item.type === "CREDIT";
+  const credit = item.type === "CREDIT";
 
-  const iconWrap =
-    info.kind === "debit"
-      ? "bg-red-50 text-brand-red"
-      : info.kind === "payment"
-      ? "bg-emerald-50 text-emerald-600"
-      : "bg-amber-50 text-amber-600";
+  const dateCell = showDate ? (
+    <div className="leading-tight">
+      <span className="text-2xl font-extrabold tabular-nums text-neutral-text-primary">{p.day}</span>
+      <span className="ml-1 text-xs font-semibold text-neutral-text-secondary md:ml-0 md:block">
+        {p.month} {p.year}
+      </span>
+    </div>
+  ) : null;
 
-  const Icon = info.kind === "debit" ? FileDown : info.kind === "payment" ? CreditCard : ArrowDownLeft;
+  const particulars = (
+    <div className="min-w-0">
+      <p className="truncate font-semibold text-neutral-text-primary">{info.title}</p>
+      <p className="truncate text-xs text-neutral-text-secondary">
+        {info.sub} · {p.time}
+      </p>
+      {item.payment_id && <CopyRef id={item.id} text={item.payment_id} copiedId={copiedId} onCopy={onCopy} />}
+    </div>
+  );
 
   return (
-    <li className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-neutral-bg sm:px-7">
-      <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${iconWrap}`}>
-        <Icon size={19} />
-      </span>
-
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-neutral-text-primary">{info.title}</p>
-        <p className="truncate text-xs text-neutral-text-secondary">
-          {info.sub} · {timeOnly(item.created_at)}
-        </p>
-        {item.payment_id && (
-          <button
-            onClick={() => onCopy(item.id, item.payment_id)}
-            className="mt-1.5 inline-flex max-w-full items-center gap-1.5 rounded-md bg-neutral-bg px-2 py-0.5 font-mono text-[11px] text-neutral-text-secondary hover:text-brand-red"
-            title="Copy payment reference"
-          >
-            <span className="truncate">{item.payment_id}</span>
-            {copiedId === item.id ? <Check size={11} className="shrink-0 text-emerald-600" /> : <Copy size={11} className="shrink-0" />}
-          </button>
-        )}
+    <li className="border-b border-[#e9e1d4] last:border-b-0">
+      {/* desktop: true ledger columns */}
+      <div className={`hidden items-center gap-0 py-3.5 md:grid ${COLS}`}>
+        <div className="self-start border-r border-red-200 pl-1 pr-3">{dateCell}</div>
+        <div className="px-5">{particulars}</div>
+        <div className="px-2 text-right font-bold tabular-nums text-emerald-700">
+          {credit ? num(item.amount) : <span className="font-normal text-[#cfc6b6]">—</span>}
+        </div>
+        <div className="px-2 text-right font-bold tabular-nums text-brand-red">
+          {!credit ? num(item.amount) : <span className="font-normal text-[#cfc6b6]">—</span>}
+        </div>
+        <div className="px-2 text-right font-bold tabular-nums text-neutral-text-primary">
+          {num(item.balance_after)}
+        </div>
       </div>
 
-      <div className="shrink-0 text-right">
-        <p className={`text-base font-extrabold tabular-nums ${positive ? "text-emerald-600" : "text-brand-red"}`}>
-          {positive ? "+" : "−"}
-          {Number(item.amount).toLocaleString()}
-        </p>
-        <p className="text-[11px] text-neutral-text-secondary">
-          Balance {Number(item.balance_after).toLocaleString()}
-        </p>
+      {/* mobile: compact stacked entry */}
+      <div className="flex items-start gap-3 py-3.5 md:hidden">
+        <div className="w-14 shrink-0 border-r border-red-200 pr-2">{dateCell}</div>
+        <div className="min-w-0 flex-1">{particulars}</div>
+        <div className="shrink-0 text-right">
+          <p className={`font-extrabold tabular-nums ${credit ? "text-emerald-700" : "text-brand-red"}`}>
+            {credit ? "+" : "−"}
+            {num(item.amount)}
+          </p>
+          <p className="text-[11px] text-neutral-text-secondary">Bal {num(item.balance_after)}</p>
+        </div>
       </div>
     </li>
   );
 }
 
-function SkeletonRows() {
+function Skeleton() {
   return (
-    <ul className="divide-y divide-neutral-border" aria-label="Loading transactions">
+    <ul aria-label="Loading entries">
       {[0, 1, 2, 3].map((i) => (
-        <li key={i} className="flex animate-pulse items-center gap-4 px-5 py-4 sm:px-7">
-          <span className="h-11 w-11 rounded-2xl bg-neutral-bg" />
-          <div className="flex-1 space-y-2">
-            <div className="h-3.5 w-40 rounded bg-neutral-bg" />
-            <div className="h-3 w-56 max-w-full rounded bg-neutral-bg" />
-          </div>
-          <div className="space-y-2">
-            <div className="ml-auto h-4 w-14 rounded bg-neutral-bg" />
-            <div className="h-3 w-20 rounded bg-neutral-bg" />
-          </div>
+        <li key={i} className="flex animate-pulse items-center gap-4 border-b border-[#e9e1d4] py-4">
+          <span className="h-8 w-14 rounded bg-[#efe8da]" />
+          <span className="h-4 flex-1 rounded bg-[#efe8da]" />
+          <span className="h-4 w-16 rounded bg-[#efe8da]" />
         </li>
       ))}
     </ul>
@@ -161,19 +164,7 @@ export default function TransactionHistory() {
   const items = result.data || [];
   const total = Number(result.total || 0);
   const pageCount = Math.max(1, Math.ceil(total / LIMIT));
-
-  // Latest first (desc) => page 1, first item = current balance
-  const currentBalance = page === 1 && items.length ? Number(items[0].balance_after) : null;
-
-  const stats = useMemo(() => {
-    let added = 0;
-    let used = 0;
-    items.forEach((i) => {
-      if (i.type === "CREDIT") added += Number(i.amount || 0);
-      else used += Number(i.amount || 0);
-    });
-    return { added, used };
-  }, [items]);
+  const balance = page === 1 && items.length ? Number(items[0].balance_after) : null;
 
   const filtered = useMemo(
     () =>
@@ -183,15 +174,18 @@ export default function TransactionHistory() {
     [items, filter]
   );
 
-  const groups = useMemo(() => {
-    const map = new Map();
-    filtered.forEach((item) => {
-      const key = dayLabel(item.created_at);
-      if (!map.has(key)) map.set(key, []);
-      map.get(key).push(item);
-    });
-    return [...map.entries()];
-  }, [filtered]);
+  const totals = useMemo(
+    () =>
+      filtered.reduce(
+        (acc, i) => {
+          if (i.type === "CREDIT") acc.credit += Number(i.amount || 0);
+          else acc.debit += Number(i.amount || 0);
+          return acc;
+        },
+        { credit: 0, debit: 0 }
+      ),
+    [filtered]
+  );
 
   const handleCopy = async (id, text) => {
     try {
@@ -203,133 +197,132 @@ export default function TransactionHistory() {
     }
   };
 
-  const from = total === 0 ? 0 : (page - 1) * LIMIT + 1;
-  const to = Math.min(page * LIMIT, total);
-
   return (
-    <main className="min-h-[75vh] bg-neutral-bg px-4 py-8 sm:px-6 sm:py-10">
-      <div className="mx-auto max-w-4xl space-y-5">
-        {/* ───────── hero ───────── */}
-        <header
-          className="relative overflow-hidden rounded-3xl bg-brand-black p-6 text-white shadow-xl sm:p-8"
-          style={{
-            backgroundImage:
-              "radial-gradient(520px 260px at 100% 0%, rgba(224,48,30,.45), transparent 65%), radial-gradient(360px 200px at 0% 100%, rgba(224,48,30,.18), transparent 70%)",
-          }}
-        >
+    <main className="min-h-[75vh] bg-[#f6f1e7] px-4 py-8 sm:px-6 sm:py-12">
+      {/* the passbook */}
+      <div className="relative mx-auto max-w-4xl overflow-hidden rounded-l-md rounded-r-3xl bg-[#fffdf8] shadow-[0_24px_50px_-24px_rgba(60,35,10,.45)] ring-1 ring-[#e5dccb]">
+        {/* red spine with stitches */}
+        <div className="absolute inset-y-0 left-0 w-4 bg-brand-red sm:w-6" aria-hidden="true">
+          <div className="absolute inset-y-3 left-1/2 -translate-x-1/2 border-l-2 border-dashed border-white/50" />
+        </div>
+
+        <div className="pl-7 pr-5 pb-2 pt-6 sm:pl-12 sm:pr-9 sm:pt-8">
+          {/* cover */}
           <Link
             to="/profile"
-            className="inline-flex items-center gap-2 text-sm text-gray-400 transition hover:text-white"
+            className="inline-flex items-center gap-1.5 text-sm text-neutral-text-secondary transition hover:text-brand-red"
           >
-            <ArrowLeft size={16} /> My profile
+            <ArrowLeft size={15} /> My profile
           </Link>
 
-          <div className="mt-6 flex flex-wrap items-end justify-between gap-5">
-            <div>
-              <p className="flex items-center gap-2 text-sm text-gray-300">
-                <Wallet size={16} className="text-brand-red" />
-                Wallet balance
-              </p>
-              <p className="mt-1 flex items-baseline gap-2">
-                <span className="text-5xl font-extrabold tracking-tight tabular-nums sm:text-6xl">
-                  {currentBalance === null ? "—" : currentBalance.toLocaleString()}
-                </span>
-                <span className="text-lg font-semibold text-gray-400">coins</span>
-              </p>
-              <p className="mt-2 max-w-md text-sm text-gray-400">
-                Top-ups, coin grants and resume downloads, all in one place.
-              </p>
-            </div>
-
-            <Link
-              to="/credits/buy"
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-red px-5 py-3 text-sm font-bold text-white shadow-lg shadow-red-900/40 transition hover:bg-brand-red-hover"
-            >
-              <Plus size={17} /> Buy coins
-            </Link>
-          </div>
-
-          <div className="mt-7 grid grid-cols-3 gap-3">
-            <Stat label="Total records" value={total.toLocaleString()} />
-            <Stat label="Added (this page)" value={`+${stats.added.toLocaleString()}`} tone="in" />
-            <Stat label="Used (this page)" value={`−${stats.used.toLocaleString()}`} tone="out" />
-          </div>
-        </header>
-
-        {/* ───────── list card ───────── */}
-        <section className="overflow-hidden rounded-3xl border border-neutral-border bg-white shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-border px-5 py-4 sm:px-7">
-            <div className="flex items-center gap-2.5">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-red-50 text-brand-red">
-                <ReceiptText size={18} />
-              </span>
-              <div>
-                <h1 className="font-bold leading-tight text-neutral-text-primary">Transactions</h1>
-                <p className="text-xs text-neutral-text-secondary">
-                  {total === 0 ? "No records" : `Showing ${from}–${to} of ${total.toLocaleString()}`}
-                </p>
-              </div>
-            </div>
-
-            <div className="inline-flex rounded-xl bg-neutral-bg p-1" role="tablist" aria-label="Filter transactions">
-              {FILTERS.map((f) => (
-                <button
-                  key={f.id}
-                  role="tab"
-                  aria-selected={filter === f.id}
-                  onClick={() => setFilter(f.id)}
-                  className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
-                    filter === f.id
-                      ? "bg-brand-black text-white shadow"
-                      : "text-neutral-text-secondary hover:text-neutral-text-primary"
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {loading ? (
-            <SkeletonRows />
-          ) : !items.length ? (
-            <div className="px-6 py-16 text-center">
-              <span className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-red-50 text-brand-red">
-                <CreditCard size={28} />
-              </span>
-              <p className="text-lg font-bold text-neutral-text-primary">No transactions yet</p>
-              <p className="mx-auto mt-1 max-w-xs text-sm text-neutral-text-secondary">
-                Buy coins to download your resumes. Every top-up and download will show up here.
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-5">
+            <div className="min-w-0">
+              <h1 className="text-3xl font-extrabold tracking-tight text-neutral-text-primary sm:text-4xl">
+                Coin <span className="text-brand-red">Passbook</span>
+              </h1>
+              <p className="mt-1 text-sm text-neutral-text-secondary">
+                Every top-up, grant and download, entered in order.
               </p>
               <Link
                 to="/credits/buy"
-                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-red px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-red-hover"
+                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-red"
               >
                 <Plus size={16} /> Buy coins
               </Link>
             </div>
+            <Stamp value={balance} />
+          </div>
+
+          {/* filter: ledger-style underline tabs */}
+          <div className="mt-8 flex gap-6 border-b border-[#e0d6c3]" role="tablist" aria-label="Filter entries">
+            {FILTERS.map((f) => (
+              <button
+                key={f.id}
+                role="tab"
+                aria-selected={filter === f.id}
+                onClick={() => setFilter(f.id)}
+                className={`-mb-px border-b-2 pb-2.5 text-sm font-semibold transition ${
+                  filter === f.id
+                    ? "border-brand-red text-neutral-text-primary"
+                    : "border-transparent text-neutral-text-secondary hover:text-neutral-text-primary"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+            <span className="ml-auto pb-2.5 text-xs text-neutral-text-secondary">
+              {num(total)} {total === 1 ? "entry" : "entries"}
+            </span>
+          </div>
+
+          {/* ledger head */}
+          <div
+            className={`hidden border-b-[3px] border-double border-[#cfc3ab] py-2.5 text-xs font-semibold text-neutral-text-secondary md:grid ${COLS}`}
+          >
+            <span className="pl-1">Date</span>
+            <span className="px-5">Particulars</span>
+            <span className="px-2 text-right">Credit</span>
+            <span className="px-2 text-right">Debit</span>
+            <span className="px-2 text-right">Balance</span>
+          </div>
+
+          {/* ledger body */}
+          {loading ? (
+            <Skeleton />
+          ) : !items.length ? (
+            <div className="py-16 text-center">
+              <p className="text-xl font-bold text-neutral-text-primary">No entries yet</p>
+              <p className="mx-auto mt-1 max-w-xs text-sm text-neutral-text-secondary">
+                Your passbook is blank. Buy coins and your first entry will be written here.
+              </p>
+            </div>
           ) : !filtered.length ? (
-            <div className="px-6 py-14 text-center text-sm text-neutral-text-secondary">
-              No {filter === "in" ? "coins added" : "coins used"} on this page.
-            </div>
+            <p className="py-14 text-center text-sm text-neutral-text-secondary">
+              No {filter === "in" ? "credit" : "debit"} entries on this page.
+            </p>
           ) : (
-            <div>
-              {groups.map(([label, rows]) => (
-                <div key={label}>
-                  <p className="sticky top-0 border-y border-neutral-border bg-neutral-bg/90 px-5 py-1.5 text-xs font-semibold text-neutral-text-secondary backdrop-blur first:border-t-0 sm:px-7">
-                    {label}
-                  </p>
-                  <ul className="divide-y divide-neutral-border">
-                    {rows.map((item) => (
-                      <Row key={item.id} item={item} copiedId={copiedId} onCopy={handleCopy} />
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+            <ul>
+              {filtered.map((item, idx) => {
+                const showDate =
+                  idx === 0 || parts(item.created_at).key !== parts(filtered[idx - 1].created_at).key;
+                return (
+                  <Entry
+                    key={item.id}
+                    item={item}
+                    showDate={showDate}
+                    copiedId={copiedId}
+                    onCopy={handleCopy}
+                  />
+                );
+              })}
+            </ul>
           )}
 
-          <footer className="flex items-center justify-between border-t border-neutral-border px-5 py-3.5 text-sm text-neutral-text-secondary sm:px-7">
+          {/* totals row */}
+          {!loading && filtered.length > 0 && (
+            <>
+              <div
+                className={`hidden border-t-[3px] border-double border-[#cfc3ab] py-3 text-sm font-bold md:grid ${COLS}`}
+              >
+                <span />
+                <span className="px-5 text-neutral-text-secondary">Total on this page</span>
+                <span className="px-2 text-right tabular-nums text-emerald-700">{num(totals.credit)}</span>
+                <span className="px-2 text-right tabular-nums text-brand-red">{num(totals.debit)}</span>
+                <span />
+              </div>
+              <div className="flex items-center justify-between border-t-[3px] border-double border-[#cfc3ab] py-3 text-sm font-bold md:hidden">
+                <span className="text-neutral-text-secondary">Page total</span>
+                <span className="tabular-nums">
+                  <span className="text-emerald-700">+{num(totals.credit)}</span>
+                  <span className="mx-2 text-[#cfc6b6]">/</span>
+                  <span className="text-brand-red">−{num(totals.debit)}</span>
+                </span>
+              </div>
+            </>
+          )}
+
+          {/* pagination */}
+          <div className="flex items-center justify-between py-4 text-sm text-neutral-text-secondary">
             <span>
               Page {page} of {pageCount}
             </span>
@@ -337,20 +330,20 @@ export default function TransactionHistory() {
               <button
                 disabled={page <= 1 || loading}
                 onClick={() => setPage((v) => v - 1)}
-                className="inline-flex items-center gap-1 rounded-lg border border-neutral-border px-3 py-1.5 font-medium transition hover:border-brand-black hover:text-neutral-text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-1 rounded-lg border border-[#d9ceb9] px-3 py-1.5 font-medium transition hover:border-brand-black hover:text-neutral-text-primary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <ChevronLeft size={15} /> Previous
               </button>
               <button
                 disabled={page >= pageCount || loading}
                 onClick={() => setPage((v) => v + 1)}
-                className="inline-flex items-center gap-1 rounded-lg bg-brand-black px-3 py-1.5 font-medium text-white transition hover:bg-brand-red disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-1 rounded-lg border border-[#d9ceb9] px-3 py-1.5 font-medium transition hover:border-brand-black hover:text-neutral-text-primary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next <ChevronRight size={15} />
               </button>
             </div>
-          </footer>
-        </section>
+          </div>
+        </div>
       </div>
     </main>
   );
