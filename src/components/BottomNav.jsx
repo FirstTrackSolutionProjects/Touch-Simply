@@ -32,7 +32,7 @@ const BottomNav = () => {
         })}
 
         {/* CENTER BUTTON (Floating) */}
-        <Link to="/editor" className="absolute -top-7 left-1/2 -translate-x-1/2 bg-brand-black text-white p-4 rounded-full shadow-xl hover:scale-110 active:scale-95 transition border-4 border-white">
+        <Link to="/templates?type=resume" aria-label="Create a resume: choose a template" title="Choose a resume template" className="absolute -top-7 left-1/2 -translate-x-1/2 bg-brand-black text-white p-4 rounded-full shadow-xl hover:scale-110 active:scale-95 transition border-4 border-white">
           <FaPlus className="text-lg" />
         </Link>
 
