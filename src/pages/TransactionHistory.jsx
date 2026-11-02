@@ -37,8 +37,8 @@ export default function TransactionHistory() {
               <ReceiptText />
             </span>
             <div>
-              <h1 className="text-2xl font-bold">Payment &amp; credit history</h1>
-              <p className="mt-1 text-sm text-gray-400">Successful wallet top-ups, credit grants, and download usage.</p>
+              <h1 className="text-2xl font-bold">Payment &amp; coin history</h1>
+              <p className="mt-1 text-sm text-gray-400">Successful wallet top-ups, coin grants, and download usage.</p>
             </div>
           </div>
         </header>
@@ -49,7 +49,7 @@ export default function TransactionHistory() {
             <p className="text-sm text-neutral-text-secondary">{Number(result.total || 0).toLocaleString()} records</p>
           </div>
           <Link to="/credits/buy" className="rounded-xl bg-brand-red px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-red-hover transition">
-            Buy credits
+            Buy coins
           </Link>
         </div>
         
@@ -59,7 +59,7 @@ export default function TransactionHistory() {
           <div className="p-12 text-center">
             <CreditCard className="mx-auto mb-3 text-gray-300" size={36} />
             <p className="font-semibold text-neutral-text-primary">No transactions yet</p>
-            <p className="mt-1 text-sm text-neutral-text-secondary">Wallet top-ups and credit usage will appear here.</p>
+            <p className="mt-1 text-sm text-neutral-text-secondary">Wallet top-ups and coin usage will appear here.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -68,7 +68,7 @@ export default function TransactionHistory() {
                 <tr>
                   <th className="px-6 py-3">Activity</th>
                   <th className="px-6 py-3">Reference</th>
-                  <th className="px-6 py-3">Credits</th>
+                  <th className="px-6 py-3">Coins</th>
                   <th className="px-6 py-3">Balance after</th>
                   <th className="px-6 py-3">Date</th>
                 </tr>
@@ -82,19 +82,19 @@ export default function TransactionHistory() {
                       <td className="px-6 py-4">
                         <span className="inline-flex items-center gap-2 font-semibold text-neutral-text-primary">
                           {positive ? <ArrowDownLeft className="text-green-600" size={17} /> : <ArrowUpRight className="text-brand-red" size={17} />}
-                          {payment ? "Payment received" : positive ? "Credits added" : "Resume download"}
+                          {payment ? "Payment received" : positive ? "Coins added" : "Resume download"}
                         </span>
                         <span className="mt-1 block pl-6 text-xs text-neutral-text-secondary">
-                          {payment ? "Successful" : positive ? "Wallet credit" : "Credits used"}
+                          {payment ? "Successful" : positive ? "Wallet coins added" : "Coins used"}
                         </span>
                       </td>
                       <td className="max-w-[180px] truncate px-6 py-4 font-mono text-xs text-neutral-text-secondary" title={item.payment_id || "—"}>
                         {item.payment_id || "—"}
                       </td>
                       <td className={`px-6 py-4 font-bold ${positive ? "text-green-700" : "text-brand-red"}`}>
-                        {positive ? "+" : "−"}{Number(item.amount).toLocaleString()} cr
+                        {positive ? "+" : "−"}{Number(item.amount).toLocaleString()} coins
                       </td>
-                      <td className="px-6 py-4 text-neutral-text-primary">{Number(item.balance_after).toLocaleString()} cr</td>
+                      <td className="px-6 py-4 text-neutral-text-primary">{Number(item.balance_after).toLocaleString()} coins</td>
                       <td className="px-6 py-4 whitespace-nowrap text-neutral-text-secondary">{date(item.created_at)}</td>
                     </tr>
                   );

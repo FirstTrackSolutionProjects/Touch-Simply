@@ -52,7 +52,7 @@ const WatermarkedPreview = ({
           <Download size={14} /> {downloadLocked ? "Locked" : "Download"}
         </button>
       </div>
-      {downloadLocked && <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900"><span>Download locked. You need 4 credits; your balance is too low.</span><a href="/credits/buy" className="shrink-0 font-bold underline">Buy credits</a></div>}
+      {downloadLocked && <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900"><span>Download locked. You need 4 coins; your balance is too low.</span><a href="/credits/buy" className="shrink-0 font-bold underline">Buy coins</a></div>}
 
       {/* PREVIEW AREA */}
       <div className="flex-1 overflow-y-auto bg-gray-100 rounded-xl p-3 border border-gray-200">

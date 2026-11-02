@@ -55,7 +55,7 @@ const LibraryCard = ({ item, onRedownload, onModify, downloadLocked = false }) =
             onClick={onRedownload}
             disabled={downloadLocked}
             className="flex items-center justify-center gap-2 bg-black text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-            title={downloadLocked ? "Insufficient credits" : "Download this version"}
+            title={downloadLocked ? "Not enough coins" : "Download this version"}
           >
             <Download size={15} />
             Download

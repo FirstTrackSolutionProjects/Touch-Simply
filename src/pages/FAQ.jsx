@@ -10,7 +10,7 @@ const FAQ = () => {
     { question: "What can I create on this platform?", answer: "You can create professional resumes, personal portfolios, and custom logos all in one place." },
     { question: "How do I create a resume?", answer: "Choose a resume template, fill in your details, and download it instantly in PDF format." },
     { question: "Can I design my own logo?", answer: "Yes, you can create custom logos using our logo builder with different styles, fonts, and icons." },
-    { question: "Is it free to use?", answer: "Yes, basic features are free. Downloading a resume costs a few credits, and you get 10 free credits when you sign up." },
+    { question: "Is it free to use?", answer: "Yes, basic features are free. Downloading a resume costs a few coins, and you get 10 free coins when you sign up." },
     { question: "What formats are available for download?", answer: "Resumes can be downloaded as PDF. Logos can be downloaded as image files (PNG)." },
     { question: "Are templates customizable?", answer: "Yes, you can customize colors, fonts, layouts, and content based on your needs." },
     { question: "Is my data safe?", answer: "Yes, your data is securely stored and we do not share it with third parties." },

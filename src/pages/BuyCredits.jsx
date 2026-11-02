@@ -30,7 +30,7 @@ const BuyCredits = () => {
 
   const handleBuy = async () => {
     if (isNaN(credits) || credits < MIN_CREDITS_PURCHASE) {
-        toast.error(`You must purchase a minimum of ${MIN_CREDITS_PURCHASE} credits.`);
+        toast.error(`You must purchase a minimum of ${MIN_CREDITS_PURCHASE} coins.`);
         return;
     }
     setLoading(true);
@@ -53,7 +53,7 @@ const BuyCredits = () => {
         amount: priceINR * 100,
         currency: "INR",
         name: "Touch Simply",
-        description: `${credits} credits`,
+        description: `${credits} coins`,
         order_id: orderId,
         handler: async (response) => {
           try {
@@ -63,7 +63,7 @@ const BuyCredits = () => {
             });
             const w = await getWalletBalance();
             toast.success(
-              `Credits added! New balance: ${w.data?.balance}`
+              `Coins added! New balance: ${w.data?.balance}`
             );
             window.dispatchEvent(new Event("touchsimply:balance-changed"));
             navigate(location.state?.from || "/dashboard");
@@ -99,10 +99,10 @@ const BuyCredits = () => {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6">
       <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl p-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-1">
-          Buy Credits
+          Buy Coins
         </h1>
         <p className="text-sm text-gray-500 mb-6">
-          Credits are used to download your designs. 1 download = 4 credits (₹
+          Coins are used to download your designs. 1 download = 4 coins (₹
           {4 * RATE_PER_CREDIT}).
         </p>
 
@@ -131,7 +131,7 @@ const BuyCredits = () => {
 
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Or enter a custom amount (min. {MIN_CREDITS_PURCHASE})
+            Or enter a custom amount (min. {MIN_CREDITS_PURCHASE} coins)
           </label>
           <input
             type="number"
@@ -142,14 +142,14 @@ const BuyCredits = () => {
             className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 outline-none"
           />
           {custom && credits < MIN_CREDITS_PURCHASE && (
-            <p className="text-xs text-red-500 mt-2">Minimum purchase is {MIN_CREDITS_PURCHASE} credits.</p>
+            <p className="text-xs text-red-500 mt-2">Minimum purchase is {MIN_CREDITS_PURCHASE} coins.</p>
           )}
         </div>
 
         <div className="flex items-center justify-between bg-gray-50 rounded-xl p-4 mb-6">
           <div>
             <p className="text-xs text-gray-500">You will receive</p>
-            <p className="text-lg font-bold">{isNaN(credits) || credits < MIN_CREDITS_PURCHASE ? "—" : credits} credits</p>
+            <p className="text-lg font-bold">{isNaN(credits) || credits < MIN_CREDITS_PURCHASE ? "—" : credits} coins</p>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-500">Total</p>

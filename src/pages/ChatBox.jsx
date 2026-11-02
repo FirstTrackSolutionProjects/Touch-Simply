@@ -28,7 +28,7 @@ const SupportPage = () => {
 
   const categories = [
     { name: "Account & Login", icon: LifeBuoy },
-    { name: "Payments & Credits", icon: LifeBuoy },
+    { name: "Payments & Coins", icon: LifeBuoy },
     { name: "Bug Report", icon: LifeBuoy },
     { name: "Feature Request", icon: LifeBuoy },
     { name: "Other", icon: LifeBuoy },

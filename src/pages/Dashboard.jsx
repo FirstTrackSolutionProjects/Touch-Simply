@@ -46,7 +46,7 @@ const Dashboard = () => {
     { title: "Resumes", value: "12", icon: <FileText size={22} /> },
     { title: "Portfolios", value: "4", icon: <Briefcase size={22} /> },
     { title: "Projects", value: "18", icon: <BarChart3 size={22} /> },
-    { title: "AI Credits", value: credits !== null ? String(credits) : "—", icon: <Zap size={22} /> },
+    { title: "AI Coins", value: credits !== null ? String(credits) : "—", icon: <Zap size={22} /> },
   ];
 
   // ================= RECENT =================
@@ -102,7 +102,7 @@ const Dashboard = () => {
       <div className="mt-8 space-y-4">
         <div className="bg-neutral-bg rounded-xl p-4 border border-neutral-border">
           <div className="flex items-center gap-2 text-brand-black font-semibold mb-2">
-            <Zap size={16} className="text-brand-red" /> Credits
+            <Zap size={16} className="text-brand-red" /> Coins
           </div>
           <p className="text-2xl font-extrabold text-neutral-text-primary">{credits ?? "—"}</p>
           <Link to="/credits/buy" className="mt-3 block text-center w-full bg-brand-red text-white text-xs font-bold py-2 rounded-lg hover:bg-brand-red-hover transition">Buy More</Link>
@@ -210,7 +210,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* RECHARGE CREDITS SECTION */}
+          {/* RECHARGE COINS SECTION */}
           <div className="bg-white border border-neutral-border rounded-3xl p-6 md:p-8 shadow-sm">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-start gap-4">
@@ -218,12 +218,12 @@ const Dashboard = () => {
                   <Zap size={26} className="text-brand-red" />
                 </div>
                 <div>
-                  <h3 className="text-xl md:text-2xl font-bold text-neutral-text-primary">Recharge Credits</h3>
+                  <h3 className="text-xl md:text-2xl font-bold text-neutral-text-primary">Recharge Coins</h3>
                   <p className="text-neutral-text-secondary mt-1 text-sm md:text-base">
-                    You currently have <span className="font-bold text-brand-red">{credits ?? "—"} credits</span>.
+                    You currently have <span className="font-bold text-brand-red">{credits ?? "—"} coins</span>.
                   </p>
                   <p className="text-neutral-text-secondary mt-1 text-sm">
-                    Conversion rate: <span className="font-semibold text-neutral-text-primary">1 Credit = ₹{RATE_PER_CREDIT}</span> (e.g., 4 credits = ₹{4 * RATE_PER_CREDIT})
+                    Conversion rate: <span className="font-semibold text-neutral-text-primary">1 coin = ₹{RATE_PER_CREDIT}</span> (e.g., 4 coins = ₹{4 * RATE_PER_CREDIT})
                   </p>
                 </div>
               </div>
@@ -231,7 +231,7 @@ const Dashboard = () => {
                 to="/credits/buy"
                 className="inline-flex items-center justify-center gap-2 bg-brand-black text-white font-bold px-8 py-3.5 rounded-xl hover:bg-black transition shadow-lg"
               >
-                Buy Credits
+                Buy Coins
               </Link>
             </div>
           </div>

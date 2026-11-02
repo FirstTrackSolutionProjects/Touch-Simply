@@ -108,7 +108,7 @@ const NavBar = () => {
                 <Link to="/credits/buy" className="flex items-center gap-1 text-xs bg-brand-red/5 border border-brand-red/20 text-brand-red px-3 py-1.5 rounded-full hover:bg-brand-red/10 transition">
                   <Zap size={12} />
                   <span className="font-bold">{credits ?? "—"}</span>
-                  <span>credits</span>
+                  <span>coins</span>
                 </Link>
                 <div className="relative">
                   <button onClick={() => setCreateOpen((v) => !v)} className="flex items-center gap-1 bg-brand-black hover:bg-black text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors duration-300">
@@ -177,7 +177,7 @@ const NavBar = () => {
                   </Link>
                 )}
                 <Link to="/credits/buy" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 px-4 py-3 text-base bg-brand-red/10 text-brand-red rounded-lg hover:bg-brand-red/20 transition font-medium">
-                  <Zap size={14} /> <span className="font-bold">{credits ?? "—"}</span> credits
+                  <Zap size={14} /> <span className="font-bold">{credits ?? "—"}</span> coins
                 </Link>
                 <Link to="/transactions" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 px-4 py-3 rounded-lg text-base hover:bg-neutral-bg"><ReceiptText size={18} /> Payment History</Link>
                 <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg bg-neutral-bg hover:bg-neutral-border/50 transition">

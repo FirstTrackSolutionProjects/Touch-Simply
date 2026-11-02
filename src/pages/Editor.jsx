@@ -276,13 +276,13 @@ const Editor = () => {
 
     if (needsCredits) {
       if (balance !== null && balance < DOWNLOAD_RESUME_CREDIT_COST) {
-        toast.error(`Insufficient credits. ${DOWNLOAD_RESUME_CREDIT_COST} credits needed.`);
+        toast.error(`Not enough coins. ${DOWNLOAD_RESUME_CREDIT_COST} coins needed.`);
         navigate("/credits/buy", { state: { from: "/editor", needed: DOWNLOAD_RESUME_CREDIT_COST } });
         return;
       }
       const message = isDirty
-        ? `This resume has been modified. Downloading it will cost ${DOWNLOAD_RESUME_CREDIT_COST} credits. Continue?`
-        : `Downloading this resume for the first time will cost ${DOWNLOAD_RESUME_CREDIT_COST} credits. Continue?`;
+        ? `This resume has been modified. Downloading it will cost ${DOWNLOAD_RESUME_CREDIT_COST} coins. Continue?`
+        : `Downloading this resume for the first time will cost ${DOWNLOAD_RESUME_CREDIT_COST} coins. Continue?`;
       if (!window.confirm(message)) {
         return;
       }
@@ -319,7 +319,7 @@ const Editor = () => {
           window.dispatchEvent(new Event("touchsimply:balance-changed"));
         } catch { /* ignore */ }
         markDownloaded(resumeId);
-        toast.success(`Downloaded (${DOWNLOAD_RESUME_CREDIT_COST} credits deducted)`);
+        toast.success(`Downloaded (${DOWNLOAD_RESUME_CREDIT_COST} coins deducted)`);
       } else {
         toast.success("Downloaded");
       }
@@ -327,7 +327,7 @@ const Editor = () => {
     } catch (err) {
       const status = err.response?.status;
       if (status === 402 || status === 400) {
-        toast.error(`Insufficient credits. ${DOWNLOAD_RESUME_CREDIT_COST} credits needed. Redirecting...`);
+        toast.error(`Not enough coins. ${DOWNLOAD_RESUME_CREDIT_COST} coins needed. Redirecting...`);
         navigate("/credits/buy", { state: { from: "/editor", needed: DOWNLOAD_RESUME_CREDIT_COST } });
       } else {
         toast.error(err.response?.data?.message || "Download failed");
@@ -394,7 +394,7 @@ const Editor = () => {
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 text-xs bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-full">
             <span className="font-bold">{balance ?? "—"}</span>
-            <span>credits</span>
+            <span>coins</span>
           </div>
           <button onClick={handleClone} className="flex items-center gap-1 text-xs bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50">
             <Copy size={13} /> Clone
@@ -406,8 +406,8 @@ const Editor = () => {
       {downloadLocked && (
         <div className="flex items-center justify-center gap-2 bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-900">
           <AlertTriangle size={14} />
-          You need {DOWNLOAD_RESUME_CREDIT_COST} credits to download. Your balance is low.
-          <button onClick={() => navigate("/credits/buy")} className="font-bold underline">Buy credits</button>
+          You need {DOWNLOAD_RESUME_CREDIT_COST} coins to download. Your balance is low.
+          <button onClick={() => navigate("/credits/buy")} className="font-bold underline">Buy coins</button>
         </div>
       )}
 

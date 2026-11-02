@@ -7,9 +7,9 @@ const permissionOptions = [
   { id: "overview", label: "Overview", desc: "Dashboard stats and summary", icon: LayoutDashboard },
   { id: "users", label: "Users", desc: "View and manage accounts", icon: User },
   { id: "resumes", label: "Resumes", desc: "Browse user resumes", icon: FileText },
-  { id: "transactions", label: "Transactions", desc: "Payments and credit activity", icon: Activity },
+  { id: "transactions", label: "Transactions", desc: "Payments and coin activity", icon: Activity },
   { id: "templates", label: "Templates", desc: "Resume template library", icon: BookOpen },
-  { id: "plans", label: "Credit plans", desc: "Pricing and credit packs", icon: Package },
+  { id: "plans", label: "Coin plans", desc: "Pricing and coin packs", icon: Package },
   { id: "notifications", label: "Announcements", desc: "Send updates to users", icon: Bell },
 ];
 

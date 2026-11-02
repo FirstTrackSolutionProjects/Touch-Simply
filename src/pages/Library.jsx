@@ -44,7 +44,7 @@ const Library = () => {
 
   const handleRedownload = async (downloadItem) => {
     if (balance !== null && balance < DOWNLOAD_RESUME_CREDIT_COST) {
-      toast.warn("Insufficient credits to download. Please recharge.");
+      toast.warn("Not enough coins to download. Please recharge your wallet.");
       navigate('/credits/buy');
       return;
     }
@@ -61,7 +61,7 @@ const Library = () => {
       }
     } catch (err) {
       if (err.response?.status === 402) {
-        toast.error("Download locked: insufficient credits. Please recharge your wallet.");
+        toast.error("Download locked: not enough coins. Please recharge your wallet.");
         navigate('/credits/buy');
       } else {
         toast.error(err.response?.data?.message || "Failed to redownload");
