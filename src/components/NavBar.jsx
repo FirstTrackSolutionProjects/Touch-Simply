@@ -37,6 +37,7 @@ const NavBar = () => {
   }, [user, authLoading]);
 
   const navLinks = [
+    { name: "Home", path: "/" },
     { name: "Templates", path: "/templates" },
     { name: "Slides", path: "/presentation" },
     { name: "About", path: "/about" },
@@ -86,13 +87,13 @@ const NavBar = () => {
                 key={link.name}
                 to={link.path}
                 className={`relative py-2 text-sm transition-colors duration-300 group ${
-                  location.pathname.startsWith(link.path) ? "text-brand-red" : "hover:text-brand-red"
+                  (link.path === "/" ? location.pathname === "/" : location.pathname.startsWith(link.path)) ? "text-brand-red" : "hover:text-brand-red"
                 }`}
               >
                 {link.name}
                 <span
                   className={`absolute bottom-0 left-0 h-0.5 bg-brand-red rounded-full transition-all duration-300 ${
-                    location.pathname.startsWith(link.path) ? "w-full" : "w-0 group-hover:w-full"
+                    (link.path === "/" ? location.pathname === "/" : location.pathname.startsWith(link.path)) ? "w-full" : "w-0 group-hover:w-full"
                   }`}
                 ></span>
               </Link>
@@ -163,7 +164,7 @@ const NavBar = () => {
         </div>
         <div className="flex flex-col p-4 space-y-2 text-neutral-text-primary">
           {navLinks.map((link) => (
-            <Link key={link.name} to={link.path} onClick={() => setMenuOpen(false)} className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${location.pathname.startsWith(link.path) ? "text-brand-red bg-brand-red/5" : "hover:bg-neutral-bg"}`}>
+            <Link key={link.name} to={link.path} onClick={() => setMenuOpen(false)} className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${(link.path === "/" ? location.pathname === "/" : location.pathname.startsWith(link.path)) ? "text-brand-red bg-brand-red/5" : "hover:bg-neutral-bg"}`}>
               {link.name}
             </Link>
           ))}
