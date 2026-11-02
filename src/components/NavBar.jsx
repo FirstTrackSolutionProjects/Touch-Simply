@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  Menu, X, ChevronDown, FileText, Palette, Briefcase, Presentation,
+  Menu, X, ChevronDown, ArrowLeft, FileText, Palette, Briefcase, Presentation,
   Zap, ShieldCheck, ReceiptText, LogIn,
 } from "lucide-react";
 import UserAvatar from "./UserAvatar";
@@ -13,9 +13,14 @@ const NavBar = () => {
   const [credits, setCredits] = useState(null);
   const [createOpen, setCreateOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, authLoading } = useAuth();
   const hasAdminAccess = ["ADMIN", "OWNER"].includes(String(user?.role || "").toUpperCase());
   const adminLinkLabel = String(user?.role || "").toUpperCase() === "OWNER" ? "Owner Panel" : "Admin";
+  const goBack = () => {
+    if (window.history.state?.idx > 0) navigate(-1);
+    else navigate("/");
+  };
 
   useEffect(() => {
     if (!user && !authLoading) setCreateOpen(false);
@@ -82,6 +87,11 @@ const NavBar = () => {
 
           {/* 3. Right Side: Desktop Menu (Hidden on Mobile) */}
           <div className="hidden md:flex items-center gap-6 text-neutral-text-primary font-medium">
+            {location.pathname !== "/" && (
+              <button type="button" onClick={goBack} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-2 text-sm text-neutral-text-secondary transition hover:bg-neutral-bg hover:text-brand-red" aria-label="Go back">
+                <ArrowLeft size={17} /> <span className="hidden lg:inline">Back</span>
+              </button>
+            )}
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -127,9 +137,6 @@ const NavBar = () => {
                     </>
                   )}
                 </div>
-                <Link to="/dashboard" className="hover:scale-110 transition-transform ml-1">
-                  <UserAvatar user={user} size="sm" />
-                </Link>
               </div>
             ) : (
               <Link to="/login" className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-brand-red text-white hover:bg-brand-red-hover transition-colors text-sm font-semibold shadow-md shadow-brand-red/10">
@@ -139,8 +146,13 @@ const NavBar = () => {
             )}
           </div>
 
-          {/* 4. Far Right: Mobile Menu Button with balancing Ghost */}
-          <div className="flex md:hidden items-center">
+          {/* Mobile back and menu controls */}
+          <div className="flex md:hidden items-center gap-1">
+            {location.pathname !== "/" && (
+              <button type="button" onClick={goBack} className="-ml-2 inline-flex items-center gap-1 rounded-lg p-2 text-neutral-text-secondary transition hover:bg-neutral-bg hover:text-brand-red" aria-label="Go back">
+                <ArrowLeft size={21} /> <span className="text-xs font-medium">Back</span>
+              </button>
+            )}
             <button onClick={() => setMenuOpen(true)} className="text-neutral-text-primary p-2 -mr-2">
               <Menu size={28} />
             </button>
