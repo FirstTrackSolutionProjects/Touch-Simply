@@ -4,6 +4,7 @@ import PortfolioForm from "../components/portfolio/PortfolioForm";
 import PortfolioCanvas from "../components/portfolio/PortfolioCanvas";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import PageBackButton from "../components/PageBackButton";
 
 const PortfolioBuilder = () => {
   const location = useLocation();
@@ -90,6 +91,7 @@ const downloadPDF = async () => {
       {/* LEFT */}
       <div className="md:w-1/2 p-6">
         <div className="bg-white p-6 rounded-2xl shadow-xl">
+          <PageBackButton className="mb-4" fallback="/templates" />
           <PortfolioForm data={data} setData={setData} />
         </div>
       </div>

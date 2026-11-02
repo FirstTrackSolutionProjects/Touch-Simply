@@ -6,6 +6,7 @@ import PptxGenJS from "pptxgenjs";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { saveToLibrary } from "../utils/library";
+import PageBackButton from "../components/PageBackButton";
 
 const themes = {
   light: "bg-white text-brand-black",
@@ -159,6 +160,7 @@ const Presentation = () => {
       {/* Sidebar */}
       {!fullscreen && (
         <div className="w-full md:w-[340px] bg-white border-r border-neutral-border p-5 flex flex-col shadow-sm z-10">
+          <PageBackButton className="mb-4" fallback="/templates" />
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-neutral-text-primary">Slides</h2>
             <button onClick={addSlide} className="bg-brand-black text-white p-2 rounded-lg hover:bg-black transition">

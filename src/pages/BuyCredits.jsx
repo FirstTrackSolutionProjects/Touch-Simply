@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { CreditCard, Loader2 } from "lucide-react";
+import PageBackButton from "../components/PageBackButton";
 import {
   createRechargeOrder,
   verifyRechargePayment,
@@ -98,6 +99,7 @@ const BuyCredits = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6">
       <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl p-8">
+        <PageBackButton className="mb-5" fallback="/dashboard" />
         <h1 className="text-2xl font-bold text-gray-900 mb-1">
           Buy Coins
         </h1>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import LogoForm from "../components/logo/LogoForm";
 import LogoCanvas from "../components/logo/LogoCanvas";
+import PageBackButton from "../components/PageBackButton";
 
 const LogoBuilder = () => {
   const location = useLocation();
@@ -27,6 +28,7 @@ const LogoBuilder = () => {
       <div className="md:w-1/3 w-full p-5 border-r border-white/10 bg-white/5 backdrop-blur-xl">
 
         <div className="bg-white/95 rounded-2xl p-6 shadow-xl">
+          <PageBackButton className="mb-4" fallback="/templates" />
 
           <h2 className="text-xl font-bold mb-4">
             Customize Logo

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import ToolCard from "../components/ToolCard";
+import PageBackButton from "../components/PageBackButton";
 import { getWalletBalance } from "../services/walletService";
 import {
   FileText, Briefcase, Palette, Presentation, Sparkles, FolderOpen,
@@ -164,6 +165,7 @@ const Dashboard = () => {
         </header>
 
         <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-10">
+          <PageBackButton fallback="/" />
           
           {/* HERO BANNER */}
           <div className="bg-brand-black rounded-3xl overflow-hidden relative">

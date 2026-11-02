@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import TemplateSection from "../components/TemplateSection";
+import PageBackButton from "../components/PageBackButton";
 import { getResumeTemplates } from "../services/resumeService";
 import { useAuth } from "../context/AuthContext";
 
@@ -70,6 +71,7 @@ const Templates = () => {
   return (
     <section className="py-24 px-6 bg-neutral-bg min-h-screen">
       <div className="max-w-7xl mx-auto">
+        <PageBackButton className="mb-8" />
         <div className="text-center mb-20">
           <h1 className="text-4xl md:text-6xl font-extrabold text-neutral-text-primary">
             Choose Your Template

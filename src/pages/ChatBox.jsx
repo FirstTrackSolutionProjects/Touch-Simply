@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { LifeBuoy, Send, CheckCircle2, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { LifeBuoy, Send, ChevronLeft, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 
@@ -61,6 +62,7 @@ const SupportPage = () => {
           </div>
           <h1 className="text-2xl font-bold text-neutral-text-primary mt-4">Ticket Submitted!</h1>
           <p className="text-neutral-text-secondary mt-2">We've received your request. Our support team will get back to you shortly at <span className="font-semibold text-neutral-text-primary">{user?.email}</span>.</p>
+          <Link to="/dashboard" className="mt-8 inline-block w-full bg-brand-secondary text-white font-semibold py-3 rounded-xl hover:bg-brand-secondary-dark transition-colors">Back to Dashboard</Link>
         </div>
       </div>
     );
@@ -70,6 +72,7 @@ const SupportPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-neutral-bg via-brand-secondary/5 to-brand-primary/5 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <div className="mb-8">
+          <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm font-medium text-neutral-text-secondary hover:text-brand-secondary mb-4"><ChevronLeft size={16} /> Back to Dashboard</Link>
           <div className="text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-neutral-text-primary">Support Center</h1>
             <p className="mt-2 text-md text-neutral-text-secondary">How can we help you today? Submit a ticket below.</p>

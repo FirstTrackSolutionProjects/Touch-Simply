@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Loader2, Copy, AlertTriangle } from "lucide-react";
+import { Loader2, Copy, ArrowLeft, AlertTriangle } from "lucide-react";
 
 import {
   createResumeFromTemplate,
@@ -378,6 +378,7 @@ const Editor = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <div className="flex items-center justify-between px-4 py-3 bg-white border-b shadow-sm">
         <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-lg" title="Go back" aria-label="Go back"><ArrowLeft size={18} /></button>
           <div>
             <h1 className="text-sm font-semibold text-gray-900">
               {templateTitle || "Resume Editor"}
