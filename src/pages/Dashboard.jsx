@@ -193,9 +193,9 @@ const Dashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-x-hidden">
+     <main className="min-w-0 flex-1">
         {/* TOPBAR */}
-        <header style={{ top: NAV_H }} className="bg-white/80 backdrop-blur-xl border-b border-neutral-border sticky z-30 px-4 sm:px-8 py-4 flex items-center justify-between">
+        <header className="sticky top-16 z-30 lg:top-[100px] bg-white/80 backdrop-blur-xl border-b border-neutral-border px-4 sm:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button className="lg:hidden p-1 text-neutral-text-primary" onClick={() => setMobileMenu(true)}><Menu size={24} /></button>
             <div>
@@ -225,7 +225,7 @@ const Dashboard = () => {
           </div>
         </header>
 
-        <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-10">
+        <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-10 overflow-x-clip">
           <PageBackButton fallback="/" />
 
           {/* HERO BANNER */}
