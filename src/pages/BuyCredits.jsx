@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import { CreditCard, Loader2, Zap, Check, ShieldCheck, Download, Coins } from "lucide-react";
+import { CreditCard, Loader2, Check, ShieldCheck, Download, Coins } from "lucide-react";
 import { motion } from "framer-motion";
 import PageBackButton from "../components/PageBackButton";
 import {
@@ -15,15 +15,19 @@ const MIN_CREDITS_PURCHASE = 4;
 const COINS_PER_DOWNLOAD = 4;
 
 const PACKS = [
-  { credits: MIN_CREDITS_PURCHASE, label: "Starter" },
-  { credits: 10, label: "Popular", badge: "Most Popular" },
-  { credits: 25, label: "Pro" },
-  { credits: 50, label: "Business" },
+  { credits: MIN_CREDITS_PURCHASE, label: "Starter", note: "Try it out" },
+  { credits: 10, label: "Popular", note: "Great for a few resumes", badge: "Most popular" },
+  { credits: 25, label: "Pro", note: "For job-hunt season" },
+  { credits: 50, label: "Business", note: "Teams and heavy users" },
 ];
+
+const downloadsFor = (c) => Math.floor(c / COINS_PER_DOWNLOAD);
+const plural = (n) => `${n} ${n === 1 ? "download" : "downloads"}`;
 
 const BuyCredits = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const customRef = useRef(null);
   const [selected, setSelected] = useState(MIN_CREDITS_PURCHASE);
   const [custom, setCustom] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,7 +35,7 @@ const BuyCredits = () => {
   const credits = custom ? parseInt(custom, 10) : selected;
   const priceINR = credits > 0 ? credits * RATE_PER_CREDIT : 0;
   const invalid = isNaN(credits) || credits < MIN_CREDITS_PURCHASE;
-  const downloads = invalid ? 0 : Math.floor(credits / COINS_PER_DOWNLOAD);
+  const downloads = invalid ? 0 : downloadsFor(credits);
 
   const handleBuy = async () => {
     if (isNaN(credits) || credits < MIN_CREDITS_PURCHASE) {
@@ -67,9 +71,7 @@ const BuyCredits = () => {
               paymentId: response.razorpay_payment_id,
             });
             const w = await getWalletBalance();
-            toast.success(
-              `Coins added! New balance: ${w.data?.balance}`
-            );
+            toast.success(`Coins added! New balance: ${w.data?.balance}`);
             window.dispatchEvent(new Event("touchsimply:balance-changed"));
             navigate(location.state?.from || "/dashboard");
           } catch {
@@ -82,9 +84,7 @@ const BuyCredits = () => {
       rzp.on("payment.failed", () => toast.error("Payment failed"));
       rzp.open();
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Could not start payment"
-      );
+      toast.error(err.response?.data?.message || "Could not start payment");
     } finally {
       setLoading(false);
     }
@@ -100,175 +100,215 @@ const BuyCredits = () => {
     }
   };
 
+  const customActive = custom !== "";
+  const customInvalid = customActive && (isNaN(credits) || credits < MIN_CREDITS_PURCHASE);
+
   return (
-    <div className="relative min-h-screen bg-neutral-bg overflow-hidden px-4 sm:px-6 py-10 md:py-16">
-      {/* Background decoration */}
-      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[700px] max-w-full bg-brand-red/10 blur-3xl rounded-full pointer-events-none" />
+    <div className="relative min-h-screen overflow-hidden bg-neutral-bg px-4 py-8 sm:px-6 md:py-12">
+      {/* one quiet shape, nothing else */}
       <div
-        className="absolute inset-0 opacity-[0.035] pointer-events-none"
-        style={{
-          backgroundImage:
-            "linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)",
-          backgroundSize: "44px 44px",
-        }}
+        className="pointer-events-none absolute -right-48 -top-48 h-[640px] w-[640px] rounded-full bg-red-50"
+        aria-hidden="true"
       />
 
       <motion.div
-        initial={{ opacity: 0, y: 28 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative max-w-3xl mx-auto"
+        transition={{ duration: 0.45 }}
+        className="relative mx-auto max-w-6xl"
       >
-        <PageBackButton className="mb-5" fallback="/dashboard" />
+        <PageBackButton className="mb-6" fallback="/dashboard" />
 
-        <div className="relative overflow-hidden bg-white rounded-[2rem] shadow-2xl shadow-black/5 border border-neutral-border">
-          <div className="absolute top-0 left-10 h-1.5 w-20 rounded-b-full bg-brand-red" />
+        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
+          {/* ───────── left: choose ───────── */}
+          <section>
+            <h1 className="text-4xl font-black leading-[1.05] tracking-tight text-neutral-text-primary sm:text-5xl">
+              Top up your coins
+            </h1>
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-neutral-text-secondary">
+              Coins pay for your downloads. One resume download costs {COINS_PER_DOWNLOAD} coins
+              (₹{COINS_PER_DOWNLOAD * RATE_PER_CREDIT}). Pick a pack or type your own amount.
+            </p>
 
-          {/* Header */}
-          <div className="relative p-6 sm:p-10 pb-6">
-            <div className="absolute -top-16 -right-16 w-52 h-52 bg-brand-red/10 blur-3xl rounded-full pointer-events-none" />
-            <div className="relative flex items-start gap-4">
-              <div className="w-14 h-14 shrink-0 rounded-2xl bg-gradient-to-br from-brand-red to-red-700 text-white flex items-center justify-center shadow-lg shadow-brand-red/30">
-                <Zap size={26} />
-              </div>
-              <div>
-                <h1 className="text-3xl md:text-4xl font-extrabold text-neutral-text-primary tracking-tight">
-                  Buy <span className="text-brand-red">Coins</span>
-                </h1>
-                <p className="text-sm md:text-base text-neutral-text-secondary mt-2 leading-relaxed">
-                  Coins are used to download your designs. 1 download = {COINS_PER_DOWNLOAD} coins (₹{COINS_PER_DOWNLOAD * RATE_PER_CREDIT}).
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="px-6 sm:px-10 pb-8 sm:pb-10">
-            {/* Packs */}
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-text-secondary mb-3">Choose a pack</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
+            <div role="radiogroup" aria-label="Choose a coin pack" className="mt-8 space-y-3">
               {PACKS.map((p) => {
-                const active = selected === p.credits && !custom;
+                const active = selected === p.credits && !customActive;
                 return (
                   <button
                     key={p.credits}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
                     onClick={() => {
                       setSelected(p.credits);
                       setCustom("");
                     }}
-                    className={`group relative p-4 md:p-5 rounded-2xl border-2 text-center transition-all duration-300 hover:-translate-y-1 ${
+                    className={`flex w-full items-center gap-4 rounded-2xl border-2 bg-white px-4 py-4 text-left transition sm:gap-5 sm:px-6 ${
                       active
-                        ? "border-brand-red bg-brand-red/5 shadow-xl shadow-brand-red/15"
-                        : "border-neutral-border bg-white hover:border-brand-red/40 hover:shadow-lg"
+                        ? "border-brand-red shadow-lg ring-4 ring-red-100"
+                        : "border-white hover:border-neutral-border"
                     }`}
                   >
-                    {p.badge && (
-                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold uppercase tracking-wider bg-brand-red text-white px-2.5 py-1 rounded-full shadow-md">
-                        {p.badge}
-                      </span>
-                    )}
-                    {active && (
-                      <span className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-brand-red text-white flex items-center justify-center shadow">
-                        <Check size={12} />
-                      </span>
-                    )}
-                    <div
-                      className={`w-10 h-10 mx-auto rounded-xl flex items-center justify-center mb-3 transition-all ${
-                        active
-                          ? "bg-brand-red text-white shadow-md shadow-brand-red/30"
-                          : "bg-brand-red/10 text-brand-red group-hover:bg-brand-red group-hover:text-white"
+                    <span
+                      className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition ${
+                        active ? "border-brand-red bg-brand-red text-white" : "border-gray-300"
                       }`}
+                      aria-hidden="true"
                     >
-                      <Zap size={18} />
-                    </div>
-                    <p className="text-3xl font-extrabold text-neutral-text-primary tracking-tight">{p.credits}</p>
-                    <p className="text-xs text-neutral-text-secondary font-medium">{p.label}</p>
-                    <p className="text-sm font-bold text-brand-red mt-3 bg-brand-red/10 rounded-lg py-1">
+                      {active && <Check size={14} strokeWidth={3} />}
+                    </span>
+
+                    <span className="w-20 shrink-0 sm:w-24">
+                      <span className="block text-4xl font-black leading-none tabular-nums text-neutral-text-primary">
+                        {p.credits}
+                      </span>
+                      <span className="text-xs font-medium text-neutral-text-secondary">coins</span>
+                    </span>
+
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="font-bold text-neutral-text-primary">{p.label}</span>
+                        {p.badge && (
+                          <span className="rounded-full bg-brand-red px-2.5 py-0.5 text-[11px] font-bold text-white">
+                            {p.badge}
+                          </span>
+                        )}
+                      </span>
+                      <span className="mt-0.5 block truncate text-sm text-neutral-text-secondary">
+                        {plural(downloadsFor(p.credits))} · {p.note}
+                      </span>
+                    </span>
+
+                    <span className="shrink-0 text-2xl font-extrabold tabular-nums text-neutral-text-primary">
                       ₹{p.credits * RATE_PER_CREDIT}
-                    </p>
+                    </span>
                   </button>
                 );
               })}
-            </div>
 
-            {/* Divider */}
-            <div className="flex items-center gap-4 mb-6">
-              <span className="flex-1 h-px bg-neutral-border" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-text-secondary">or</span>
-              <span className="flex-1 h-px bg-neutral-border" />
-            </div>
-
-            {/* Custom */}
-            <div className="mb-8">
-              <label className="block text-sm font-bold text-neutral-text-primary mb-2">
-                Enter a custom amount{" "}
-                <span className="font-medium text-neutral-text-secondary">(min. {MIN_CREDITS_PURCHASE} coins)</span>
-              </label>
-              <div className="relative">
-                <Coins size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-text-secondary pointer-events-none" />
-                <input
-                  type="number"
-                  min={MIN_CREDITS_PURCHASE}
-                  value={custom}
-                  onChange={handleCustomChange}
-                  placeholder="e.g. 15"
-                  className={`w-full bg-neutral-bg border rounded-xl py-3.5 pl-11 pr-24 text-neutral-text-primary placeholder-neutral-text-secondary/70 outline-none transition-all focus:bg-white focus:ring-4 ${
-                    custom && credits < MIN_CREDITS_PURCHASE
-                      ? "border-brand-red focus:ring-brand-red/10"
-                      : "border-neutral-border focus:border-brand-red/60 focus:ring-brand-red/10"
+              {/* custom amount row */}
+              <label
+                className={`flex w-full cursor-text items-center gap-4 rounded-2xl border-2 bg-white px-4 py-4 transition sm:gap-5 sm:px-6 ${
+                  customInvalid
+                    ? "border-brand-red"
+                    : customActive
+                    ? "border-brand-red shadow-lg ring-4 ring-red-100"
+                    : "border-white hover:border-neutral-border"
+                }`}
+                onClick={() => customRef.current?.focus()}
+              >
+                <span
+                  className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition ${
+                    customActive && !customInvalid ? "border-brand-red bg-brand-red text-white" : "border-gray-300"
                   }`}
-                />
-                {custom && !isNaN(credits) && (
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-brand-red">
+                  aria-hidden="true"
+                >
+                  {customActive && !customInvalid && <Check size={14} strokeWidth={3} />}
+                </span>
+
+                <span className="w-20 shrink-0 sm:w-24">
+                  <input
+                    ref={customRef}
+                    type="number"
+                    inputMode="numeric"
+                    min={MIN_CREDITS_PURCHASE}
+                    value={custom}
+                    onChange={handleCustomChange}
+                    placeholder="15"
+                    aria-label="Custom number of coins"
+                    className="w-full bg-transparent text-4xl font-black leading-none tabular-nums text-neutral-text-primary outline-none placeholder:text-gray-300 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  />
+                  <span className="text-xs font-medium text-neutral-text-secondary">coins</span>
+                </span>
+
+                <span className="min-w-0 flex-1">
+                  <span className="block font-bold text-neutral-text-primary">Your own amount</span>
+                  <span
+                    className={`mt-0.5 block text-sm ${
+                      customInvalid ? "font-semibold text-brand-red" : "text-neutral-text-secondary"
+                    }`}
+                  >
+                    {customInvalid
+                      ? `Minimum purchase is ${MIN_CREDITS_PURCHASE} coins`
+                      : customActive
+                      ? plural(downloads)
+                      : `Type any amount, min. ${MIN_CREDITS_PURCHASE} coins`}
+                  </span>
+                </span>
+
+                <span className="shrink-0 text-2xl font-extrabold tabular-nums text-neutral-text-primary">
+                  {customActive && !customInvalid ? `₹${priceINR}` : <Coins size={22} className="text-gray-300" />}
+                </span>
+              </label>
+            </div>
+          </section>
+
+          {/* ───────── right: receipt ───────── */}
+          <aside className="lg:sticky lg:top-28">
+            <div className="relative rounded-3xl bg-brand-black text-white shadow-2xl shadow-black/20">
+              <div className="p-7 pb-6">
+                <p className="text-sm font-semibold text-gray-400">Your order</p>
+
+                <p className="mt-3 flex items-baseline gap-2">
+                  <span className="text-6xl font-black leading-none tracking-tight tabular-nums">
+                    {invalid ? "—" : credits}
+                  </span>
+                  <span className="text-lg font-semibold text-gray-400">coins</span>
+                </p>
+
+                <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-gray-200">
+                  <Download size={13} className="text-brand-red" />
+                  {invalid ? "Pick a pack to continue" : `≈ ${plural(downloads)}`}
+                </p>
+
+                <dl className="mt-6 space-y-2.5 text-sm">
+                  <div className="flex justify-between">
+                    <dt className="text-gray-400">Price per coin</dt>
+                    <dd className="font-semibold">₹{RATE_PER_CREDIT}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-gray-400">One download</dt>
+                    <dd className="font-semibold">
+                      {COINS_PER_DOWNLOAD} coins · ₹{COINS_PER_DOWNLOAD * RATE_PER_CREDIT}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+
+              {/* perforation */}
+              <div className="relative" aria-hidden="true">
+                <span className="absolute -left-3 -top-3 h-6 w-6 rounded-full bg-neutral-bg" />
+                <span className="absolute -right-3 -top-3 h-6 w-6 rounded-full bg-neutral-bg" />
+                <div className="mx-6 border-t-2 border-dashed border-white/20" />
+              </div>
+
+              <div className="p-7 pt-6">
+                <div className="flex items-end justify-between">
+                  <span className="text-sm font-semibold text-gray-400">Total</span>
+                  <span className="text-5xl font-black leading-none tracking-tight tabular-nums text-brand-red">
                     ₹{priceINR}
                   </span>
-                )}
-              </div>
-              {custom && credits < MIN_CREDITS_PURCHASE && (
-                <p className="text-xs font-semibold text-brand-red mt-2">Minimum purchase is {MIN_CREDITS_PURCHASE} coins.</p>
-              )}
-            </div>
+                </div>
 
-            {/* Summary */}
-            <div className="relative overflow-hidden bg-brand-black rounded-2xl p-5 sm:p-6 mb-6 text-white shadow-xl shadow-black/10 ring-1 ring-white/5">
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-brand-red/40 blur-3xl rounded-full pointer-events-none" />
-              <div className="relative flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs text-gray-400 font-medium">You will receive</p>
-                  <p className="text-2xl sm:text-3xl font-extrabold mt-1 tracking-tight">
-                    {invalid ? "—" : credits} <span className="text-base font-bold text-gray-400">coins</span>
-                  </p>
-                  {!invalid && (
-                    <p className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-gray-200">
-                      <Download size={12} className="text-brand-red" /> ≈ {downloads} {downloads === 1 ? "download" : "downloads"}
-                    </p>
+                <button
+                  onClick={handleBuy}
+                  disabled={loading || invalid}
+                  className="group mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-red py-4 text-base font-bold text-white transition hover:bg-brand-red-hover active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {loading ? (
+                    <Loader2 size={18} className="animate-spin" />
+                  ) : (
+                    <CreditCard size={18} className="transition-transform group-hover:scale-110" />
                   )}
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-gray-400 font-medium">Total</p>
-                  <p className="text-3xl sm:text-4xl font-extrabold text-brand-red tracking-tight mt-1">₹{priceINR}</p>
-                  <p className="text-[11px] text-gray-500 mt-1">1 coin = ₹{RATE_PER_CREDIT}</p>
-                </div>
+                  {loading ? "Processing..." : `Pay ₹${priceINR}`}
+                </button>
+
+                <p className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
+                  <ShieldCheck size={14} className="text-brand-red" /> Secure payment powered by Razorpay
+                </p>
               </div>
             </div>
-
-            {/* Pay button */}
-            <button
-              onClick={handleBuy}
-              disabled={loading || invalid}
-              className="group w-full bg-brand-red text-white py-4 rounded-xl font-bold text-base hover:bg-brand-red-hover hover:-translate-y-0.5 active:scale-[0.99] transition-all shadow-lg shadow-brand-red/30 disabled:opacity-50 disabled:hover:translate-y-0 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <Loader2 size={18} className="animate-spin" />
-              ) : (
-                <CreditCard size={18} className="group-hover:scale-110 transition-transform" />
-              )}
-              {loading ? "Processing..." : `Pay ₹${priceINR}`}
-            </button>
-
-            <p className="flex items-center justify-center gap-2 text-xs text-neutral-text-secondary mt-4">
-              <ShieldCheck size={14} className="text-brand-red" /> Secure payment powered by Razorpay
-            </p>
-          </div>
+          </aside>
         </div>
       </motion.div>
     </div>
