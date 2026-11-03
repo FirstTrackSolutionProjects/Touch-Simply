@@ -62,6 +62,8 @@ const DynamicForm = ({
     const label = field.title || field.label || field.name;
     const value = getFieldValue(field);
     const required = field.required === true;
+    const isEmpty = value == null || value === "" || (Array.isArray(value) && value.length === 0);
+    const placeholder = isEmpty ? label || "Enter value" : field.placeholder || "";
     const fieldClassName =
       "w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white text-sm";
 
@@ -148,7 +150,7 @@ const DynamicForm = ({
             id={fieldId}
             value={textValue}
             required={required}
-            placeholder={field.placeholder || ""}
+            placeholder={placeholder}
             rows={field.rows || 3}
             className={fieldClassName}
             onChange={(event) => {
@@ -179,7 +181,7 @@ const DynamicForm = ({
           type={inputType}
           value={value ?? ""}
           required={required}
-          placeholder={field.placeholder || ""}
+          placeholder={placeholder}
           className={fieldClassName}
           onChange={(event) => onChange(path, event.target.value)}
         />

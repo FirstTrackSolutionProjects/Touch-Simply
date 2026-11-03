@@ -62,7 +62,9 @@ const clearConfigValues = (node) => {
     for (const key of Object.keys(node)) out[key] = clearConfigValues(node[key]);
     const cv = node.current_value;
     if (typeof cv === "string") {
-      out.placeholder = node.placeholder || cv;
+      // Never reuse template sample values (which may contain someone's real
+      // profile details) as the hint in a new user's blank form.
+      out.placeholder = node.title || node.label || node.name || "Enter value";
       out.current_value = "";
     } else if (Array.isArray(cv) && cv.every((x) => typeof x === "string")) {
       out.current_value = [];
