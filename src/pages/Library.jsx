@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import LibraryCard from "../components/LibraryCard";
-import { getAllResumeDownloads, redownloadFromLibrary } from "../services/resumeService";
+import { getAllResumeDownloads, redownloadFromLibrary, deleteResumeDownload } from "../services/resumeService";
 import { FolderOpen, Search, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { getWalletBalance } from "../services/walletService";
@@ -78,6 +78,17 @@ const Library = () => {
     }
   };
 
+  const handleDelete = async (item) => {
+    if (!window.confirm(`Delete “${item.title || "Untitled Resume"}” from your library?`)) return;
+    try {
+      await deleteResumeDownload(item.id);
+      setItems((current) => current.filter((entry) => entry.id !== item.id));
+      toast.success("Resume removed from your library");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete resume");
+    }
+  };
+
   const filteredItems = items.filter((item) =>
     (item?.title || "").toLowerCase().includes(search.toLowerCase())
   );
@@ -120,7 +131,7 @@ const Library = () => {
             <LibraryCard
               key={item.id}
               item={item}
-              onDelete={undefined} // Keep it simple, no delete for now
+              onDelete={handleDelete}
               onRedownload={() => handleRedownload(item)}
               onModify={handleModify}
               downloadLocked={balance !== null && balance < DOWNLOAD_RESUME_CREDIT_COST}

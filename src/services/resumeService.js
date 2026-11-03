@@ -137,6 +137,12 @@ export const redownloadFromLibrary = async (downloadId) => {
   return res.data;
 };
 
+// DELETE A SAVED LIBRARY DOWNLOAD
+export const deleteResumeDownload = async (downloadId) => {
+  const res = await API.delete(`/resumes/downloads/${downloadId}`);
+  return res.data;
+};
+
 // DELETE RESUME
 export const deleteResume = async (resumeId) => {
   const res = await API.delete(`/resumes/${resumeId}`);

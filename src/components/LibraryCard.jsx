@@ -1,7 +1,7 @@
 import React from "react";
-import { Download, FileText, Image as ImageIcon, Presentation, Briefcase, Pencil } from "lucide-react";
+import { Download, FileText, Image as ImageIcon, Presentation, Briefcase, Pencil, Trash2 } from "lucide-react";
 
-const LibraryCard = ({ item, onRedownload, onModify, downloadLocked = false }) => {
+const LibraryCard = ({ item, onRedownload, onModify, onDelete, downloadLocked = false }) => {
 
   const getIcon = () => {
     switch (item.type) {
@@ -44,12 +44,20 @@ const LibraryCard = ({ item, onRedownload, onModify, downloadLocked = false }) =
 
         <div className="flex items-center gap-2 mt-3">
           <button
-            onClick={onModify}
+            onClick={() => onModify(item)}
             className="flex-1 flex items-center justify-center gap-2 bg-gray-100 text-gray-700 text-sm font-semibold py-2.5 rounded-lg hover:bg-gray-200 transition-colors"
             title="Modify this project"
           >
             <Pencil size={15} />
-            Modify
+            Edit
+          </button>
+          <button
+            onClick={() => onDelete(item)}
+            className="flex items-center justify-center gap-2 border border-red-200 text-red-600 text-sm font-semibold px-3 py-2.5 rounded-lg hover:bg-red-50 transition-colors"
+            title="Remove this resume from your library"
+            aria-label={`Delete ${item.title || "resume"}`}
+          >
+            <Trash2 size={15} />
           </button>
           <button
             onClick={onRedownload}
