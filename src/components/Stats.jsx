@@ -1,104 +1,218 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { FileText, Users, Star, Sparkles } from "lucide-react";
 
-const Counter = ({ end, duration = 1500 }) => {
+/* ---------- count-up (respects reduced motion) ---------- */
+const Counter = ({ end, duration = 1600, suffix = "" }) => {
   const [count, setCount] = useState(0);
+  const started = useRef(false);
+  const ref = useRef(null);
 
   useEffect(() => {
-    let start = 0;
-    const increment = end / (duration / 16);
-
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= end) {
-        setCount(end);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(start));
-      }
-    }, 16);
-
-    return () => clearInterval(timer);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      setCount(end);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || started.current) return;
+        started.current = true;
+        const start = performance.now();
+        const tick = (now) => {
+          const progress = Math.min((now - start) / duration, 1);
+          // easeOutCubic
+          const eased = 1 - Math.pow(1 - progress, 3);
+          setCount(Math.floor(eased * end));
+          if (progress < 1) requestAnimationFrame(tick);
+          else setCount(end);
+        };
+        requestAnimationFrame(tick);
+      },
+      { threshold: 0.4 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
   }, [end, duration]);
 
-  return <span>{count}</span>;
+  return (
+    <span ref={ref}>
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
 };
 
+const stats = [
+  {
+    icon: FileText,
+    value: 10000,
+    suffix: "+",
+    label: "Resumes Created",
+    note: "Across resumes, portfolios & logos",
+  },
+  {
+    icon: Users,
+    value: 5000,
+    suffix: "+",
+    label: "Active Users",
+    note: "Building their next opportunity",
+  },
+  {
+    icon: Star,
+    value: 4.8,
+    suffix: "/5",
+    label: "Average Rating",
+    note: "From verified users",
+    decimal: true,
+  },
+];
+
+/* avatar initials for the trust row */
+const avatars = ["RS", "AD", "AV", "PS", "MK"];
+
 const Stats = () => {
-  const stats = [
-    {
-      icon: "📄",
-      value: 10000,
-      label: "Resumes Created",
-      suffix: "+",
-    },
-    {
-      icon: "👥",
-      value: 5000,
-      label: "Active Users",
-      suffix: "+",
-    },
-    {
-      icon: "⭐",
-      value: 48,
-      label: "User Rating",
-      suffix: "/5",
-      decimal: true,
-    },
-  ];
-
   return (
-    <section className="w-full bg-gradient-to-b from-white to-blue-50 py-16 md:py-20 relative overflow-hidden">
+    <section className="relative w-full bg-white py-20 md:py-24 overflow-hidden">
+      {/* subtle grid — same language as Hero/About */}
+      <div
+        className="absolute inset-0 opacity-[0.035] pointer-events-none"
+        style={{
+          backgroundImage:
+            "linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)",
+          backgroundSize: "44px 44px",
+        }}
+      />
+      {/* red glow — matches Hero's brand-red/5 blur */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[420px] max-w-full bg-brand-red/5 blur-[120px] rounded-full pointer-events-none" />
 
-      {/* 🔥 Background Glow */}
-      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.15),transparent_60%)] pointer-events-none"></div>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* ---------- header ---------- */}
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <motion.span
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-red/10 border border-brand-red/15 text-brand-red text-xs font-bold uppercase tracking-[0.18em]"
+          >
+            <Sparkles size={12} />
+            Trusted by thousands
+          </motion.span>
 
-      <div className="relative px-6 md:px-12 lg:px-20 text-center">
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.05 }}
+            className="mt-5 text-3xl md:text-4xl font-extrabold text-neutral-text-primary tracking-tight"
+          >
+            Numbers that <span className="text-brand-red">speak</span> for us
+          </motion.h2>
 
-        {/* Heading */}
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-          Trusted by Thousands of Users
-        </h2>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="mt-3 text-neutral-text-secondary text-base md:text-lg leading-relaxed"
+          >
+            A growing community of professionals who trust Touch Simply to
+            shape their next career move.
+          </motion.p>
+        </div>
 
-        <p className="text-gray-500 mb-12 text-sm md:text-base">
-          Join a growing community building professional resumes effortlessly
-        </p>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-
-          {stats.map((stat, i) => (
-            <div
-              key={i}
-              className="group bg-white/80 backdrop-blur-xl rounded-2xl shadow-md p-8 hover:shadow-2xl transition duration-300 hover:-translate-y-2 border border-white/20"
+        {/* ---------- stat cards ---------- */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 md:gap-6">
+          {stats.map(({ icon: Icon, value, suffix, label, note, decimal }, i) => (
+            <motion.div
+              key={label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.5 }}
+              className="group relative overflow-hidden bg-neutral-bg border border-neutral-border rounded-2xl p-7 md:p-8 shadow-sm hover:shadow-xl hover:border-brand-red/30 hover:-translate-y-1 transition-all duration-300"
             >
-              {/* Icon */}
-              <div className="text-4xl mb-4 transform group-hover:scale-110 transition">
-                {stat.icon}
+              {/* corner glow on hover */}
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand-red/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+              <div className="relative flex items-start justify-between">
+                <div className="w-12 h-12 rounded-xl bg-white border border-neutral-border text-brand-red flex items-center justify-center shadow-sm group-hover:bg-brand-red group-hover:text-white group-hover:border-brand-red group-hover:shadow-lg group-hover:shadow-brand-red/30 group-hover:scale-105 transition-all duration-300">
+                  <Icon size={22} />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-text-secondary bg-white border border-neutral-border px-2.5 py-1 rounded-full">
+                  Live
+                </span>
               </div>
 
-              {/* Value */}
-              <h3 className="text-3xl font-bold text-blue-600">
-                {stat.decimal ? (
-                  <>
-                    {(stat.value / 10).toFixed(1)}
-                  </>
+              <div className="relative mt-6 text-4xl md:text-5xl font-black tracking-tight text-neutral-text-primary tabular-nums">
+                {decimal ? (
+                  <>{value.toFixed(1)}{suffix}</>
                 ) : (
-                  <Counter end={stat.value} />
+                  <Counter end={value} suffix={suffix} />
                 )}
-                {stat.suffix}
-              </h3>
+              </div>
 
-              {/* Label */}
-              <p className="text-gray-500 mt-2 text-sm md:text-base">
-                {stat.label}
+              <p className="relative mt-2 text-base font-bold text-neutral-text-primary">
+                {label}
               </p>
-
-              {/* Hover Line */}
-              <div className="mt-4 h-1 w-0 bg-gradient-to-r from-blue-500 to-indigo-500 group-hover:w-full transition-all duration-300 rounded-full"></div>
-            </div>
+              <p className="relative mt-1 text-sm text-neutral-text-secondary leading-relaxed">
+                {note}
+              </p>
+            </motion.div>
           ))}
-
         </div>
+
+        {/* ---------- trust strip ---------- */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.15 }}
+          className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10"
+        >
+          {/* avatar stack */}
+          <div className="flex items-center gap-3">
+            <div className="flex -space-x-3">
+              {avatars.map((initials, i) => (
+                <div
+                  key={initials}
+                  style={{ zIndex: avatars.length - i }}
+                  className="w-9 h-9 rounded-full bg-brand-black text-white text-[11px] font-bold flex items-center justify-center ring-2 ring-white shadow-sm"
+                >
+                  {initials}
+                </div>
+              ))}
+              <div className="w-9 h-9 rounded-full bg-brand-red text-white text-[11px] font-bold flex items-center justify-center ring-2 ring-white shadow-sm">
+                +
+              </div>
+            </div>
+            <div className="leading-tight">
+              <p className="text-sm font-bold text-neutral-text-primary">
+                4,900+ creators joined
+              </p>
+              <p className="text-xs text-neutral-text-secondary">
+                in the last 12 months
+              </p>
+            </div>
+          </div>
+
+          <div className="hidden sm:block w-px h-10 bg-neutral-border" />
+
+          {/* stars */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-0.5 text-brand-red">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={16} fill="currentColor" strokeWidth={0} />
+              ))}
+            </div>
+            <div className="leading-tight">
+              <p className="text-sm font-bold text-neutral-text-primary">4.8 out of 5</p>
+              <p className="text-xs text-neutral-text-secondary">
+                based on 1,200+ reviews
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
