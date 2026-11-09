@@ -77,7 +77,9 @@ const DynamicForm = ({
     const value = getFieldValue(field);
     const required = field.required === true;
     const isEmpty = value == null || value === "" || (Array.isArray(value) && value.length === 0);
-    const placeholder = isEmpty ? label || "Enter value" : field.placeholder || "";
+    const placeholder = isEmpty
+      ? field.placeholder || label || "Enter value"
+      : "";
     const fieldClassName =
       "w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white text-sm";
 

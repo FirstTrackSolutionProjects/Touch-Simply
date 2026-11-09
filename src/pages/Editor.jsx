@@ -55,16 +55,26 @@ const setValueAtPath = (value, path, nextValue) => {
 };
 
 /** Template ke sample data (naam, skills, etc.) ko khali karta hai. */
-const clearConfigValues = (node) => {
-  if (Array.isArray(node)) return node.map(clearConfigValues);
+const clearConfigValues = (node, { useDefaultPlaceholders = false } = {}) => {
+  if (Array.isArray(node)) {
+    return node.map((item) => clearConfigValues(item, { useDefaultPlaceholders }));
+  }
   if (isPlain(node)) {
     const out = {};
-    for (const key of Object.keys(node)) out[key] = clearConfigValues(node[key]);
+    for (const key of Object.keys(node)) {
+      out[key] = clearConfigValues(node[key], { useDefaultPlaceholders });
+    }
     const cv = node.current_value;
     if (typeof cv === "string") {
-      // Never reuse template sample values (which may contain someone's real
-      // profile details) as the hint in a new user's blank form.
-      out.placeholder = node.title || node.label || node.name || "Enter value";
+      // Only templates explicitly allowed to use dummy defaults can surface
+      // them as examples; current_value always stays blank for a new resume.
+      const safeDefaultHint =
+        useDefaultPlaceholders &&
+        typeof node.default_value === "string" &&
+        node.default_value.trim()
+          ? node.default_value
+          : "";
+      out.placeholder = safeDefaultHint || node.title || node.label || node.name || "Enter value";
       out.current_value = "";
     } else if (Array.isArray(cv) && cv.every((x) => typeof x === "string")) {
       out.current_value = [];
@@ -363,7 +373,11 @@ const Editor = () => {
         if (cancelled) return;
 
         // Naya resume: sample data hata do
-        const blankCfg = clearConfigValues(cfg);
+        // Clean CV's defaults are example prompts. Show them as placeholders
+        // to guide users while keeping the actual resume fields empty.
+        const blankCfg = clearConfigValues(cfg, {
+          useDefaultPlaceholders: String(cfg.template || "").toLowerCase() === "cleancv",
+        });
         setConfig(blankCfg);
         try {
           await uploadConfigJson(resume.id, blankCfg);
