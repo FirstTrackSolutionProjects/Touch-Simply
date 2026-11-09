@@ -72,8 +72,12 @@ const clearConfigValues = (node) => {
   return node;
 };
 
-const fillCleanCVExampleValues = (config) => {
-  if (String(config?.template || "").toLowerCase() !== "cleancv") return config;
+const fillTemplateExampleValues = (config, templateTitle = "") => {
+  const templateName = String(templateTitle || config?.template || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+  const supportedTemplates = new Set(["cleancv", "cvtemplate", "dcv", "deedy", "deedycv"]);
+  if (!supportedTemplates.has(templateName)) return config;
 
   const personalDetailHints = {
     gender: "Example: Female",
@@ -90,7 +94,7 @@ const fillCleanCVExampleValues = (config) => {
     if (typeof node.current_value === "string" && !node.current_value.trim()) {
       if (typeof node.default_value === "string" && node.default_value.trim()) {
         next.current_value = node.default_value;
-      } else if (personalDetailHints[node.name]) {
+      } else if (templateName === "cleancv" && personalDetailHints[node.name]) {
         next.placeholder = personalDetailHints[node.name];
       }
     } else if (
@@ -323,7 +327,7 @@ const Editor = () => {
         if (!configUrl) throw new Error("Workspace is missing a config file.");
         const cfg = await loadConfigJson(configUrl);
         if (cancelled) return;
-        setConfig(fillCleanCVExampleValues(cfg));
+        setConfig(fillTemplateExampleValues(cfg, templateTitle));
         setResumeId(id);
         await fetchBalance();
       } catch (err) {
@@ -363,7 +367,7 @@ const Editor = () => {
               const cfg = await loadConfigJson(configUrl);
               if (cancelled) return;
               setResumeId(savedId);
-              setConfig(fillCleanCVExampleValues(cfg));
+              setConfig(fillTemplateExampleValues(cfg, templateTitle));
               await fetchBalance();
               return;
             }
@@ -395,9 +399,9 @@ const Editor = () => {
         const cfg = await loadConfigJson(configJsonUrl);
         if (cancelled) return;
 
-        // New resumes start blank. Clean CV then seeds its known dummy examples
-        // into empty fields so users can see what to replace, like Premium CV.
-        const blankCfg = fillCleanCVExampleValues(clearConfigValues(cfg));
+        // New resumes start blank. These templates then seed their configured
+        // dummy defaults into empty fields so users can see what to replace.
+        const blankCfg = fillTemplateExampleValues(clearConfigValues(cfg), templateTitle || cfg.template);
         setConfig(blankCfg);
         try {
           await uploadConfigJson(resume.id, blankCfg);
