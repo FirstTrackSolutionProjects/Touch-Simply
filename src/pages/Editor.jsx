@@ -55,26 +55,14 @@ const setValueAtPath = (value, path, nextValue) => {
 };
 
 /** Template ke sample data (naam, skills, etc.) ko khali karta hai. */
-const clearConfigValues = (node, { useDefaultPlaceholders = false } = {}) => {
-  if (Array.isArray(node)) {
-    return node.map((item) => clearConfigValues(item, { useDefaultPlaceholders }));
-  }
+const clearConfigValues = (node) => {
+  if (Array.isArray(node)) return node.map(clearConfigValues);
   if (isPlain(node)) {
     const out = {};
-    for (const key of Object.keys(node)) {
-      out[key] = clearConfigValues(node[key], { useDefaultPlaceholders });
-    }
+    for (const key of Object.keys(node)) out[key] = clearConfigValues(node[key]);
     const cv = node.current_value;
     if (typeof cv === "string") {
-      // Only templates explicitly allowed to use dummy defaults can surface
-      // them as examples; current_value always stays blank for a new resume.
-      const safeDefaultHint =
-        useDefaultPlaceholders &&
-        typeof node.default_value === "string" &&
-        node.default_value.trim()
-          ? node.default_value
-          : "";
-      out.placeholder = safeDefaultHint || node.title || node.label || node.name || "Enter value";
+      out.placeholder = node.title || node.label || node.name || "Enter value";
       out.current_value = "";
     } else if (Array.isArray(cv) && cv.every((x) => typeof x === "string")) {
       out.current_value = [];
@@ -84,7 +72,7 @@ const clearConfigValues = (node, { useDefaultPlaceholders = false } = {}) => {
   return node;
 };
 
-const addCleanCVExamplePlaceholders = (config) => {
+const fillCleanCVExampleValues = (config) => {
   if (String(config?.template || "").toLowerCase() !== "cleancv") return config;
 
   const visit = (node) => {
@@ -92,13 +80,17 @@ const addCleanCVExamplePlaceholders = (config) => {
     if (!isPlain(node)) return node;
 
     const next = Object.fromEntries(Object.entries(node).map(([key, value]) => [key, visit(value)]));
-    if (
-      typeof node.current_value === "string" &&
-      !node.current_value.trim() &&
-      typeof node.default_value === "string" &&
-      node.default_value.trim()
+    if (typeof node.current_value === "string" && !node.current_value.trim()) {
+      if (typeof node.default_value === "string" && node.default_value.trim()) {
+        next.current_value = node.default_value;
+      }
+    } else if (
+      Array.isArray(node.current_value) &&
+      node.current_value.length === 0 &&
+      Array.isArray(node.default_value) &&
+      node.default_value.length > 0
     ) {
-      next.placeholder = node.default_value;
+      next.current_value = [...node.default_value];
     }
     return next;
   };
@@ -322,7 +314,7 @@ const Editor = () => {
         if (!configUrl) throw new Error("Workspace is missing a config file.");
         const cfg = await loadConfigJson(configUrl);
         if (cancelled) return;
-        setConfig(addCleanCVExamplePlaceholders(cfg));
+        setConfig(fillCleanCVExampleValues(cfg));
         setResumeId(id);
         await fetchBalance();
       } catch (err) {
@@ -362,7 +354,7 @@ const Editor = () => {
               const cfg = await loadConfigJson(configUrl);
               if (cancelled) return;
               setResumeId(savedId);
-              setConfig(addCleanCVExamplePlaceholders(cfg));
+              setConfig(fillCleanCVExampleValues(cfg));
               await fetchBalance();
               return;
             }
@@ -394,12 +386,9 @@ const Editor = () => {
         const cfg = await loadConfigJson(configJsonUrl);
         if (cancelled) return;
 
-        // Naya resume: sample data hata do
-        // Clean CV's defaults are example prompts. Show them as placeholders
-        // to guide users while keeping the actual resume fields empty.
-        const blankCfg = clearConfigValues(cfg, {
-          useDefaultPlaceholders: String(cfg.template || "").toLowerCase() === "cleancv",
-        });
+        // New resumes start blank. Clean CV then seeds its known dummy examples
+        // into empty fields so users can see what to replace, like Premium CV.
+        const blankCfg = fillCleanCVExampleValues(clearConfigValues(cfg));
         setConfig(blankCfg);
         try {
           await uploadConfigJson(resume.id, blankCfg);
