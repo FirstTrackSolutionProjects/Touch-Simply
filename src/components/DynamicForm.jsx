@@ -81,7 +81,7 @@ const DynamicForm = ({
       ? field.placeholder || label || "Enter value"
       : "";
     const fieldClassName =
-      "w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white text-sm";
+      "w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white text-sm placeholder:text-gray-500";
 
     if (field.type === "checkbox") {
       return (
@@ -201,6 +201,9 @@ const DynamicForm = ({
           className={fieldClassName}
           onChange={(event) => onChange(path, event.target.value)}
         />
+        {field.name === "date_of_birth" && (
+          <p className="mt-1 text-xs text-gray-500">Choose your date of birth from the calendar.</p>
+        )}
       </div>
     );
   };

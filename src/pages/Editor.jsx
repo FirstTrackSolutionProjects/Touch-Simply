@@ -75,6 +75,13 @@ const clearConfigValues = (node) => {
 const fillCleanCVExampleValues = (config) => {
   if (String(config?.template || "").toLowerCase() !== "cleancv") return config;
 
+  const personalDetailHints = {
+    gender: "Example: Female",
+    father_name: "Enter your father's full name",
+    mother_name: "Enter your mother's full name",
+    nationality: "Example: Indian",
+  };
+
   const visit = (node) => {
     if (Array.isArray(node)) return node.map(visit);
     if (!isPlain(node)) return node;
@@ -83,6 +90,8 @@ const fillCleanCVExampleValues = (config) => {
     if (typeof node.current_value === "string" && !node.current_value.trim()) {
       if (typeof node.default_value === "string" && node.default_value.trim()) {
         next.current_value = node.default_value;
+      } else if (personalDetailHints[node.name]) {
+        next.placeholder = personalDetailHints[node.name];
       }
     } else if (
       Array.isArray(node.current_value) &&
