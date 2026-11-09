@@ -7,6 +7,27 @@ import PageBackButton from "../components/PageBackButton";
 import { getResumeTemplates } from "../services/resumeService";
 import { useAuth } from "../context/AuthContext";
 
+const DEFAULT_RESUME_TEMPLATE_IMAGE = "/images/modern-resume.jpg";
+const TEMPLATE_PREVIEW_BY_S3_KEY_SUFFIX = {
+  "/CleanCV": "/template-previews/CleanCV.png",
+  "/PremiumCV": "/template-previews/PremiumCV.png",
+};
+
+const getResumeTemplatePreview = (template) => {
+  const s3Key = String(template.s3_key || template.s3Key || "").replace(/\/+$/, "");
+  const matchingPreview = Object.entries(TEMPLATE_PREVIEW_BY_S3_KEY_SUFFIX)
+    .find(([suffix]) => s3Key.toLowerCase().endsWith(suffix.toLowerCase()));
+
+  return {
+    image: matchingPreview?.[1]
+      || template.preview_image_url
+      || template.previewImageUrl
+      || template.preview_url
+      || DEFAULT_RESUME_TEMPLATE_IMAGE,
+    fallbackImage: matchingPreview ? DEFAULT_RESUME_TEMPLATE_IMAGE : undefined,
+  };
+};
+
 const Templates = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -21,7 +42,7 @@ const Templates = () => {
         const list = (res.data?.templates || []).map((t) => ({
           name: t.title,
           key: t.id,
-          image: t.previewImageUrl || "/images/modern-resume.jpg",
+          ...getResumeTemplatePreview(t),
         }));
         setResumeTemplates(list);
       } catch (e) {

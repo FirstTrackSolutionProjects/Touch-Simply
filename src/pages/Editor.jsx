@@ -583,10 +583,11 @@ const Editor = () => {
       .map((key) => {
         const val = node[key];
         const stats = countFields(val);
-        const label =
+        const defaultLabel =
           (isPlain(val) && typeof val.label === "string" && val.label) ||
           (isPlain(val) && typeof val.title === "string" && val.title) ||
           prettify(key);
+        const label = key.toLowerCase() === "header" ? "Personal Information" : defaultLabel;
         return { key, label, ...stats };
       });
   }, [config, rootPath]);

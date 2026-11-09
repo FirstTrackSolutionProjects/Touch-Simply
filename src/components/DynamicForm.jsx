@@ -57,6 +57,20 @@ const DynamicForm = ({
   onAddArrayField,
   onRemoveArrayField,
 }) => {
+  const sectionHelp = {
+    header: "Add your name and the contact details you want employers to use.",
+    personal_information: "Add the personal and contact details you want employers to see. You can leave private or optional details blank.",
+    personal_details: "Optional details appear in a Personal Details block on your CV only when you fill them in.",
+    education: "For every course or qualification, add the school, college, or university name, your degree/course, start date, completion or pass date, and grade if available.",
+    experience: "Add each job or internship, with the organization, your role, dates, and key responsibilities.",
+    skills: "Add skills relevant to the role you are applying for.",
+    projects: "Add projects with a short description of what you built or achieved.",
+  };
+  const humanizeSection = (id, title) => {
+    if (id.toLowerCase() === "header") return "Personal Information";
+    if (id.toLowerCase() === "personal_information") return "Personal Information";
+    return title;
+  };
   const renderField = (field, path) => {
     const fieldId = path.map(String).join("-");
     const label = field.title || field.label || field.name;
@@ -298,7 +312,7 @@ const DynamicForm = ({
   return (
     <div className="space-y-6">
       {Object.entries(config.sections).map(([sectionId, section]) => {
-        const title = getNodeTitle(section, titleCase(sectionId));
+        const title = humanizeSection(sectionId, getNodeTitle(section, titleCase(sectionId)));
         return (
           <section
             key={sectionId}
@@ -310,6 +324,11 @@ const DynamicForm = ({
                 <span className="text-[11px] text-gray-400">Optional</span>
               )}
             </div>
+            {sectionHelp[sectionId.toLowerCase()] && (
+              <p className="-mt-2 mb-4 text-xs leading-5 text-gray-500">
+                {sectionHelp[sectionId.toLowerCase()]}
+              </p>
+            )}
             {renderNode(section, ["sections", sectionId])}
           </section>
         );

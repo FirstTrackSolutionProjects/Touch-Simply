@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { FaCheckCircle, FaArrowRight } from "react-icons/fa";
+import { FaCheckCircle, FaArrowRight, FaTimes, FaSearchPlus } from "react-icons/fa";
 import { motion } from "framer-motion";
+
+const useFallbackImage = (event, fallbackImage) => {
+  if (!fallbackImage || event.currentTarget.dataset.fallbackApplied === "true") return;
+  event.currentTarget.dataset.fallbackApplied = "true";
+  event.currentTarget.src = fallbackImage;
+};
 
 const TemplateSection = ({ title, data, type, onUse }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [visible, setVisible] = useState(isMobile ? 2 : 4);
   const [selected, setSelected] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -17,9 +24,9 @@ const TemplateSection = ({ title, data, type, onUse }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const use = (key) => {
-    setSelected(key);
-    onUse(key, type);
+  const use = (template) => {
+    setSelected(template.key);
+    onUse(template.key, type);
   };
 
   return (
@@ -70,6 +77,7 @@ const TemplateSection = ({ title, data, type, onUse }) => {
                   src={t.image}
                   alt={t.name}
                   loading="lazy"
+                  onError={(event) => useFallbackImage(event, t.fallbackImage)}
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
 
@@ -89,10 +97,10 @@ const TemplateSection = ({ title, data, type, onUse }) => {
                 {/* desktop: action bar slides up on hover / keyboard focus */}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden bg-gradient-to-t from-black/70 via-black/20 to-transparent p-3 pt-16 opacity-0 transition-opacity duration-300 group-focus-within:opacity-100 group-hover:opacity-100 md:block">
                   <button
-                    onClick={() => use(t.key)}
+                    onClick={() => setPreview(t)}
                     className="pointer-events-auto flex w-full translate-y-3 items-center justify-center gap-2 rounded-xl bg-brand-red py-3 text-sm font-bold text-white shadow-lg shadow-black/30 transition-all duration-300 hover:bg-brand-red-hover group-focus-within:translate-y-0 group-hover:translate-y-0"
                   >
-                    Use this template <FaArrowRight size={12} />
+                    Preview design <FaSearchPlus size={12} />
                   </button>
                 </div>
               </div>
@@ -107,10 +115,10 @@ const TemplateSection = ({ title, data, type, onUse }) => {
 
               {/* mobile button (hover touch par kaam nahi karta) */}
               <button
-                onClick={() => use(t.key)}
+                onClick={() => setPreview(t)}
                 className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-black py-2.5 text-xs font-bold text-white transition active:scale-95 md:hidden"
               >
-                <FaCheckCircle size={12} /> Use template
+                <FaSearchPlus size={12} /> Preview design
               </button>
             </motion.article>
           );
@@ -125,6 +133,53 @@ const TemplateSection = ({ title, data, type, onUse }) => {
           >
             Explore more <FaArrowRight size={12} />
           </button>
+        </div>
+      )}
+
+      {preview && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${preview.name} template preview`}
+          onMouseDown={(event) => { if (event.target === event.currentTarget) setPreview(null); }}
+          onKeyDown={(event) => { if (event.key === "Escape") setPreview(null); }}
+        >
+          <div className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl md:flex-row">
+            <button
+              type="button"
+              onClick={() => setPreview(null)}
+              className="absolute right-3 top-3 z-10 grid h-10 w-10 place-items-center rounded-full bg-white/95 text-neutral-text-primary shadow hover:bg-red-50"
+              aria-label="Close preview"
+            >
+              <FaTimes />
+            </button>
+            <div className="min-h-0 flex-1 overflow-auto bg-[#f4f1ef] p-4 md:p-6">
+              <img
+                src={preview.image}
+                alt={`${preview.name} full preview`}
+                onError={(event) => useFallbackImage(event, preview.fallbackImage)}
+                className="mx-auto max-h-[72vh] w-auto rounded-lg object-contain shadow-lg"
+              />
+            </div>
+            <div className="flex shrink-0 flex-col justify-center gap-4 p-6 md:w-80">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-brand-red">Template preview</p>
+                <h3 className="mt-2 text-2xl font-black text-neutral-text-primary">{preview.name}</h3>
+                <p className="mt-2 text-sm leading-6 text-neutral-text-secondary">Review this design first. If it looks right, choose it to start filling in your CV.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => use(preview)}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-red px-5 py-3 font-bold text-white hover:bg-brand-red-hover"
+              >
+                Use this template <FaArrowRight size={13} />
+              </button>
+              <button type="button" onClick={() => setPreview(null)} className="rounded-xl border border-neutral-border px-5 py-3 font-semibold text-neutral-text-primary hover:bg-neutral-bg">
+                Keep browsing
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </section>
