@@ -79,6 +79,28 @@ const fillTemplateExampleValues = (config, templateTitle = "") => {
   const supportedTemplates = new Set(["cleancv", "cvtemplate", "dcv", "deedy", "deedycv"]);
   if (!supportedTemplates.has(templateName)) return config;
 
+  // CVTemplate/DCV configs contain a real-looking sample profile. Keep the
+  // editor helpful while avoiding a specific person's details in new resumes.
+  const genericHeaderValues = {
+    fullname: "Your Name",
+    name: "Your Name",
+    jobtitle: "Job Title",
+    title: "Job Title",
+    location: "City, State",
+    phonenumber: "Phone Number",
+    phone: "Phone Number",
+    email: "you@example.com",
+    emailaddress: "you@example.com",
+    githuburl: "https://github.com/username",
+    github: "https://github.com/username",
+    githubdisplaytext: "github.com/username",
+    githublabel: "github.com/username",
+    linkedinurl: "https://linkedin.com/in/username",
+    linkedin: "https://linkedin.com/in/username",
+    linkedindisplaytext: "linkedin.com/in/username",
+    linkedinlabel: "linkedin.com/in/username",
+  };
+
   const personalDetailHints = {
     gender: "Example: Female",
     father_name: "Enter your father's full name",
@@ -86,11 +108,38 @@ const fillTemplateExampleValues = (config, templateTitle = "") => {
     nationality: "Example: Indian",
   };
 
-  const visit = (node) => {
-    if (Array.isArray(node)) return node.map(visit);
+  const visit = (node, inHeader = false) => {
+    if (Array.isArray(node)) return node.map((item) => visit(item, inHeader));
     if (!isPlain(node)) return node;
 
-    const next = Object.fromEntries(Object.entries(node).map(([key, value]) => [key, visit(value)]));
+    const nodeSection = [node.section, node.name, node.title, node.label]
+      .filter(Boolean)
+      .map((value) => String(value).toLowerCase().replace(/[^a-z0-9]/g, ""));
+    const withinHeader =
+      inHeader || nodeSection.some((name) => ["header", "personalinformation"].includes(name));
+    const next = Object.fromEntries(
+      Object.entries(node).map(([key, value]) => [
+        key,
+        visit(
+          value,
+          withinHeader || ["header", "personalinformation"].includes(key.toLowerCase().replace(/[^a-z0-9]/g, ""))
+        ),
+      ])
+    );
+    if (withinHeader && typeof node.current_value === "string") {
+      const fieldName = [node.name, node.title, node.label, node.key]
+        .filter(Boolean)
+        .map((value) => String(value).toLowerCase().replace(/[^a-z0-9]/g, ""));
+      const genericValue = fieldName.map((name) => genericHeaderValues[name]).find(Boolean);
+      const isUntouchedSample =
+        !node.current_value.trim() || node.current_value === node.default_value;
+      if (genericValue && isUntouchedSample) {
+        next.current_value = genericValue;
+        next.default_value = genericValue;
+        next.placeholder = genericValue;
+        return next;
+      }
+    }
     if (typeof node.current_value === "string" && !node.current_value.trim()) {
       if (typeof node.default_value === "string" && node.default_value.trim()) {
         next.current_value = node.default_value;
