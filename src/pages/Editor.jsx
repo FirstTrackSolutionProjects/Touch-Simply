@@ -84,6 +84,8 @@ const fillTemplateExampleValues = (config, templateTitle = "") => {
   const genericHeaderValues = {
     fullname: "Your Name",
     name: "Your Name",
+    firstname: "Your",
+    lastname: "Name",
     jobtitle: "Job Title",
     title: "Job Title",
     location: "City, State",
@@ -99,6 +101,12 @@ const fillTemplateExampleValues = (config, templateTitle = "") => {
     linkedin: "https://linkedin.com/in/username",
     linkedindisplaytext: "linkedin.com/in/username",
     linkedinlabel: "linkedin.com/in/username",
+    personalwebsiteurl: "https://example.com",
+    websitedisplaytext: "example.com",
+    socialprofileurl: "https://example.com/profile",
+    socialprofiledisplaytext: "example.com/profile",
+    primaryemail: "you@example.com",
+    secondaryemail: "",
   };
 
   const personalDetailHints = {
@@ -130,10 +138,12 @@ const fillTemplateExampleValues = (config, templateTitle = "") => {
       const fieldName = [node.name, node.title, node.label, node.key]
         .filter(Boolean)
         .map((value) => String(value).toLowerCase().replace(/[^a-z0-9]/g, ""));
-      const genericValue = fieldName.map((name) => genericHeaderValues[name]).find(Boolean);
+      const genericValue = fieldName
+        .map((name) => genericHeaderValues[name])
+        .find((value) => value !== undefined);
       const isUntouchedSample =
         !node.current_value.trim() || node.current_value === node.default_value;
-      if (genericValue && isUntouchedSample) {
+      if (genericValue !== undefined && isUntouchedSample) {
         next.current_value = genericValue;
         next.default_value = genericValue;
         next.placeholder = genericValue;
