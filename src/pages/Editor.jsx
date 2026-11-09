@@ -84,6 +84,28 @@ const clearConfigValues = (node, { useDefaultPlaceholders = false } = {}) => {
   return node;
 };
 
+const addCleanCVExamplePlaceholders = (config) => {
+  if (String(config?.template || "").toLowerCase() !== "cleancv") return config;
+
+  const visit = (node) => {
+    if (Array.isArray(node)) return node.map(visit);
+    if (!isPlain(node)) return node;
+
+    const next = Object.fromEntries(Object.entries(node).map(([key, value]) => [key, visit(value)]));
+    if (
+      typeof node.current_value === "string" &&
+      !node.current_value.trim() &&
+      typeof node.default_value === "string" &&
+      node.default_value.trim()
+    ) {
+      next.placeholder = node.default_value;
+    }
+    return next;
+  };
+
+  return visit(config);
+};
+
 const countFields = (node) => {
   if (Array.isArray(node)) {
     return node.reduce(
@@ -300,7 +322,7 @@ const Editor = () => {
         if (!configUrl) throw new Error("Workspace is missing a config file.");
         const cfg = await loadConfigJson(configUrl);
         if (cancelled) return;
-        setConfig(cfg);
+        setConfig(addCleanCVExamplePlaceholders(cfg));
         setResumeId(id);
         await fetchBalance();
       } catch (err) {
@@ -340,7 +362,7 @@ const Editor = () => {
               const cfg = await loadConfigJson(configUrl);
               if (cancelled) return;
               setResumeId(savedId);
-              setConfig(cfg);
+              setConfig(addCleanCVExamplePlaceholders(cfg));
               await fetchBalance();
               return;
             }
