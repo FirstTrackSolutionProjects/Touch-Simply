@@ -60,7 +60,7 @@ const DynamicForm = ({
   const sectionHelp = {
     header: "Add your name and the contact details you want employers to use.",
     personal_information: "Add the personal and contact details you want employers to see. You can leave private or optional details blank.",
-    personal_details: "Optional details appear in a Personal Details block on your CV only when you fill them in.",
+    personal_details: "Optional: add any details you want, such as date of birth, gender, parents' names, nationality, marital status, birthplace, address, or languages. Leave any field blank and it will be omitted from your CV.",
     education: "For every course or qualification, add the school, college, or university name, your degree/course, start date, completion or pass date, and grade if available.",
     experience: "Add each job or internship, with the organization, your role, dates, and key responsibilities.",
     skills: "Add skills relevant to the role you are applying for.",
