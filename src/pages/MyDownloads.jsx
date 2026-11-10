@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import LibraryCard from "../components/LibraryCard";
 import { getAllResumeDownloads, redownloadFromLibrary, deleteResumeDownload } from "../services/resumeService";
-import { FolderOpen, Search, Loader2, Download, RotateCw } from "lucide-react";
+import { FolderOpen, Search, Loader2, Download } from "lucide-react";
 import { toast } from "react-toastify";
 import { getWalletBalance } from "../services/walletService";
 import { useNavigate } from "react-router-dom";

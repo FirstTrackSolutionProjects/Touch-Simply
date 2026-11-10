@@ -7,7 +7,7 @@ import { getWalletBalance } from "../services/walletService";
 import {
   FileText, Briefcase, Palette, Presentation, Sparkles, FolderOpen,
   LogOut, User, UserRound, Home, Layers3, Settings, Crown, Zap, Menu, X,
-  Search, Bell, BarChart3, Activity, Star, ChevronRight, ShieldCheck,
+  Search, Bell, BarChart3, Activity, ChevronRight, ShieldCheck,
   Download
 } from "lucide-react";
 
