@@ -8,6 +8,7 @@ import { getResumeTemplates } from "../services/resumeService";
 import { useAuth } from "../context/AuthContext";
 
 const DEFAULT_RESUME_TEMPLATE_IMAGE = "/images/modern-resume.jpg";
+const EDITOR_SESSION_KEY = "touchsimply-editor-session";
 const TEMPLATE_PREVIEW_BY_S3_KEY_SUFFIX = {
   "/CleanCV": "/template-previews/CleanCV.png",
   "/PremiumCV": "/template-previews/PremiumCV.png",
@@ -76,6 +77,14 @@ const Templates = () => {
     let destination;
     if (type === "resume") {
       const template = resumeTemplates.find((t) => t.key === key);
+      // Selecting a template starts a fresh resume. The editor keeps a session
+      // pointer so a reload can recover an in-progress resume, but reusing that
+      // pointer here can reopen a workspace created from an older template config.
+      try {
+        window.sessionStorage.removeItem(`${EDITOR_SESSION_KEY}-${key}`);
+      } catch {
+        // Continue to the editor when session storage is unavailable.
+      }
       destination = { pathname: "/editor", state: { templateId: key, templateTitle: template?.name || "Resume" } };
     }
     if (type === "logo") destination = { pathname: "/logo", state: { templateId: key } };
