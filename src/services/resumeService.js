@@ -53,6 +53,12 @@ export const getAllResumes = async (query = { page: 1, limit: 10 }) => {
   return res.data;
 };
 
+// GET MY PROJECTS (resumes the user is building, auto-saved, sorted by last edit)
+export const getMyProjects = async (query = { page: 1, limit: 20, sort_by: "updated_at", direction: "desc" }) => {
+  const res = await API.get("/resumes/projects", { params: query });
+  return res.data;
+};
+
 // GET SINGLE RESUME
 export const getResumeById = async (resumeId) => {
   const res = await API.get(`/resumes/${resumeId}`);

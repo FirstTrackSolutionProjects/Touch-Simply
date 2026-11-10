@@ -359,8 +359,8 @@ const Editor = () => {
   const location = useLocation();
   const { user } = useAuth();
 
-  // Passed from Templates page or Library
-  const { templateId, templateTitle, resumeId: existingResumeId } = location.state || {};
+  // Passed from Templates page, My Projects, or My Downloads
+  const { templateId, templateTitle, resumeId: existingResumeId, autoDownload = false } = location.state || {};
 
   const [resumeId, setResumeId] = useState(existingResumeId || null);
   const [config, setConfig] = useState(null);
@@ -597,6 +597,11 @@ const Editor = () => {
   const handleDownload = async () => {
     if (!resumeId) return;
     if (previewImageUrls.length === 0) {
+      // autoDownload flow: compile first, then download.
+      if (autoDownload) {
+        await doCompile();
+        return; // doCompile -> user can click Download again (or we re-call via effect)
+      }
       toast.warn("Compile first before downloading");
       return;
     }
@@ -665,6 +670,17 @@ const Editor = () => {
       setDownloading(false);
     }
   };
+
+  // Auto-download once the preview is ready when arriving with autoDownload=true.
+  useEffect(() => {
+    if (!autoDownload) return;
+    if (creating || compiling) return;
+    if (previewImageUrls.length === 0) return;
+    // Small delay so the user sees the compiled preview before the browser dialog.
+    const t = setTimeout(() => { handleDownload(); }, 500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoDownload, creating, compiling, previewImageUrls.length]);
 
   // ─────────────────────────────────────────────
   // CLONE

@@ -91,7 +91,10 @@ function App() {
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/library" element={<Library />} />
+        <Route path="/projects" element={<ProtectedRoute><MyProjects /></ProtectedRoute>} />
+        <Route path="/downloads" element={<ProtectedRoute><MyDownloads /></ProtectedRoute>} />
+        {/* Legacy alias so old links keep working */}
+        <Route path="/library" element={<ProtectedRoute><MyDownloads /></ProtectedRoute>} />
         <Route path="/refund" element={<RefundCancellation />} />
         <Route path="/terms" element={<TermsConditions />} />
         <Route path="/faq" element={<FAQ />} />

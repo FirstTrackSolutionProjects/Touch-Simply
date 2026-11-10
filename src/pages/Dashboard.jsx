@@ -67,7 +67,8 @@ const Dashboard = () => {
       { to: "/templates", label: "Templates", icon: Layers3 },
     ]},
     { label: "Workspace", items: [
-      { to: "/library", label: "My Library", icon: FolderOpen },
+      { to: "/projects", label: "My Projects", icon: FolderOpen },
+      { to: "/downloads", label: "My Downloads", icon: Download },
       { to: "/transactions", label: "Activity", icon: Activity },
       { to: "/chat", label: "AI Assistant", icon: Sparkles, badge: "AI" },
     ]},
@@ -366,7 +367,7 @@ const Dashboard = () => {
                 <h2 className="text-xl md:text-2xl font-bold text-neutral-text-primary">Recent Projects</h2>
                 <p className="text-neutral-text-secondary mt-1 text-sm">Continue where you left off.</p>
               </div>
-              <Link to="/library" className="text-brand-red flex items-center gap-1 hover:gap-2 transition-all text-sm font-semibold">
+              <Link to="/projects" className="text-brand-red flex items-center gap-1 hover:gap-2 transition-all text-sm font-semibold">
                 View All <ChevronRight size={18} />
               </Link>
             </div>

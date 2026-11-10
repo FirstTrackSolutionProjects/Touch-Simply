@@ -46,7 +46,7 @@ const LibraryCard = ({ item, onRedownload, onModify, onDelete, downloadLocked = 
           <button
             onClick={() => onModify(item)}
             className="flex-1 flex items-center justify-center gap-2 bg-gray-100 text-gray-700 text-sm font-semibold py-2.5 rounded-lg hover:bg-gray-200 transition-colors"
-            title="Modify this project"
+            title="Edit the original project"
           >
             <Pencil size={15} />
             Edit
@@ -54,8 +54,8 @@ const LibraryCard = ({ item, onRedownload, onModify, onDelete, downloadLocked = 
           <button
             onClick={() => onDelete(item)}
             className="flex items-center justify-center gap-2 border border-red-200 text-red-600 text-sm font-semibold px-3 py-2.5 rounded-lg hover:bg-red-50 transition-colors"
-            title="Remove this resume from your library"
-            aria-label={`Delete ${item.title || "resume"}`}
+            title="Remove this download"
+            aria-label={`Delete ${item.title || "download"}`}
           >
             <Trash2 size={15} />
           </button>

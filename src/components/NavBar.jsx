@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
 import {
   Menu, X, ChevronDown, FileText, Palette, Briefcase, Presentation,
-  Zap, ShieldCheck, ReceiptText, LogIn,
+  Zap, ShieldCheck, ReceiptText, LogIn, Download,
 } from "lucide-react";
 import UserAvatar from "./UserAvatar";
 import { getWalletBalance } from "../services/walletService";
@@ -44,7 +44,10 @@ const NavBar = () => {
     { name: "Contact", path: "/contact" },
   ];
 
-  if (user) navLinks.splice(2, 0, { name: "My Library", path: "/library" });
+  if (user) {
+    navLinks.splice(2, 0, { name: "My Projects", path: "/projects" });
+    navLinks.splice(3, 0, { name: "My Downloads", path: "/downloads" });
+  }
 
   const createItems = [
     { label: "Resume", icon: <FileText size={15} />, to: "/templates?type=resume" },
@@ -176,6 +179,8 @@ const NavBar = () => {
                 <Link to="/credits/buy" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 px-4 py-3 text-base bg-brand-red/10 text-brand-red rounded-lg hover:bg-brand-red/20 transition font-medium">
                   <Zap size={14} /> <span className="font-bold">{credits ?? "—"}</span> coins
                 </Link>
+                <Link to="/projects" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 px-4 py-3 rounded-lg text-base hover:bg-neutral-bg"><FileText size={18} /> My Projects</Link>
+                <Link to="/downloads" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 px-4 py-3 rounded-lg text-base hover:bg-neutral-bg"><Download size={18} /> My Downloads</Link>
                 <Link to="/transactions" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 px-4 py-3 rounded-lg text-base hover:bg-neutral-bg"><ReceiptText size={18} /> Payment History</Link>
                 <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg bg-neutral-bg hover:bg-neutral-border/50 transition">
                   <UserAvatar user={user} size="sm" /> <span className="font-medium">Dashboard</span>
