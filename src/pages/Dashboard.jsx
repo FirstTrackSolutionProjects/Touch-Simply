@@ -78,19 +78,19 @@ const Dashboard = () => {
   ];
 
   const SidebarContent = () => (
-    <>
+    <div className="flex flex-col h-full min-h-0">
       {/* Brand */}
-      <div className="flex items-center gap-3 mb-6 px-2">
-        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-red to-red-700 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-brand-red/30 ring-4 ring-brand-red/10">T</div>
+      <div className="flex items-center gap-3 mb-4 px-2 shrink-0">
+        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-red to-red-700 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-brand-red/30 ring-4 ring-brand-red/10">T</div>
         <h1 className="text-xl font-extrabold text-neutral-text-primary tracking-tight">
           Touch <span className="text-brand-red">Simply</span>
         </h1>
       </div>
 
       {/* User mini card */}
-      <div className="mb-6 flex items-center gap-3 p-3 rounded-2xl bg-neutral-bg border border-neutral-border">
+      <div className="mb-4 flex items-center gap-3 p-2.5 rounded-2xl bg-neutral-bg border border-neutral-border shrink-0">
         <div className="relative">
-          <div className="w-10 h-10 rounded-xl bg-brand-black text-white flex items-center justify-center font-bold">
+          <div className="w-9 h-9 rounded-xl bg-brand-black text-white flex items-center justify-center font-bold">
             {(firstName || "U").charAt(0).toUpperCase()}
           </div>
           <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-white" />
@@ -101,12 +101,12 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 space-y-6 overflow-y-auto pr-1 -mr-1">
+      {/* Nav (scrollable area) */}
+      <nav className="flex-1 min-h-0 space-y-4 overflow-y-auto pr-1 -mr-1 sidebar-scroll">
         {navGroups.map((group) => (
           <div key={group.label}>
-            <p className="text-[10px] text-neutral-text-secondary uppercase tracking-[0.22em] px-3 mb-2 font-bold">{group.label}</p>
-            <div className="space-y-1">
+            <p className="text-[10px] text-neutral-text-secondary uppercase tracking-[0.22em] px-3 mb-1.5 font-bold">{group.label}</p>
+            <div className="space-y-0.5">
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const active = location.pathname === item.to;
@@ -115,7 +115,7 @@ const Dashboard = () => {
                     key={item.to}
                     to={item.to}
                     onClick={() => setMobileMenu(false)}
-                    className={`group relative flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                    className={`group relative flex items-center gap-3 px-3 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                       active
                         ? "bg-brand-red/10 text-brand-red"
                         : "text-neutral-text-secondary hover:bg-neutral-bg hover:text-neutral-text-primary hover:translate-x-0.5"
@@ -137,7 +137,7 @@ const Dashboard = () => {
                 );
               })}
               {group.label === "Account" && isAdmin && (
-                <Link to="/admin/dashboard" className="group flex items-center gap-3 px-3 py-2.5 rounded-xl bg-brand-black text-white text-sm font-semibold hover:bg-black transition-all shadow-md hover:shadow-lg mt-2">
+                <Link to="/admin/dashboard" className="group flex items-center gap-3 px-3 py-2 rounded-xl bg-brand-black text-white text-sm font-semibold hover:bg-black transition-all shadow-md hover:shadow-lg mt-2">
                   <ShieldCheck size={18} className="text-brand-red" />
                   <span className="flex-1">Admin Panel</span>
                   <ChevronRight size={16} className="opacity-50 group-hover:translate-x-1 transition-transform" />
@@ -148,9 +148,9 @@ const Dashboard = () => {
         ))}
       </nav>
 
-      {/* Bottom */}
-      <div className="mt-5 space-y-3">
-        <div className="relative overflow-hidden rounded-2xl bg-brand-black p-4 text-white">
+      {/* Bottom (always visible, never overlaps nav) */}
+      <div className="mt-3 space-y-2 shrink-0">
+        <div className="relative overflow-hidden rounded-2xl bg-brand-black p-3 text-white">
           <div className="absolute -top-8 -right-8 w-28 h-28 bg-brand-red/40 blur-2xl rounded-full pointer-events-none" />
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-300">
@@ -158,28 +158,36 @@ const Dashboard = () => {
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10">1 = ₹{RATE_PER_CREDIT}</span>
           </div>
-          <p className="relative text-3xl font-extrabold mt-2">{credits ?? "—"}</p>
-          <div className="relative mt-3 h-1.5 rounded-full bg-white/10 overflow-hidden">
+          <p className="relative text-2xl font-extrabold mt-1">{credits ?? "—"}</p>
+          <div className="relative mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
             <div className="h-full rounded-full bg-brand-red transition-all duration-700" style={{ width: `${Math.min(((credits || 0) / 50) * 100, 100)}%` }} />
           </div>
-          <Link to="/credits/buy" className="relative mt-4 block text-center w-full bg-brand-red text-white text-xs font-bold py-2.5 rounded-xl hover:bg-brand-red-hover transition shadow-lg shadow-brand-red/30">
+          <Link to="/credits/buy" className="relative mt-3 block text-center w-full bg-brand-red text-white text-xs font-bold py-2 rounded-xl hover:bg-brand-red-hover transition shadow-lg shadow-brand-red/30">
             Buy More
           </Link>
         </div>
-        <button onClick={logout} className="flex items-center justify-center gap-2 w-full px-3 py-2.5 text-sm font-semibold text-neutral-text-secondary hover:text-brand-red hover:bg-brand-red/5 rounded-xl transition-colors">
+        <button onClick={logout} className="flex items-center justify-center gap-2 w-full px-3 py-2 text-sm font-semibold text-neutral-text-secondary hover:text-brand-red hover:bg-brand-red/5 rounded-xl transition-colors">
           <LogOut size={16} /> Sign Out
         </button>
       </div>
-    </>
+    </div>
   );
 
   return (
     <div className="min-h-screen bg-neutral-bg flex">
+      {/* Sidebar thin scrollbar (separate CSS file ki zaroorat nahi) */}
+      <style>{`
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 9999px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-scroll { scrollbar-width: thin; }
+      `}</style>
+
       {/* Mobile Overlay */}
       {mobileMenu && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setMobileMenu(false)} />}
 
       {/* Mobile Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-neutral-border p-5 flex flex-col transform transition-transform lg:hidden ${mobileMenu ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-neutral-border p-4 pt-12 flex flex-col transform transition-transform lg:hidden ${mobileMenu ? "translate-x-0" : "-translate-x-full"}`}>
         <button className="absolute top-4 right-4 p-2 text-neutral-text-secondary" onClick={() => setMobileMenu(false)}><X size={20} /></button>
         <SidebarContent />
       </aside>
@@ -187,15 +195,15 @@ const Dashboard = () => {
       {/* Desktop Sidebar */}
       <aside
         style={{ top: NAV_H, height: `calc(100vh - ${NAV_H}px)` }}
-        className="hidden lg:flex flex-col w-72 shrink-0 bg-white border-r border-neutral-border p-5 sticky"
+        className="hidden lg:flex flex-col w-72 shrink-0 bg-white border-r border-neutral-border p-4 sticky overflow-hidden self-start"
       >
         <SidebarContent />
       </aside>
 
       {/* Main Content */}
-     <main className="min-w-0 flex-1">
+      <main className="min-w-0 flex-1">
         {/* TOPBAR */}
-       <header className="flex items-center justify-between gap-4 border-b border-neutral-border bg-white px-4 py-4 sm:px-8">
+        <header className="flex items-center justify-between gap-4 border-b border-neutral-border bg-white px-4 py-4 sm:px-8">
           <div className="flex items-center gap-4">
             <button className="lg:hidden p-1 text-neutral-text-primary" onClick={() => setMobileMenu(true)}><Menu size={24} /></button>
             <div>
