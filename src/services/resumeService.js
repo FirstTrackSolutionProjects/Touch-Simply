@@ -41,8 +41,8 @@ export const compileResume = async (resumeId) => {
 };
 
 // DOWNLOAD RESUME
-export const downloadResume = async (resumeId) => {
-  const res = await API.get(`/resumes/${resumeId}/download`);
+export const downloadResume = async (resumeId, filename) => {
+  const res = await API.get(`/resumes/${resumeId}/download`, { params: filename ? { filename } : undefined });
   // returns { success, data: { downloadUrl } }
   return res.data;
 };

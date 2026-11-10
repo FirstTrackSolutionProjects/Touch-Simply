@@ -30,11 +30,26 @@ import {
 
 import DynamicForm from "../components/DynamicForm";
 import WatermarkedPreview from "../components/WatermarkedPreview";
+import { useAuth } from "../context/AuthContext";
 
 const DOWNLOADED_KEY = "touchsimply-downloaded-resumes";
 const EDITOR_SESSION_KEY = "touchsimply-editor-session";
 const AUTO_COMPILE_MS = 3000;
 const DOWNLOAD_RESUME_CREDIT_COST = 4;
+
+const buildResumeFilename = (config, accountUser) => {
+  const sections = config?.sections || {};
+  const header = sections.header?.fields || sections.personal_information?.fields || {};
+  const read = (...fields) => fields.map((field) => field?.current_value ?? field?.default_value ?? "").find((value) => String(value).trim()) || "";
+  const formName = read(header.full_name, header.name, sections.personal_information?.full_name);
+  const firstName = read(header.first_name, header.firstname, sections.personal_information?.first_name);
+  const lastName = read(header.last_name, header.lastname, sections.personal_information?.last_name);
+  const genericName = [accountUser?.first_name, accountUser?.middle_name, accountUser?.last_name].filter(Boolean).join(" ");
+  let name = formName || [firstName, lastName].filter(Boolean).join(" ") || genericName || "Resume";
+  if (/^(your name|full name|name)$/i.test(String(name).trim())) name = genericName || name;
+  const base = String(name).normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/\bATS\b/gi, " ").replace(/[_-]+/g, " ").replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim().replace(/\s+Resume$/i, "");
+  return `${base || "Resume"} Resume.pdf`;
+};
 
 // ─────────────────────────────────────────────
 // helpers
@@ -342,6 +357,7 @@ const EDITOR_CSS = `
 const Editor = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   // Passed from Templates page or Library
   const { templateId, templateTitle, resumeId: existingResumeId } = location.state || {};
@@ -602,7 +618,8 @@ const Editor = () => {
 
     setDownloading(true);
     try {
-      const res = await downloadResume(resumeId);
+      const downloadFilename = buildResumeFilename(config, user).replace(/\.pdf$/i, "");
+      const res = await downloadResume(resumeId, downloadFilename);
       const downloadUrlOrBase64 = res.data?.downloadUrl;
       if (!downloadUrlOrBase64) throw new Error("No download payload returned");
 
@@ -615,7 +632,7 @@ const Editor = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${templateTitle || "resume"}.pdf`;
+        a.download = `${downloadFilename}.pdf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
