@@ -76,7 +76,7 @@ const fillTemplateExampleValues = (config, templateTitle = "") => {
   const templateName = String(templateTitle || config?.template || "")
     .toLowerCase()
     .replace(/[^a-z0-9]/g, "");
-  const supportedTemplates = new Set(["cleancv", "cvtemplate", "dcv", "deedy", "deedycv"]);
+  const supportedTemplates = new Set(["cleancv", "premiumcv", "cvtemplate", "dcv", "deedy", "deedycv"]);
   if (!supportedTemplates.has(templateName)) return config;
 
   // CVTemplate/DCV configs contain a real-looking sample profile. Keep the
