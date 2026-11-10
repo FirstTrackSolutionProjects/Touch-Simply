@@ -28,3 +28,5 @@ export const getAdminPlans = async () => (await API.get("/admin/plans")).data;
 export const createAdminPlan = async (plan) => (await API.post("/admin/plans", plan)).data;
 export const updateAdminPlan = async (id, plan) => (await API.patch(`/admin/plans/${id}`, plan)).data;
 export const deleteAdminPlan = async (id) => (await API.delete(`/admin/plans/${id}`)).data;
+export const getAdminTickets = async (params) => (await API.get("/admin/tickets", { params })).data;
+export const updateAdminTicketStatus = async (id, status) => (await API.patch(`/admin/tickets/${id}/status`, { status })).data;

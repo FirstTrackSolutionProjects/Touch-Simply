@@ -31,6 +31,7 @@ import AccountSecurity from "./pages/AccountSecurity";
 import MyProfile from "./pages/MyProfile";
 import BuyCredits from "./pages/BuyCredits";
 import TransactionHistory from "./pages/TransactionHistory";
+import Support from "./pages/Support";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./admin/AdminRoute";
 import { ToastContainer } from "react-toastify";
@@ -85,6 +86,7 @@ function App() {
         <Route path="/settings" element={<ProtectedRoute><AccountSecurity /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><MyProfile /></ProtectedRoute>} />
         <Route path="/transactions" element={<ProtectedRoute><TransactionHistory /></ProtectedRoute>} />
+        <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
         <Route path="/about" element={<About />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />

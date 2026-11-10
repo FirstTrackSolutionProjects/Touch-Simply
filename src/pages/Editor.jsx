@@ -157,7 +157,7 @@ const fillTemplateExampleValues = (config, templateTitle = "") => {
     if (typeof node.current_value === "string" && !node.current_value.trim()) {
       if (typeof node.default_value === "string" && node.default_value.trim()) {
         next.current_value = node.default_value;
-      } else if (["cleancv", "premiumcv"].includes(templateName) && personalDetailHints[node.name]) {
+      } else if (["cleancv", "premiumcv", "cvtemplate", "dcv", "deedy", "deedycv"].includes(templateName) && personalDetailHints[node.name]) {
         next.placeholder = personalDetailHints[node.name];
       }
     } else if (

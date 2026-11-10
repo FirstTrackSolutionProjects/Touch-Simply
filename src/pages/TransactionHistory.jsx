@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Check, ChevronLeft, ChevronRight, Copy, Plus } from "lucide-react";
 import { getMyTransactions } from "../services/walletService";
+import { getMyInvoices } from "../services/supportService";
 
 const LIMIT = 20;
 
@@ -142,6 +143,7 @@ export default function TransactionHistory() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [copiedId, setCopiedId] = useState(null);
+  const [invoices, setInvoices] = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -160,6 +162,8 @@ export default function TransactionHistory() {
       active = false;
     };
   }, [page]);
+
+  useEffect(() => { getMyInvoices().then((response) => setInvoices(response?.data || [])).catch(() => setInvoices([])); }, []);
 
   const items = result.data || [];
   const total = Number(result.total || 0);
@@ -229,9 +233,19 @@ export default function TransactionHistory() {
               >
                 <Plus size={16} /> Buy coins
               </Link>
+              <Link to="/support" className="ml-2 mt-4 inline-flex items-center gap-2 rounded-lg border border-[#d9ceb9] px-4 py-2.5 text-sm font-semibold text-neutral-text-primary">Contact support</Link>
             </div>
             <Stamp value={balance} />
           </div>
+
+          <section className="mt-8 rounded-2xl border border-[#e5dccb] bg-white/70 p-4 sm:p-5">
+            <h2 className="text-lg font-bold text-neutral-text-primary">Invoices</h2>
+            <p className="mt-1 text-xs text-neutral-text-secondary">Invoices appear here after they have been emailed to you.</p>
+            <div className="mt-3 divide-y divide-[#e9e1d4]">
+              {invoices.map((invoice) => <div key={invoice.id} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"><div><p className="font-semibold">{invoice.invoice_number}</p><p className="text-xs text-neutral-text-secondary">{new Date(invoice.emailed_at || invoice.created_at).toLocaleDateString("en-IN")} · Payment {invoice.payment_id}</p></div><strong>{invoice.currency} {num(invoice.amount)}</strong></div>)}
+              {!invoices.length && <p className="py-3 text-sm text-neutral-text-secondary">No emailed invoices yet.</p>}
+            </div>
+          </section>
 
           {/* filter: ledger-style underline tabs */}
           <div className="mt-8 flex gap-6 border-b border-[#e0d6c3]" role="tablist" aria-label="Filter entries">

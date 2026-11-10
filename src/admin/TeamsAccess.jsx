@@ -1,6 +1,6 @@
 ﻿import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { Activity, Bell, BookOpen, Check, ChevronDown, FileText, LayoutDashboard, LoaderCircle, Package, Pencil, RefreshCw, Search, ShieldCheck, Trash2, User, UserPlus, Users, X } from "lucide-react";
+import { Activity, Bell, BookOpen, Check, ChevronDown, FileText, LayoutDashboard, LoaderCircle, Package, Pencil, RefreshCw, Search, ShieldCheck, Trash2, User, UserPlus, Users, X, MessageCircle } from "lucide-react";
 import { createAdminTeam, deleteAdminTeam, getAdminTeamEmployees, getAdminTeams, updateAdminTeam } from "./adminService";
 
 const permissionOptions = [
@@ -11,6 +11,7 @@ const permissionOptions = [
   { id: "templates", label: "Templates", desc: "Resume template library", icon: BookOpen },
   { id: "plans", label: "Coin plans", desc: "Pricing and coin packs", icon: Package },
   { id: "notifications", label: "Announcements", desc: "Send updates to users", icon: Bell },
+  { id: "tickets", label: "Support tickets", desc: "Review customer support requests", icon: MessageCircle },
 ];
 
 const emptyForm = { name: "", description: "", member_ids: [], permissions: [], new_employee: { first_name: "", middle_name: "", last_name: "", email: "", password: "", confirm_password: "" } };

@@ -5,14 +5,14 @@ import { toast } from "react-toastify";
 import {
   Activity, ArrowDownLeft, ArrowUpRight, Bell, BookOpen, ChevronLeft, ChevronRight,
   CreditCard, FileText, LayoutDashboard, LoaderCircle, LogOut,
-  Eye, Menu, Package, Pencil, Plus, Search, Send, ShieldCheck, ShieldOff, Trash2, Users, UserPlus, UsersRound, Wallet, X,
+  Eye, Menu, Package, Pencil, Plus, Search, Send, ShieldCheck, ShieldOff, Trash2, Users, UserPlus, UsersRound, Wallet, X, MessageCircle,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import {
   adjustAdminCredits, broadcastAdminNotification, createAdminPlan, createAdminTemplate, deleteAdminPlan, deleteAdminResume, deleteAdminTemplate,
   getAdminAccess,
   getAdminOverview, getAdminPlans, getAdminResumes, getAdminTemplates,
-  createAdminUser, getAdminTransactions, getAdminUsers, getAdminNotifications, getAdminUserProfile, setAdminUserRole, setAdminUserStatus, updateAdminPlan, updateAdminResume, updateAdminTemplate, updateAdminUser,
+  createAdminUser, getAdminTransactions, getAdminUsers, getAdminNotifications, getAdminUserProfile, setAdminUserRole, setAdminUserStatus, updateAdminPlan, updateAdminResume, updateAdminTemplate, updateAdminUser, getAdminTickets, updateAdminTicketStatus,
 } from "./adminService";
 
 const navItems = [
@@ -23,6 +23,7 @@ const navItems = [
   { id: "templates", label: "Templates", icon: BookOpen },
   { id: "plans", label: "Coin plans", icon: Package },
   { id: "notifications", label: "Announcements", icon: Bell },
+  { id: "tickets", label: "Support tickets", icon: MessageCircle },
   { id: "teams", label: "Teams & access", icon: UsersRound, ownerOnly: true },
 ];
 
@@ -91,6 +92,10 @@ function AdminPanel() {
         const response = await getAdminNotifications();
         setRows(response.data || []);
         setTotal(response.data?.length || 0);
+      } else if (selectedSection === "tickets") {
+        const response = await getAdminTickets({ page: currentPage, limit: pageSize });
+        setRows(response.data?.tickets || []);
+        setTotal(response.data?.total || 0);
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || "Could not load admin data");
@@ -142,6 +147,11 @@ function AdminPanel() {
   };
 
   const refresh = () => loadSection(section, page, search);
+
+  const changeTicketStatus = async (ticket, status) => {
+    try { await updateAdminTicketStatus(ticket.id, status); toast.success("Ticket updated"); refresh(); }
+    catch (error) { toast.error(error?.response?.data?.message || "Could not update ticket"); }
+  };
 
   const exportCurrentPage = () => {
     const data = ["templates", "plans"].includes(section) ? filteredLocalRows : rows;
@@ -422,8 +432,9 @@ function AdminPanel() {
           {!loading && section === "templates" && <TemplatesTable rows={filteredLocalRows} onAdd={() => editTemplate()} onEdit={editTemplate} onDelete={removeTemplate} />}
           {!loading && section === "plans" && <PlansTable rows={filteredLocalRows} onAdd={() => openPlan()} onEdit={openPlan} onDelete={removePlan} />}
           {!loading && section === "notifications" && <NotificationsSection rows={rows} noticeForm={noticeForm} setNoticeForm={setNoticeForm} onSubmit={sendAnnouncement} busy={busyKey === "announcement"} />}
+          {!loading && section === "tickets" && <TicketsTable rows={rows} onStatus={changeTicketStatus} />}
 
-          {!loading && ["users", "resumes", "transactions"].includes(section) && <div className="mt-5 flex items-center justify-between text-sm text-neutral-text-secondary"><span>{total ? `${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, total)} of ${total}` : "No records"}</span><div className="flex gap-2"><button disabled={page <= 1} onClick={() => setPage((value) => value - 1)} className="rounded-lg border border-neutral-border bg-white p-2 disabled:opacity-40 hover:bg-neutral-bg transition"><ChevronLeft size={17} /></button><span className="min-w-8 self-center text-center">{page} / {pageCount}</span><button disabled={page >= pageCount} onClick={() => setPage((value) => value + 1)} className="rounded-lg border border-neutral-border bg-white p-2 disabled:opacity-40 hover:bg-neutral-bg transition"><ChevronRight size={17} /></button></div></div>}
+          {!loading && ["users", "resumes", "transactions", "tickets"].includes(section) && <div className="mt-5 flex items-center justify-between text-sm text-neutral-text-secondary"><span>{total ? `${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, total)} of ${total}` : "No records"}</span><div className="flex gap-2"><button disabled={page <= 1} onClick={() => setPage((value) => value - 1)} className="rounded-lg border border-neutral-border bg-white p-2 disabled:opacity-40 hover:bg-neutral-bg transition"><ChevronLeft size={17} /></button><span className="min-w-8 self-center text-center">{page} / {pageCount}</span><button disabled={page >= pageCount} onClick={() => setPage((value) => value + 1)} className="rounded-lg border border-neutral-border bg-white p-2 disabled:opacity-40 hover:bg-neutral-bg transition"><ChevronRight size={17} /></button></div></div>}
         </div>
       </main>
 
@@ -554,6 +565,11 @@ function EmptyState({ text }) {
 
 function Modal({ title, children, onClose }) {
   return <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"><div className="mb-5 flex items-center justify-between"><h3 className="text-lg font-bold text-neutral-text-primary">{title}</h3><button aria-label="Close dialog" onClick={onClose} className="rounded-lg p-2 text-neutral-text-secondary hover:bg-neutral-bg transition"><X size={18} /></button></div>{children}</div></div>;
+}
+
+function TicketsTable({ rows, onStatus }) {
+  if (!rows.length) return <EmptyState text="No support tickets yet" />;
+  return <div className="space-y-3">{rows.map((ticket) => <article key={ticket.id} className="rounded-2xl border border-neutral-border bg-white p-4 shadow-sm"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="font-bold text-neutral-text-primary">#{ticket.id} · {ticket.subject}</p><p className="mt-1 text-xs text-neutral-text-secondary">{[ticket.first_name, ticket.last_name].filter(Boolean).join(" ")} · {ticket.email} · {date(ticket.created_at)}</p></div><select aria-label={`Status for ticket ${ticket.id}`} value={ticket.status} onChange={(event) => onStatus(ticket, event.target.value)} className="rounded-lg border border-neutral-border bg-white px-3 py-2 text-sm"><option value="OPEN">Open</option><option value="IN_PROGRESS">In progress</option><option value="RESOLVED">Resolved</option></select></div><p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-neutral-text-secondary">{ticket.message}</p></article>)}</div>;
 }
 
 export default AdminPanel;
