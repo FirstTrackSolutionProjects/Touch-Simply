@@ -114,6 +114,10 @@ const fillTemplateExampleValues = (config, templateTitle = "") => {
     father_name: "Enter your father's full name",
     mother_name: "Enter your mother's full name",
     nationality: "Example: Indian",
+    marital_status: "Example: Single",
+    place_of_birth: "City, Country",
+    address: "House number, street, city",
+    languages: "Example: Hindi, English",
   };
 
   const visit = (node, inHeader = false) => {
@@ -153,7 +157,7 @@ const fillTemplateExampleValues = (config, templateTitle = "") => {
     if (typeof node.current_value === "string" && !node.current_value.trim()) {
       if (typeof node.default_value === "string" && node.default_value.trim()) {
         next.current_value = node.default_value;
-      } else if (templateName === "cleancv" && personalDetailHints[node.name]) {
+      } else if (["cleancv", "premiumcv"].includes(templateName) && personalDetailHints[node.name]) {
         next.placeholder = personalDetailHints[node.name];
       }
     } else if (
