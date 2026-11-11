@@ -4,6 +4,7 @@ import { FolderOpen, Search, Loader2, Pencil, Trash2, FileText, ChevronLeft, Che
 import { toast } from "react-toastify";
 import { getMyProjects, deleteResume } from "../services/resumeService";
 import { getWalletBalance } from "../services/walletService";
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 
 const DOWNLOAD_RESUME_CREDIT_COST = 4;
 const PAGE_SIZE = 12;
@@ -22,6 +23,8 @@ const MyLibrary = () => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadProjects();
@@ -64,14 +67,22 @@ const MyLibrary = () => {
   };
 
   const handleDelete = async (project) => {
-    if (!window.confirm(`Delete “${project.title}” from your library?`)) return;
+    setPendingDelete(project);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
     try {
-      await deleteResume(project.id);
-      setItems((cur) => cur.filter((p) => p.id !== project.id));
+      setDeleting(true);
+      await deleteResume(pendingDelete.id);
+      setItems((cur) => cur.filter((p) => p.id !== pendingDelete.id));
       setTotal((t) => Math.max(0, t - 1));
-      toast.success("Resume deleted from your library");
+      setPendingDelete(null);
+      toast.success("Resume removed. The owner can restore it from Trash.");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to delete resume");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -208,6 +219,13 @@ const MyLibrary = () => {
           )}
         </>
       )}
+      <DeleteConfirmationModal
+        open={Boolean(pendingDelete)}
+        itemType="resume"
+        loading={deleting}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 };

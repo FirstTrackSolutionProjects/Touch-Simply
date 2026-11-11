@@ -5,6 +5,7 @@ import { FolderOpen, Search, Loader2, Download } from "lucide-react";
 import { toast } from "react-toastify";
 import { getWalletBalance } from "../services/walletService";
 import { useNavigate } from "react-router-dom";
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 
 /**
  * "My Downloads" — every PDF the user has ever downloaded.
@@ -16,6 +17,8 @@ const MyDownloads = () => {
   const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState(null);
   const [search, setSearch] = useState("");
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,13 +77,21 @@ const MyDownloads = () => {
   };
 
   const handleDelete = async (item) => {
-    if (!window.confirm(`Delete “${item.title || "Untitled Resume"}” from your downloads?`)) return;
+    setPendingDelete(item);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
     try {
-      await deleteResumeDownload(item.id);
-      setItems((current) => current.filter((entry) => entry.id !== item.id));
-      toast.success("Download deleted from your library");
+      setDeleting(true);
+      await deleteResumeDownload(pendingDelete.id);
+      setItems((current) => current.filter((entry) => entry.id !== pendingDelete.id));
+      setPendingDelete(null);
+      toast.success("Download removed. The owner can restore it from Trash.");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to delete download");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -139,6 +150,13 @@ const MyDownloads = () => {
           ))}
         </div>
       )}
+      <DeleteConfirmationModal
+        open={Boolean(pendingDelete)}
+        itemType="download"
+        loading={deleting}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 };
