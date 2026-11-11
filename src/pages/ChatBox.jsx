@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Send, ChevronLeft, CheckCircle2, Loader2, UserRound, CreditCard, Bug,
-  Lightbulb, HelpCircle, LifeBuoy, Mail, Sparkles, ShieldCheck, ListChecks, Check
+  Lightbulb, HelpCircle, LifeBuoy, Mail, Sparkles, ShieldCheck, ListChecks, Check, Lock, Inbox
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
@@ -12,14 +12,14 @@ const TicketCategory = ({ name, desc, icon: Icon, isSelected, onClick }) => (
   <button
     type="button"
     onClick={onClick}
-    className={`group relative flex flex-col items-start gap-3 p-4 rounded-2xl border-2 text-left transition-all duration-200 ${
+    className={`group relative flex h-full flex-col items-start gap-3 p-4 rounded-2xl border-2 text-left outline-none transition-all duration-300 focus-visible:ring-4 focus-visible:ring-brand-red/20 active:scale-[0.97] ${
       isSelected
         ? "border-brand-red bg-brand-red/5 shadow-lg shadow-brand-red/10 ring-4 ring-brand-red/10"
         : "border-neutral-border bg-white hover:-translate-y-0.5 hover:border-brand-red/40 hover:shadow-md"
     }`}
   >
     <span
-      className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
+      className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:-rotate-3 ${
         isSelected
           ? "bg-brand-red text-white shadow-md shadow-brand-red/30"
           : "bg-neutral-bg text-neutral-text-secondary group-hover:bg-brand-red/10 group-hover:text-brand-red"
@@ -56,6 +56,14 @@ const StepTitle = ({ n, title, hint, done }) => (
     </div>
   </div>
 );
+
+const suggestions = {
+  "Account & Login": ["Can't sign in", "Update my profile", "Reset password"],
+  "Payments & Coins": ["Coins not added", "Refund request", "Payment failed"],
+  "Bug Report": ["Page not loading", "Something crashed", "Wrong result"],
+  "Feature Request": ["New template idea", "Export option", "Better editor"],
+  Other: ["General question", "Feedback"],
+};
 
 const fieldCls =
   "w-full rounded-xl border border-neutral-border bg-neutral-bg px-4 py-3 text-sm text-neutral-text-primary outline-none transition-all placeholder:text-gray-400 hover:border-brand-red/40 focus:border-brand-red focus:bg-white focus:ring-4 focus:ring-brand-red/10";
@@ -131,6 +139,17 @@ const SupportPage = () => {
             <p className="text-sm font-bold text-neutral-text-primary mt-1 truncate">{subject}</p>
           </div>
 
+          <ol className="relative mt-5 space-y-3 text-left">
+            {["Ticket received", "Team reviews your request", "Reply sent to your email"].map((t, i) => (
+              <li key={t} className="flex items-center gap-3 text-xs font-semibold text-neutral-text-secondary">
+                <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold ${i === 0 ? "bg-green-500 text-white" : "bg-neutral-bg border border-neutral-border text-neutral-text-secondary"}`}>
+                  {i === 0 ? <Check size={13} strokeWidth={3} /> : i + 1}
+                </span>
+                {t}
+              </li>
+            ))}
+          </ol>
+
           <div className="relative mt-7 space-y-3">
             <Link to="/dashboard" className="block w-full bg-brand-black text-white font-bold py-3.5 rounded-xl hover:bg-black hover:-translate-y-0.5 transition-all shadow-lg">
               Back to Dashboard
@@ -147,6 +166,7 @@ const SupportPage = () => {
   return (
     <div className="min-h-screen bg-neutral-bg py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-8">
+        <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}.fade-up{animation:fadeUp .55s ease both}`}</style>
         <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-text-secondary hover:text-brand-red transition">
           <ChevronLeft size={16} /> Back to Dashboard
         </Link>
@@ -174,6 +194,14 @@ const SupportPage = () => {
                 <div>
                   <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Support Center</h1>
                   <p className="text-gray-400 text-sm sm:text-base mt-1">How can we help you today? Submit a ticket below.</p>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-semibold text-gray-300">
+                      <Inbox size={12} className="text-brand-red" /> Replies on email
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[11px] font-semibold text-gray-300">
+                      <Lock size={12} className="text-brand-red" /> Private &amp; secure
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -193,18 +221,18 @@ const SupportPage = () => {
         {/* ============ BODY ============ */}
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
           {/* FORM */}
-          <form onSubmit={handleSubmit} className="rounded-3xl border border-neutral-border bg-white shadow-sm">
-            <div className="space-y-9 p-6 md:p-8">
-              <section>
+          <form onSubmit={handleSubmit} className="fade-up rounded-3xl border border-neutral-border bg-white shadow-sm">
+            <div className="space-y-5 p-5 md:p-7">
+              <section className="rounded-2xl border border-neutral-border/70 p-5 md:p-6 transition-colors hover:border-brand-red/30">
                 <StepTitle n="1" title="Select a topic" hint="Pick what your request is about." done={step1Done} />
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {categories.map((c) => (
                     <TicketCategory key={c.name} name={c.name} desc={c.desc} icon={c.icon} isSelected={category === c.name} onClick={() => setCategory(c.name)} />
                   ))}
                 </div>
               </section>
 
-              <section>
+              <section className="rounded-2xl border border-neutral-border/70 p-5 md:p-6 transition-colors hover:border-brand-red/30">
                 <StepTitle n="2" title="Subject" hint="A short summary of your issue." done={step2Done} />
                 <input
                   id="subject"
@@ -213,14 +241,29 @@ const SupportPage = () => {
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="e.g. Coins not added after payment"
                   className={fieldCls}
-                minLength={3}
-                maxLength={100}
+                  minLength={3}
+                  maxLength={100}
                   required
                 />
-                <p className="text-[11px] text-neutral-text-secondary mt-1.5 text-right">{subject.length}/100</p>
+                <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap gap-1.5">
+                    {category &&
+                      suggestions[category]?.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setSubject(s)}
+                          className="rounded-full border border-neutral-border bg-white px-3 py-1 text-[11px] font-semibold text-neutral-text-secondary transition hover:border-brand-red/40 hover:text-brand-red active:scale-95"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                  </div>
+                  <span className="text-[11px] text-neutral-text-secondary">{subject.length}/100</span>
+                </div>
               </section>
 
-              <section>
+              <section className="rounded-2xl border border-neutral-border/70 p-5 md:p-6 transition-colors hover:border-brand-red/30">
                 <StepTitle n="3" title="Describe your issue" hint="The more detail you share, the faster we can help." done={step3Done} />
                 <textarea
                   id="description"
@@ -233,7 +276,12 @@ const SupportPage = () => {
                   minLength={10}
                   required
                 />
-                <p className="text-[11px] text-neutral-text-secondary mt-1.5 text-right">{description.length}/1000</p>
+                <div className="mt-2.5 flex items-center gap-3">
+                  <div className="h-1 flex-1 overflow-hidden rounded-full bg-neutral-border">
+                    <div className="h-full rounded-full bg-brand-red transition-all duration-300" style={{ width: `${Math.min(description.length / 10, 100)}%` }} />
+                  </div>
+                  <span className="text-[11px] text-neutral-text-secondary">{description.length}/1000</span>
+                </div>
               </section>
             </div>
 
@@ -244,16 +292,16 @@ const SupportPage = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center justify-center gap-2 bg-brand-red text-white font-bold px-7 py-3 rounded-xl shadow-lg shadow-brand-red/30 hover:bg-brand-red-hover hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                className="group inline-flex items-center justify-center gap-2 bg-brand-red text-white font-bold px-7 py-3 rounded-xl shadow-lg shadow-brand-red/30 hover:bg-brand-red-hover hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
-                {submitting ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
+                {submitting ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />}
                 {submitting ? "Submitting Ticket..." : "Submit Ticket"}
               </button>
             </div>
           </form>
 
           {/* SIDE PANEL */}
-          <aside className="space-y-5 lg:sticky lg:top-6">
+          <aside className="fade-up space-y-5 lg:sticky lg:top-6" style={{ animationDelay: "120ms" }}>
             <div className="rounded-3xl border border-neutral-border bg-white p-5 shadow-sm">
               <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-text-secondary">Your account</p>
               <div className="mt-3 flex items-center gap-3">
