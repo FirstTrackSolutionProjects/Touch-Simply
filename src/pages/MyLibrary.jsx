@@ -9,12 +9,12 @@ const DOWNLOAD_RESUME_CREDIT_COST = 4;
 const PAGE_SIZE = 12;
 
 /**
- * "My Projects" — every resume a user is building.
+ * "My Library" — every resume a user is building.
  * These are the auto-saved workspaces. Editing opens the editor and
  * continues from where the user left off. Downloading from the editor
  * costs 4 coins per resume (unchanged behaviour).
  */
-const MyProjects = () => {
+const MyLibrary = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +53,7 @@ const MyProjects = () => {
       );
       setTotal(res.data?.pagination?.totalCount || 0);
     } catch (err) {
-      toast.error("Failed to load your projects");
+      toast.error("Failed to load your library");
     } finally {
       setLoading(false);
     }
@@ -69,9 +69,9 @@ const MyProjects = () => {
       await deleteResume(project.id);
       setItems((cur) => cur.filter((p) => p.id !== project.id));
       setTotal((t) => Math.max(0, t - 1));
-      toast.success("Project deleted");
+      toast.success("Resume deleted");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete project");
+      toast.error(err.response?.data?.message || "Failed to delete resume");
     }
   };
 
@@ -80,7 +80,7 @@ const MyProjects = () => {
   const handleDownload = (project) => {
     if (balance !== null && balance < DOWNLOAD_RESUME_CREDIT_COST) {
       toast.warn(`You need ${DOWNLOAD_RESUME_CREDIT_COST} coins to download.`);
-      navigate("/credits/buy", { state: { from: "/projects" } });
+      navigate("/credits/buy", { state: { from: "/my-library" } });
       return;
     }
     navigate("/editor", {
@@ -96,7 +96,7 @@ const MyProjects = () => {
         <div className="flex items-center gap-3">
           <FolderOpen size={32} className="text-brand-red" />
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">My Projects</h1>
+            <h1 className="text-3xl font-bold text-gray-800">My Library</h1>
             <p className="text-sm text-gray-500 mt-1">
               Auto-saved resumes you're working on. Downloading costs {DOWNLOAD_RESUME_CREDIT_COST} coins.
             </p>
@@ -106,7 +106,7 @@ const MyProjects = () => {
           <Search size={18} className="text-gray-400" />
           <input
             type="text"
-            placeholder="Search projects..."
+            placeholder="Search your library..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { setPage(1); loadProjects(); } }}
@@ -118,12 +118,12 @@ const MyProjects = () => {
       {loading ? (
         <div className="flex flex-col items-center justify-center h-[60vh]">
           <Loader2 className="animate-spin text-brand-red" size={48} />
-          <p className="text-gray-500 mt-4">Loading your projects...</p>
+          <p className="text-gray-500 mt-4">Loading your library...</p>
         </div>
       ) : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-[60vh] text-center">
           <FolderOpen size={80} className="text-gray-300 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-700">No projects yet</h2>
+          <h2 className="text-2xl font-bold text-gray-700">No resumes in your library yet</h2>
           <p className="text-gray-500 mt-2">Start a resume and it will appear here automatically.</p>
           <button
             onClick={() => navigate("/templates?type=resume")}
@@ -173,7 +173,7 @@ const MyProjects = () => {
                     <button
                       onClick={() => handleDelete(project)}
                       className="flex items-center justify-center border border-red-200 text-red-600 px-3 py-2.5 rounded-lg hover:bg-red-50"
-                      aria-label="Delete project"
+                      aria-label="Delete resume"
                     >
                       <Trash2 size={15} />
                     </button>
@@ -212,4 +212,4 @@ const MyProjects = () => {
   );
 };
 
-export default MyProjects;
+export default MyLibrary;

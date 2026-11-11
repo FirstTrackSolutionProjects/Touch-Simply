@@ -1,7 +1,7 @@
-﻿// Touch-Simply/src/App.jsx
+// Touch-Simply/src/App.jsx
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import BottomNav from "./components/BottomNav";
 import Footer from "./components/Footer";
@@ -17,7 +17,7 @@ import Register from "./pages/Register";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
-import MyProjects from "./pages/MyProjects";
+import MyLibrary from "./pages/MyLibrary";
 import MyDownloads from "./pages/MyDownloads";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundCancellation from "./pages/RefundCancellation";
@@ -92,7 +92,8 @@ function App() {
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/projects" element={<ProtectedRoute><MyProjects /></ProtectedRoute>} />
+        <Route path="/my-library" element={<ProtectedRoute><MyLibrary /></ProtectedRoute>} />
+        <Route path="/projects" element={<Navigate to="/my-library" replace />} />
         <Route path="/downloads" element={<ProtectedRoute><MyDownloads /></ProtectedRoute>} />
         {/* Legacy alias so old links keep working */}
         <Route path="/library" element={<ProtectedRoute><MyDownloads /></ProtectedRoute>} />

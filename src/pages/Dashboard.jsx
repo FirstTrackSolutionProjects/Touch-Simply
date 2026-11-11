@@ -68,7 +68,7 @@ const Dashboard = () => {
       { to: "/templates", label: "Templates", icon: Layers3 },
     ]},
     { label: "Workspace", items: [
-      { to: "/projects", label: "My Projects", icon: FolderOpen },
+      { to: "/my-library", label: "My Library", icon: FolderOpen },
       { to: "/downloads", label: "My Downloads", icon: Download },
       { to: "/transactions", label: "Activity", icon: Activity },
       { to: "/chat", label: "AI Assistant", icon: Sparkles, badge: "AI" },
@@ -365,10 +365,10 @@ const Dashboard = () => {
           <div className="bg-white border border-neutral-border rounded-3xl p-5 sm:p-6 md:p-8 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
               <div>
-                <h2 className="text-xl md:text-2xl font-bold text-neutral-text-primary">Recent Projects</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-neutral-text-primary">Recent Resumes</h2>
                 <p className="text-neutral-text-secondary mt-1 text-sm">Continue where you left off.</p>
               </div>
-              <Link to="/projects" className="text-brand-red flex items-center gap-1 hover:gap-2 transition-all text-sm font-semibold">
+              <Link to="/my-library" className="text-brand-red flex items-center gap-1 hover:gap-2 transition-all text-sm font-semibold">
                 View All <ChevronRight size={18} />
               </Link>
             </div>
