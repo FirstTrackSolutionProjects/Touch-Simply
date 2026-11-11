@@ -59,17 +59,17 @@ const NavBar = () => {
   return (
     <>
       <nav className="w-full bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-neutral-border">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-16 sm:h-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4 h-16 sm:h-[72px] px-4 sm:px-6 lg:px-8">
           
           {/* 1. Left Side: Logo & Branding (Desktop) */}
-          <Link to="/" className="flex items-center gap-3 group" aria-label="Touch Simply Home">
+          <Link to="/" className="flex shrink-0 items-center gap-3 group mr-2 lg:mr-6" aria-label="Touch Simply Home">
             <img
               src="/images/logo.png"
-              className="h-12 sm:h-20 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              className="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               alt="Touch Simply logo"
             />
             {/* Desktop Branding Text */}
-            <span className="text-2xl md:text-3xl font-extrabold tracking-tight hidden sm:block">
+            <span className="text-xl 2xl:text-2xl font-extrabold tracking-tight whitespace-nowrap hidden sm:block">
               <span className="text-brand-red">Touch</span>
               <span className="text-neutral-text-primary"> Simply</span>
             </span>
@@ -84,37 +84,37 @@ const NavBar = () => {
           </div>
 
           {/* 3. Right Side: Desktop Menu (Hidden on Mobile) */}
-          <div className="hidden md:flex items-center gap-6 text-neutral-text-primary font-medium">
+          <div className="hidden md:flex items-center gap-1 text-neutral-text-primary font-medium ml-auto">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
-                className={`relative py-2 text-sm transition-colors duration-300 group ${
-                  (link.path === "/" ? location.pathname === "/" : location.pathname.startsWith(link.path)) ? "text-brand-red" : "hover:text-brand-red"
+                className={`relative px-2.5 py-2 text-sm font-semibold whitespace-nowrap rounded-lg transition-colors duration-300 group ${
+                  (link.path === "/" ? location.pathname === "/" : location.pathname.startsWith(link.path)) ? "text-brand-red bg-brand-red/5" : "hover:text-brand-red hover:bg-neutral-bg"
                 }`}
               >
                 {link.name}
                 <span
-                  className={`absolute bottom-0 left-0 h-0.5 bg-brand-red rounded-full transition-all duration-300 ${
-                    (link.path === "/" ? location.pathname === "/" : location.pathname.startsWith(link.path)) ? "w-full" : "w-0 group-hover:w-full"
+                  className={`absolute bottom-0.5 left-2.5 right-2.5 h-0.5 origin-left bg-brand-red rounded-full transition-transform duration-300 ${
+                    (link.path === "/" ? location.pathname === "/" : location.pathname.startsWith(link.path)) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                   }`}
                 ></span>
               </Link>
             ))}
             {user ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 ml-3 pl-4 border-l border-neutral-border">
                 {hasAdminAccess && (
-                  <Link to="/admin/dashboard" className="flex items-center gap-1.5 text-sm text-neutral-text-secondary hover:text-brand-red transition">
+                  <Link to="/admin/dashboard" className="flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-semibold text-neutral-text-secondary hover:bg-neutral-bg hover:text-brand-red transition">
                     <ShieldCheck size={16} /> {adminLinkLabel}
                   </Link>
                 )}
-                <Link to="/credits/buy" className="flex items-center gap-1 text-xs bg-brand-red/5 border border-brand-red/20 text-brand-red px-3 py-1.5 rounded-full hover:bg-brand-red/10 transition">
+                <Link to="/credits/buy" className="flex items-center gap-1 whitespace-nowrap text-xs bg-brand-red/5 border border-brand-red/20 text-brand-red px-3 py-1.5 rounded-full hover:bg-brand-red/10 hover:-translate-y-0.5 transition-all">
                   <Zap size={12} />
                   <span className="font-bold">{credits ?? "—"}</span>
                   <span>coins</span>
                 </Link>
                 <div className="relative">
-                  <button onClick={() => setCreateOpen((v) => !v)} className="flex items-center gap-1 bg-brand-black hover:bg-black text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors duration-300">
+                  <button onClick={() => setCreateOpen((v) => !v)} className="flex items-center gap-1.5 whitespace-nowrap bg-brand-black hover:bg-black text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-md shadow-black/10 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300">
                     Create <ChevronDown size={14} className={`transition-transform ${createOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {createOpen && (
