@@ -78,7 +78,7 @@ const MyDownloads = () => {
     try {
       await deleteResumeDownload(item.id);
       setItems((current) => current.filter((entry) => entry.id !== item.id));
-      toast.success("Removed from your downloads");
+      toast.success("Download deleted from your library");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to delete download");
     }

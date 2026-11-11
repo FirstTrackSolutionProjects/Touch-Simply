@@ -5,14 +5,14 @@ import { toast } from "react-toastify";
 import {
   Activity, ArrowDownLeft, ArrowUpRight, Bell, BookOpen, ChevronLeft, ChevronRight,
   CreditCard, FileText, LayoutDashboard, LoaderCircle, LogOut,
-  Eye, Menu, Package, Pencil, Plus, Search, Send, ShieldCheck, ShieldOff, Trash2, Users, UserPlus, UsersRound, Wallet, X, MessageCircle,
+  Eye, Menu, Package, Pencil, Plus, Search, Send, ShieldCheck, ShieldOff, Trash2, Users, UserPlus, UsersRound, Wallet, X, MessageCircle, RotateCcw,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import {
   adjustAdminCredits, broadcastAdminNotification, createAdminPlan, createAdminTemplate, deleteAdminPlan, deleteAdminResume, deleteAdminTemplate,
   getAdminAccess,
   getAdminOverview, getAdminPlans, getAdminResumes, getAdminTemplates,
-  createAdminUser, getAdminTransactions, getAdminUsers, getAdminNotifications, getAdminUserProfile, setAdminUserRole, setAdminUserStatus, updateAdminPlan, updateAdminResume, updateAdminTemplate, updateAdminUser, getAdminTickets, updateAdminTicketStatus,
+  createAdminUser, getAdminTransactions, getAdminUsers, getAdminNotifications, getAdminUserProfile, setAdminUserRole, setAdminUserStatus, updateAdminPlan, updateAdminResume, updateAdminTemplate, updateAdminUser, getAdminTickets, updateAdminTicketStatus, getAdminTrash, restoreAdminTrashItem,
 } from "./adminService";
 
 const navItems = [
@@ -24,6 +24,7 @@ const navItems = [
   { id: "plans", label: "Coin plans", icon: Package },
   { id: "notifications", label: "Announcements", icon: Bell },
   { id: "tickets", label: "Support tickets", icon: MessageCircle },
+  { id: "trash", label: "Trash & restore", icon: RotateCcw, ownerOnly: true },
   { id: "teams", label: "Teams & access", icon: UsersRound, ownerOnly: true },
 ];
 
@@ -96,6 +97,10 @@ function AdminPanel() {
         const response = await getAdminTickets({ page: currentPage, limit: pageSize });
         setRows(response.data?.tickets || []);
         setTotal(response.data?.total || 0);
+      } else if (selectedSection === "trash") {
+        const response = await getAdminTrash({ page: currentPage, limit: pageSize, search: query });
+        setRows(response.data?.items || []);
+        setTotal(response.data?.total || 0);
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || "Could not load admin data");
@@ -124,10 +129,11 @@ function AdminPanel() {
   useEffect(() => {
     if (!accessPermissions) return;
     if (section === "teams" || section === "no-access") return;
-    if (!accessPermissions.includes(section)) return;
+    if (section === "trash" && !isOwner) return;
+    if (section !== "trash" && !accessPermissions.includes(section)) return;
     const timer = window.setTimeout(() => loadSection(section, page, search), search ? 250 : 0);
     return () => window.clearTimeout(timer);
-  }, [section, page, search, loadSection, accessPermissions]);
+  }, [section, page, search, loadSection, accessPermissions, isOwner]);
 
   const title = navItems.find((item) => item.id === section)?.label || (section === "no-access" ? "Access required" : "Overview");
   const visibleNavItems = navItems.filter((item) => item.ownerOnly ? isOwner : accessPermissions?.includes(item.id));
@@ -151,6 +157,16 @@ function AdminPanel() {
   const changeTicketStatus = async (ticket, status) => {
     try { await updateAdminTicketStatus(ticket.id, status); toast.success("Ticket updated"); refresh(); }
     catch (error) { toast.error(error?.response?.data?.message || "Could not update ticket"); }
+  };
+
+  const restoreTrashItem = async (item) => {
+    setBusyKey(`restore-${item.item_type}-${item.id}`);
+    try {
+      await restoreAdminTrashItem(item.item_type, item.id);
+      toast.success("Item restored to the user's library");
+      await refresh();
+    } catch (error) { toast.error(error?.response?.data?.message || "Could not restore item"); }
+    finally { setBusyKey(""); }
   };
 
   const exportCurrentPage = () => {
@@ -255,11 +271,11 @@ function AdminPanel() {
   };
 
   const removeResume = async (resume) => {
-    if (!window.confirm(`Permanently delete the resume "${resume.title}"?`)) return;
+    if (!window.confirm(`Move "${resume.title}" to Trash? The Owner can restore it later.`)) return;
     setBusyKey(`resume-${resume.id}`);
     try {
       await deleteAdminResume(resume.id);
-      toast.success("Resume deleted");
+      toast.success("Resume moved to Trash");
       await refresh();
     } catch (error) { toast.error(error?.response?.data?.message || "Could not delete resume"); }
     finally { setBusyKey(""); }
@@ -433,8 +449,9 @@ function AdminPanel() {
           {!loading && section === "plans" && <PlansTable rows={filteredLocalRows} onAdd={() => openPlan()} onEdit={openPlan} onDelete={removePlan} />}
           {!loading && section === "notifications" && <NotificationsSection rows={rows} noticeForm={noticeForm} setNoticeForm={setNoticeForm} onSubmit={sendAnnouncement} busy={busyKey === "announcement"} />}
           {!loading && section === "tickets" && <TicketsTable rows={rows} onStatus={changeTicketStatus} />}
+          {!loading && section === "trash" && isOwner && <TrashTable rows={rows} busyKey={busyKey} onRestore={restoreTrashItem} />}
 
-          {!loading && ["users", "resumes", "transactions", "tickets"].includes(section) && <div className="mt-5 flex items-center justify-between text-sm text-neutral-text-secondary"><span>{total ? `${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, total)} of ${total}` : "No records"}</span><div className="flex gap-2"><button disabled={page <= 1} onClick={() => setPage((value) => value - 1)} className="rounded-lg border border-neutral-border bg-white p-2 disabled:opacity-40 hover:bg-neutral-bg transition"><ChevronLeft size={17} /></button><span className="min-w-8 self-center text-center">{page} / {pageCount}</span><button disabled={page >= pageCount} onClick={() => setPage((value) => value + 1)} className="rounded-lg border border-neutral-border bg-white p-2 disabled:opacity-40 hover:bg-neutral-bg transition"><ChevronRight size={17} /></button></div></div>}
+          {!loading && ["users", "resumes", "transactions", "tickets", "trash"].includes(section) && <div className="mt-5 flex items-center justify-between text-sm text-neutral-text-secondary"><span>{total ? `${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, total)} of ${total}` : "No records"}</span><div className="flex gap-2"><button disabled={page <= 1} onClick={() => setPage((value) => value - 1)} className="rounded-lg border border-neutral-border bg-white p-2 disabled:opacity-40 hover:bg-neutral-bg transition"><ChevronLeft size={17} /></button><span className="min-w-8 self-center text-center">{page} / {pageCount}</span><button disabled={page >= pageCount} onClick={() => setPage((value) => value + 1)} className="rounded-lg border border-neutral-border bg-white p-2 disabled:opacity-40 hover:bg-neutral-bg transition"><ChevronRight size={17} /></button></div></div>}
         </div>
       </main>
 
@@ -505,7 +522,7 @@ function ProfileDetail({ label, value }) {
 
 function ResumesTable({ rows, busyKey, onDelete, onEdit }) {
   return <DataTable headers={["Resume", "Owner", "Template", "Mode", "Updated", "Actions"]} empty="No resumes match this search">
-    {rows.map((resume) => <tr key={resume.id} className="border-t border-neutral-border hover:bg-neutral-bg/50"><td className="px-5 py-4"><p className="font-semibold text-neutral-text-primary">{resume.title}</p><p className="max-w-[300px] truncate text-xs text-neutral-text-secondary">{resume.description}</p></td><td className="px-5 py-4"><p className="font-medium text-neutral-text-primary">{resume.owner_name}</p><p className="text-xs text-neutral-text-secondary">{resume.user_email}</p></td><td className="px-5 py-4 text-neutral-text-secondary">{resume.template_title || "—"}</td><td className="px-5 py-4"><span className="rounded-full bg-neutral-bg border border-neutral-border px-2.5 py-1 text-xs text-neutral-text-primary">{resume.simple_mode ? "Simple" : "Manual"}</span></td><td className="px-5 py-4 text-neutral-text-secondary">{date(resume.updated_at)}</td><td className="px-5 py-4"><div className="flex gap-1"><button onClick={() => onEdit(resume)} className="rounded-lg p-2 text-neutral-text-secondary hover:bg-neutral-bg transition" title="Edit resume"><Pencil size={16} /></button><button disabled={busyKey === `resume-${resume.id}`} onClick={() => onDelete(resume)} className="rounded-lg p-2 text-brand-red hover:bg-brand-red/5 disabled:opacity-50 transition" title="Delete resume">{busyKey === `resume-${resume.id}` ? <LoaderCircle className="animate-spin" size={17} /> : <Trash2 size={17} />}</button></div></td></tr>)}
+    {rows.map((resume) => <tr key={resume.id} className="border-t border-neutral-border hover:bg-neutral-bg/50"><td className="px-5 py-4"><p className="font-semibold text-neutral-text-primary">{resume.title}</p><p className="max-w-[300px] truncate text-xs text-neutral-text-secondary">{resume.description}</p></td><td className="px-5 py-4"><p className="font-medium text-neutral-text-primary">{resume.owner_name}</p><p className="text-xs text-neutral-text-secondary">{resume.user_email}</p></td><td className="px-5 py-4 text-neutral-text-secondary">{resume.template_title || "—"}</td><td className="px-5 py-4"><span className="rounded-full bg-neutral-bg border border-neutral-border px-2.5 py-1 text-xs text-neutral-text-primary">{resume.simple_mode ? "Simple" : "Manual"}</span></td><td className="px-5 py-4 text-neutral-text-secondary">{date(resume.updated_at)}</td><td className="px-5 py-4"><div className="flex gap-1"><button onClick={() => onEdit(resume)} className="rounded-lg p-2 text-neutral-text-secondary hover:bg-neutral-bg transition" title="Edit resume"><Pencil size={16} /></button><button disabled={busyKey === `resume-${resume.id}`} onClick={() => onDelete(resume)} className="rounded-lg p-2 text-brand-red hover:bg-brand-red/5 disabled:opacity-50 transition" title="Move resume to Trash">{busyKey === `resume-${resume.id}` ? <LoaderCircle className="animate-spin" size={17} /> : <Trash2 size={17} />}</button></div></td></tr>)}
   </DataTable>;
 }
 
@@ -570,6 +587,18 @@ function Modal({ title, children, onClose }) {
 function TicketsTable({ rows, onStatus }) {
   if (!rows.length) return <EmptyState text="No support tickets yet" />;
   return <div className="space-y-3">{rows.map((ticket) => <article key={ticket.id} className="rounded-2xl border border-neutral-border bg-white p-4 shadow-sm"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="font-bold text-neutral-text-primary">#{ticket.id} · {ticket.subject}</p><p className="mt-1 text-xs text-neutral-text-secondary">{[ticket.first_name, ticket.last_name].filter(Boolean).join(" ")} · {ticket.email} · {date(ticket.created_at)}</p></div><select aria-label={`Status for ticket ${ticket.id}`} value={ticket.status} onChange={(event) => onStatus(ticket, event.target.value)} className="rounded-lg border border-neutral-border bg-white px-3 py-2 text-sm"><option value="OPEN">Open</option><option value="IN_PROGRESS">In progress</option><option value="RESOLVED">Resolved</option></select></div><p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-neutral-text-secondary">{ticket.message}</p></article>)}</div>;
+}
+
+function TrashTable({ rows, busyKey, onRestore }) {
+  return <DataTable headers={["Item", "Type", "User", "Deleted", "Action"]} empty="Trash is empty">
+    {rows.map((item) => <tr key={`${item.item_type}-${item.id}`} className="border-t border-neutral-border hover:bg-neutral-bg/50">
+      <td className="px-5 py-4"><p className="font-semibold text-neutral-text-primary">{item.title}</p><p className="text-xs text-neutral-text-secondary">{item.template_title || ""}</p></td>
+      <td className="px-5 py-4 capitalize text-neutral-text-secondary">{item.item_type === "download" ? "PDF download" : "Resume"}</td>
+      <td className="px-5 py-4"><p className="font-medium text-neutral-text-primary">{item.owner_name}</p><p className="text-xs text-neutral-text-secondary">{item.user_email}</p></td>
+      <td className="px-5 py-4 text-neutral-text-secondary">{date(item.deleted_at)}</td>
+      <td className="px-5 py-4"><button disabled={busyKey === `restore-${item.item_type}-${item.id}`} onClick={() => onRestore(item)} className="inline-flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 text-sm font-semibold text-green-700 hover:bg-green-100 disabled:opacity-50">{busyKey === `restore-${item.item_type}-${item.id}` ? <LoaderCircle className="animate-spin" size={16} /> : <RotateCcw size={16} />}Restore</button></td>
+    </tr>)}
+  </DataTable>;
 }
 
 export default AdminPanel;

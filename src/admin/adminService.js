@@ -30,3 +30,5 @@ export const updateAdminPlan = async (id, plan) => (await API.patch(`/admin/plan
 export const deleteAdminPlan = async (id) => (await API.delete(`/admin/plans/${id}`)).data;
 export const getAdminTickets = async (params) => (await API.get("/admin/tickets", { params })).data;
 export const updateAdminTicketStatus = async (id, status) => (await API.patch(`/admin/tickets/${id}/status`, { status })).data;
+export const getAdminTrash = async (params) => (await API.get("/admin/trash", { params })).data;
+export const restoreAdminTrashItem = async (type, id) => (await API.patch(`/admin/trash/${encodeURIComponent(type)}/${encodeURIComponent(id)}/restore`)).data;

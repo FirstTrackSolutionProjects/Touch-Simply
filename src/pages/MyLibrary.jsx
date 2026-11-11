@@ -64,12 +64,12 @@ const MyLibrary = () => {
   };
 
   const handleDelete = async (project) => {
-    if (!window.confirm(`Delete the project “${project.title}”? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete “${project.title}” from your library?`)) return;
     try {
       await deleteResume(project.id);
       setItems((cur) => cur.filter((p) => p.id !== project.id));
       setTotal((t) => Math.max(0, t - 1));
-      toast.success("Resume deleted");
+      toast.success("Resume deleted from your library");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to delete resume");
     }
