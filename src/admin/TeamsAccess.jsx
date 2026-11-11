@@ -83,7 +83,7 @@ function TeamManagement() {
   const editTeam = (team) => {
     setEditingId(team.id);
     setForm({ ...emptyForm, name: team.name, description: team.description || "", member_ids: team.member_ids || [], permissions: team.permissions || [] });
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    document.getElementById("admin-scroll")?.scrollTo({ top: 0, behavior: "smooth" });
   };
   const toggle = (key, value) => setForm((current) => ({ ...current, [key]: current[key].includes(value) ? current[key].filter((item) => item !== value) : [...current[key], value] }));
   const allSelected = form.permissions.length === permissionOptions.length;

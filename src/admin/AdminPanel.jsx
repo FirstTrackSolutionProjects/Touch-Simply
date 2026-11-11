@@ -63,6 +63,19 @@ function AdminPanel() {
   const [noticeForm, setNoticeForm] = useState({ title: "", message: "" });
   const pageSize = 10;
 
+  // Admin panel apna poora screen khud sambhalta hai, isliye bahar ka page scroll lock karte hain
+  // (isi se neeche ka extra khali space aa raha tha).
+  useEffect(() => {
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+    };
+  }, []);
+
   const loadOverview = useCallback(async () => {
     const response = await getAdminOverview();
     setOverview(response.data);
@@ -150,6 +163,7 @@ function AdminPanel() {
     setPage(1);
     setSearch("");
     setSidebarOpen(false);
+    document.getElementById("admin-scroll")?.scrollTo({ top: 0 });
   };
 
   const refresh = () => loadSection(section, page, search);
@@ -367,43 +381,43 @@ function AdminPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-bg text-neutral-text-primary">
-      {sidebarOpen && <button aria-label="Close menu" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-30 bg-black/40 lg:hidden" />}
-      
+    <div className="fixed inset-0 z-[60] overflow-hidden bg-neutral-bg text-neutral-text-primary">
+      {sidebarOpen && <button aria-label="Close menu" onClick={() => setSidebarOpen(false)} className="absolute inset-0 z-30 bg-black/40 lg:hidden" />}
+
       {/* SIDEBAR */}
-      <aside className={`fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col bg-brand-black text-white transition-transform lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex h-[76px] items-center justify-between border-b border-white/10 px-6">
+      <aside className={`absolute inset-y-0 left-0 z-40 flex w-[260px] flex-col bg-brand-black text-white transition-transform lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="flex h-[76px] shrink-0 items-center justify-between border-b border-white/10 px-6">
           <Link to="/" className="flex items-center gap-3">
             <img src="/images/logo.png" alt="" className="h-8 w-8 object-contain brightness-0 invert" />
             <span className="font-bold tracking-tight">Touch <span className="text-brand-red">Simply</span></span>
           </Link>
           <button className="lg:hidden" onClick={() => setSidebarOpen(false)} aria-label="Close navigation"><X size={20} /></button>
         </div>
-        
-        <div className="px-5 pt-7 pb-2 text-[10px] font-bold uppercase tracking-[.18em] text-gray-500">Workspace</div>
-        <nav className="space-y-1 px-3">
+
+        <div className="shrink-0 px-5 pt-6 pb-2 text-[10px] font-bold uppercase tracking-[.18em] text-gray-500">Workspace</div>
+        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 pb-3">
           {visibleNavItems.map(({ id, label, icon: Icon }) => (
-            <button key={id} onClick={() => selectSection(id)} className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition ${section === id ? "bg-brand-red text-white shadow-lg shadow-brand-red/20" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}>
+            <button key={id} onClick={() => selectSection(id)} className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-sm transition ${section === id ? "bg-brand-red text-white shadow-lg shadow-brand-red/20" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}>
               <Icon size={18} /><span>{label}</span>
             </button>
           ))}
         </nav>
-        
-        <div className="mt-auto border-t border-white/10 p-4">
-          <div className="mb-4 flex items-center gap-3 rounded-xl bg-white/[.04] p-3">
+
+        <div className="shrink-0 border-t border-white/10 p-4">
+          <div className="mb-3 flex items-center gap-3 rounded-xl bg-white/[.04] p-3">
             <div className="grid h-9 w-9 place-items-center rounded-full bg-brand-red/20 text-sm font-bold text-brand-red">{(user?.first_name || "A").slice(0, 1).toUpperCase()}</div>
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold">{nameOf(user)}</div>
               <div className="truncate text-xs text-gray-500">{isOwner ? "Owner" : "Administrator"}</div>
             </div>
           </div>
-          <Link to="/dashboard" className="mb-2 block rounded-lg px-3 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-white transition">Go to user dashboard</Link>
+          <Link to="/dashboard" className="mb-1 block rounded-lg px-3 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-white transition">Go to user dashboard</Link>
           <button onClick={logout} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-white transition"><LogOut size={16} /> Sign out</button>
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main className="min-h-screen lg:pl-[260px]">
+      {/* MAIN CONTENT (apna scroll area) */}
+      <main id="admin-scroll" className="h-full overflow-y-auto lg:pl-[260px]">
         <header className="sticky top-0 z-20 flex h-[76px] items-center justify-between border-b border-neutral-border bg-white/90 px-4 backdrop-blur md:px-8">
           <div className="flex items-center gap-3">
             <button aria-label="Open navigation" onClick={() => setSidebarOpen(true)} className="rounded-lg p-2 hover:bg-neutral-bg lg:hidden"><Menu size={20} /></button>
@@ -441,7 +455,7 @@ function AdminPanel() {
           {section !== "overview" && section !== "teams" && section !== "no-access" && loading && <div className="grid min-h-[300px] place-items-center"><LoaderCircle className="animate-spin text-brand-red" size={32} /></div>}
           {section === "teams" && isOwner && <TeamManagement />}
           {section === "no-access" && <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900">Your account does not currently have access to any admin panel sections. Ask the Owner to add you to a team and grant the access you need.</div>}
-          
+
           {!loading && section === "users" && <UsersTable rows={rows} busyKey={busyKey} isOwner={isOwner} selfId={user?.id} selfEmail={user?.email} onBlock={handleBlock} onCredits={(person) => setCreditTarget(person)} onEdit={editUser} onRole={changeRole} onView={viewUserProfile} />}
           {!loading && section === "resumes" && <ResumesTable rows={rows} busyKey={busyKey} onDelete={removeResume} onEdit={editResume} />}
           {!loading && section === "transactions" && <TransactionsTable rows={rows} />}
@@ -457,17 +471,17 @@ function AdminPanel() {
 
       {/* MODALS */}
       {creditTarget && <Modal title={`Adjust coins · ${nameOf(creditTarget)}`} onClose={() => setCreditTarget(null)}><form onSubmit={submitCreditAdjustment} className="space-y-4"><p className="text-sm text-neutral-text-secondary">Current balance: <b className="text-neutral-text-primary">{Number(creditTarget.wallet_balance || 0).toLocaleString()} coins</b></p><label className="block text-sm font-medium text-neutral-text-primary">Action<select value={creditForm.operation} onChange={(event) => setCreditForm((form) => ({ ...form, operation: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none"><option value="CREDIT">Add coins</option><option value="DEBIT">Deduct coins</option></select></label><label className="block text-sm font-medium text-neutral-text-primary">Coins<input required min="1" max="1000000" type="number" step="1" value={creditForm.amount} onChange={(event) => setCreditForm((form) => ({ ...form, amount: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" placeholder="e.g. 10" /></label><div className="flex justify-end gap-2 pt-2"><button type="button" onClick={() => setCreditTarget(null)} className="rounded-xl px-4 py-2 text-sm text-neutral-text-secondary hover:bg-neutral-bg transition">Cancel</button><button disabled={busyKey === "credit"} className="rounded-xl bg-brand-red px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 hover:bg-brand-red-hover transition">{busyKey === "credit" ? "Saving…" : "Confirm adjustment"}</button></div></form></Modal>}
-      
+
       {planModalOpen && <Modal title={planTarget ? "Edit coin plan" : "Create coin plan"} onClose={() => { setPlanModalOpen(false); setPlanTarget(null); }}><form onSubmit={submitPlan} className="space-y-4"><label className="block text-sm font-medium text-neutral-text-primary">Plan name<input required maxLength="100" value={planForm.title} onChange={(event) => setPlanForm((form) => ({ ...form, title: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" placeholder="Starter" /></label><div className="grid grid-cols-2 gap-3"><label className="block text-sm font-medium text-neutral-text-primary">Coins<input required type="number" min="1" step="1" value={planForm.coins} onChange={(event) => setPlanForm((form) => ({ ...form, coins: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" /></label><label className="block text-sm font-medium text-neutral-text-primary">Price (INR)<input required type="number" min="0" step="1" value={planForm.cost} onChange={(event) => setPlanForm((form) => ({ ...form, cost: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" /></label></div><div className="flex justify-end gap-2 pt-2"><button type="button" onClick={() => { setPlanModalOpen(false); setPlanTarget(null); }} className="rounded-xl px-4 py-2 text-sm text-neutral-text-secondary hover:bg-neutral-bg transition">Cancel</button><button disabled={busyKey === "plan"} className="rounded-xl bg-brand-red px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 hover:bg-brand-red-hover transition">{busyKey === "plan" ? "Saving…" : "Save plan"}</button></div></form></Modal>}
-      
+
       {addUserOpen && <Modal title="Add user account" onClose={() => setAddUserOpen(false)}><form onSubmit={submitNewUser} className="max-h-[75vh] space-y-4 overflow-y-auto pr-1"><p className="rounded-xl bg-brand-red/5 border border-brand-red/10 p-3 text-sm leading-5 text-brand-red-dark">The account will be created without a password. The user can sign in with Google using this email, then set an account password in Security settings.</p>{[["first_name", "First name", true], ["middle_name", "Middle name", false], ["last_name", "Last name", true], ["email", "Email address", true], ["phone", "Phone number (optional)", false]].map(([key, label, required]) => <label key={key} className="block text-sm font-medium text-neutral-text-primary">{label}<input required={required} type={key === "email" ? "email" : key === "phone" ? "tel" : "text"} maxLength={key === "email" ? 255 : key === "phone" ? 20 : 100} value={newUserForm[key]} onChange={(event) => setNewUserForm((form) => ({ ...form, [key]: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" /></label>)}<label className="block text-sm font-medium text-neutral-text-primary">Access role<select value={newUserForm.role} onChange={(event) => setNewUserForm((form) => ({ ...form, role: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none"><option value="USER">USER</option><option value="ADMIN">ADMIN</option></select></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setAddUserOpen(false)} className="rounded-xl px-4 py-2 text-sm text-neutral-text-secondary hover:bg-neutral-bg transition">Cancel</button><button disabled={busyKey === "user-create"} className="rounded-xl bg-brand-red px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 hover:bg-brand-red-hover transition">{busyKey === "user-create" ? "Creating..." : "Create account"}</button></div></form></Modal>}
-      
+
       {profileTarget && <Modal title="User profile" onClose={() => setProfileTarget(null)}><div className="max-h-[75vh] space-y-4 overflow-y-auto"><div className="flex items-center gap-4">{profileTarget.avatar_url ? <img src={profileTarget.avatar_url} alt="" className="h-16 w-16 rounded-full object-cover" /> : <Avatar label={nameOf(profileTarget)} />}<div><p className="text-lg font-bold text-neutral-text-primary">{nameOf(profileTarget)}</p><p className="text-sm text-neutral-text-secondary">{profileTarget.email}</p></div></div><div className="grid gap-3 rounded-xl bg-neutral-bg p-4 text-sm sm:grid-cols-2 border border-neutral-border"><ProfileDetail label="Role" value={profileTarget.role} /><ProfileDetail label="Phone" value={profileTarget.phone || "Not provided"} /><ProfileDetail label="Location" value={profileTarget.location || "Not provided"} /><ProfileDetail label="Website" value={profileTarget.website || "Not provided"} /><ProfileDetail label="Status" value={profileTarget.is_blocked ? "Blocked" : "Active"} /><ProfileDetail label="Sign-in method" value={profileTarget.sign_in_method} /><ProfileDetail label="Joined" value={date(profileTarget.created_at)} /><ProfileDetail label="Wallet" value={`${Number(profileTarget.wallet_balance || 0).toLocaleString()} coins`} /></div>{profileTarget.bio && <div className="rounded-xl bg-neutral-bg p-4 border border-neutral-border"><p className="text-xs font-semibold uppercase text-neutral-text-secondary">About</p><p className="mt-1 whitespace-pre-wrap text-sm text-neutral-text-primary">{profileTarget.bio}</p></div>}<div className="flex justify-end gap-2"><button onClick={() => setProfileTarget(null)} className="rounded-xl px-4 py-2 text-sm text-neutral-text-secondary hover:bg-neutral-bg transition">Close</button>{profileTarget.role !== "OWNER" && profileTarget.id !== user?.id && <button onClick={() => { editUser(profileTarget); setProfileTarget(null); }} className="rounded-xl bg-brand-red px-4 py-2 text-sm font-semibold text-white hover:bg-brand-red-hover transition">Edit profile</button>}</div></div></Modal>}
-      
+
       {userTarget && <Modal title={`Edit user · ${userTarget.email}`} onClose={() => setUserTarget(null)}><form onSubmit={saveUser} className="max-h-[75vh] space-y-4 overflow-y-auto pr-1">{[["first_name", "First name"], ["middle_name", "Middle name"], ["last_name", "Last name"]].map(([key, label]) => <label key={key} className="block text-sm font-medium text-neutral-text-primary">{label}<input required={key !== "middle_name"} maxLength="100" value={userForm[key]} onChange={(event) => setUserForm((form) => ({ ...form, [key]: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" /></label>)}{isOwner && <><label className="block text-sm font-medium text-neutral-text-primary">Phone number<input type="tel" maxLength="20" value={userForm.phone} onChange={(event) => setUserForm((form) => ({ ...form, phone: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" placeholder="Optional" /></label><label className="block text-sm font-medium text-neutral-text-primary">Location<input maxLength="120" value={userForm.location} onChange={(event) => setUserForm((form) => ({ ...form, location: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" /></label><label className="block text-sm font-medium text-neutral-text-primary">Website<input type="url" maxLength="255" value={userForm.website} onChange={(event) => setUserForm((form) => ({ ...form, website: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" placeholder="https://example.com" /></label><label className="block text-sm font-medium text-neutral-text-primary">About user<textarea maxLength="500" rows="3" value={userForm.bio} onChange={(event) => setUserForm((form) => ({ ...form, bio: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" /></label></>}<div className="flex justify-end gap-2"><button type="button" onClick={() => setUserTarget(null)} className="rounded-xl px-4 py-2 text-sm text-neutral-text-secondary hover:bg-neutral-bg transition">Cancel</button><button disabled={busyKey === "user-edit"} className="rounded-xl bg-brand-red px-4 py-2 text-sm font-semibold text-white hover:bg-brand-red-hover transition">Save user</button></div></form></Modal>}
-      
+
       {resumeTarget && <Modal title="Edit resume details" onClose={() => setResumeTarget(null)}><form onSubmit={saveResume} className="space-y-4"><label className="block text-sm font-medium text-neutral-text-primary">Title<input required maxLength="100" value={resumeForm.title} onChange={(event) => setResumeForm((form) => ({ ...form, title: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" /></label><label className="block text-sm font-medium text-neutral-text-primary">Description<textarea maxLength="255" rows="3" value={resumeForm.description} onChange={(event) => setResumeForm((form) => ({ ...form, description: event.target.value }))} className="mt-1.5 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" /></label><div className="flex justify-end gap-2"><button type="button" onClick={() => setResumeTarget(null)} className="rounded-xl px-4 py-2 text-sm text-neutral-text-secondary hover:bg-neutral-bg transition">Cancel</button><button disabled={busyKey === `resume-${resumeTarget.id}`} className="rounded-xl bg-brand-red px-4 py-2 text-sm font-semibold text-white hover:bg-brand-red-hover transition">Save resume</button></div></form></Modal>}
-      
+
       {templateModalOpen && <Modal title={templateTarget ? "Edit template" : "Add template"} onClose={() => { setTemplateModalOpen(false); setTemplateTarget(null); }}><form onSubmit={saveTemplate} className="max-h-[75vh] space-y-3 overflow-y-auto pr-1">{[["title", "Template name", 100], ["type", "Type", 100], ["author_name", "Author", 100], ["short_description", "Short description", 100]].map(([key, label, max]) => <label key={key} className="block text-sm font-medium text-neutral-text-primary">{label}<input required maxLength={max} value={templateForm[key]} onChange={(event) => setTemplateForm((form) => ({ ...form, [key]: event.target.value }))} className="mt-1 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" /></label>)}<label className="block text-sm font-medium text-neutral-text-primary">Full description<textarea maxLength="20000" rows="3" value={templateForm.long_description} onChange={(event) => setTemplateForm((form) => ({ ...form, long_description: event.target.value }))} className="mt-1 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" /></label>{!templateTarget && <label className="block text-sm font-medium text-neutral-text-primary">S3 folder key<input required value={templateForm.s3_key} onChange={(event) => setTemplateForm((form) => ({ ...form, s3_key: event.target.value }))} placeholder="Existing template asset folder in S3" className="mt-1 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none" /></label>}<div className="grid grid-cols-2 gap-3"><label className="block text-sm font-medium text-neutral-text-primary">Engine<select value={templateForm.engine} onChange={(event) => setTemplateForm((form) => ({ ...form, engine: event.target.value }))} className="mt-1 w-full rounded-xl border border-neutral-border px-3 py-2.5 bg-neutral-bg focus:ring-2 focus:ring-brand-red/20 outline-none"><option value="LATEX">LaTeX</option><option value="XELATEX">XeLaTeX</option></select></label><label className="flex items-center gap-2 pt-6 text-sm text-neutral-text-primary"><input type="checkbox" checked={templateForm.simple_mode} onChange={(event) => setTemplateForm((form) => ({ ...form, simple_mode: event.target.checked }))} className="rounded text-brand-red focus:ring-brand-red" /> Simple mode</label></div><div className="flex justify-end gap-2 pt-2"><button type="button" onClick={() => { setTemplateModalOpen(false); setTemplateTarget(null); }} className="rounded-xl px-4 py-2 text-sm text-neutral-text-secondary hover:bg-neutral-bg transition">Cancel</button><button disabled={busyKey === "template"} className="rounded-xl bg-brand-red px-4 py-2 text-sm font-semibold text-white hover:bg-brand-red-hover transition">Save template</button></div></form></Modal>}
     </div>
   );
