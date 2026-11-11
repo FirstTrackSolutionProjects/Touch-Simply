@@ -102,7 +102,7 @@ function App() {
         <Route path="/faq" element={<FAQ />} />
         <Route path="/data-security" element={<DataSecurity />} />
         <Route path="/legal-policy" element={<LegalPolicy />} />
-        <Route path="/chat" element={<ChatBox />} />
+        <Route path="/chat" element={<ProtectedRoute><ChatBox /></ProtectedRoute>} />
         <Route
           path="/dashboard"
           element={

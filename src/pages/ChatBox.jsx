@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
+import { createMyTicket } from "../services/supportService";
 
 const TicketCategory = ({ name, desc, icon: Icon, isSelected, onClick }) => (
   <button
@@ -66,6 +67,7 @@ const SupportPage = () => {
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [ticketId, setTicketId] = useState(null);
 
   const categories = [
     { name: "Account & Login", desc: "Sign-in, profile, security", icon: UserRound },
@@ -82,18 +84,21 @@ const SupportPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!category || !subject.trim() || !description.trim()) {
+    if (!category || subject.trim().length < 3 || description.trim().length < 10) {
       toast.error("Please select a category and fill in all fields.");
       return;
     }
     setSubmitting(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await createMyTicket({
+        subject: `${category}: ${subject.trim()}`,
+        message: description.trim(),
+      });
+      setTicketId(response?.data?.id ?? null);
       setSubmitted(true);
-      toast.success("Your support ticket has been created!");
+      toast.success("Your support ticket has been sent to our team.");
     } catch (error) {
-      toast.error("Failed to submit ticket. Please try again.");
+      toast.error(error?.response?.data?.message || "Could not submit your ticket. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -104,6 +109,7 @@ const SupportPage = () => {
     setSubject("");
     setDescription("");
     setSubmitted(false);
+    setTicketId(null);
   };
 
   if (submitted) {
@@ -116,7 +122,7 @@ const SupportPage = () => {
           </div>
           <h1 className="relative text-2xl font-extrabold text-neutral-text-primary mt-6">Ticket Submitted!</h1>
           <p className="relative text-neutral-text-secondary mt-2 text-sm leading-relaxed">
-            We've received your request. Our support team will get back to you shortly at{" "}
+            We've received your request{ticketId ? ` as ticket #${ticketId}` : ""}. Our support team will get back to you shortly at{" "}
             <span className="font-semibold text-neutral-text-primary">{user?.email}</span>.
           </p>
 
@@ -207,7 +213,8 @@ const SupportPage = () => {
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="e.g. Coins not added after payment"
                   className={fieldCls}
-                  maxLength={100}
+                minLength={3}
+                maxLength={100}
                   required
                 />
                 <p className="text-[11px] text-neutral-text-secondary mt-1.5 text-right">{subject.length}/100</p>
@@ -223,6 +230,7 @@ const SupportPage = () => {
                   rows={7}
                   className={`${fieldCls} resize-y leading-relaxed`}
                   maxLength={1000}
+                  minLength={10}
                   required
                 />
                 <p className="text-[11px] text-neutral-text-secondary mt-1.5 text-right">{description.length}/1000</p>
