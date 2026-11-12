@@ -78,6 +78,17 @@ const HTML_INPUT_TYPES = new Set([
   "url",
   "week",
 ]);
+const PHONE_COUNTRY_CODES = [
+  ["+91", "India (+91)"], ["+1", "United States/Canada (+1)"], ["+44", "United Kingdom (+44)"],
+  ["+61", "Australia (+61)"], ["+64", "New Zealand (+64)"], ["+971", "UAE (+971)"],
+  ["+966", "Saudi Arabia (+966)"], ["+65", "Singapore (+65)"], ["+880", "Bangladesh (+880)"],
+  ["+92", "Pakistan (+92)"], ["+94", "Sri Lanka (+94)"], ["+977", "Nepal (+977)"],
+  ["+49", "Germany (+49)"], ["+33", "France (+33)"], ["+81", "Japan (+81)"],
+  ["+86", "China (+86)"], ["+27", "South Africa (+27)"], ["+234", "Nigeria (+234)"],
+];
+const ROLE_OPTIONS = ["Software Engineer", "Frontend Developer", "Backend Developer", "Full Stack Developer", "Web Developer", "Mobile App Developer", "Data Analyst", "Data Scientist", "DevOps Engineer", "UI/UX Designer", "Product Manager", "Project Manager", "Business Analyst", "Marketing Specialist", "Sales Executive", "Teacher", "Accountant", "Customer Support Representative", "Intern"];
+const QUALIFICATION_OPTIONS = ["High School Diploma", "Secondary School Certificate", "Higher Secondary Certificate", "Diploma", "Bachelor of Arts (BA)", "Bachelor of Science (BSc)", "Bachelor of Commerce (BCom)", "Bachelor of Computer Applications (BCA)", "Bachelor of Technology (BTech)", "Bachelor of Engineering (BE)", "Bachelor of Business Administration (BBA)", "Master of Arts (MA)", "Master of Science (MSc)", "Master of Commerce (MCom)", "Master of Computer Applications (MCA)", "Master of Technology (MTech)", "Master of Business Administration (MBA)", "PhD", "Other"];
+const LOCATION_OPTIONS = ["India", "United States", "United Kingdom", "Canada", "Australia", "New Zealand", "United Arab Emirates", "Singapore", "Germany", "France", "Japan", "Other"];
 
 const DynamicForm = ({
   config,
@@ -108,6 +119,8 @@ const DynamicForm = ({
     const placeholder = isEmpty
       ? field.placeholder || label || "Enter value"
       : "";
+    const fieldDescriptor = [field.name, field.title, field.label, field.placeholder]
+      .filter(Boolean).join(" ").toLowerCase();
     const fieldClassName =
       "w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white text-sm placeholder:text-gray-500";
 
@@ -166,6 +179,100 @@ const DynamicForm = ({
               );
             })}
           </select>
+        </div>
+      );
+    }
+
+    if (/\b(phone|mobile|telephone)\b/.test(fieldDescriptor)) {
+      const phoneMatch = String(value ?? "").trim().match(/^(\+\d{1,4})\s*(.*)$/);
+      const currentCode = phoneMatch?.[1] || "+91";
+      const phoneNumber = phoneMatch ? phoneMatch[2] : String(value ?? "");
+      return (
+        <div key={fieldId}>
+          <label htmlFor={fieldId} className="block text-xs font-medium text-gray-700 mb-1">{label} {required && "*"}</label>
+          <div className="grid grid-cols-[minmax(125px,0.8fr)_2fr] gap-2">
+            <select aria-label="Phone country calling code" value={currentCode} required={required} className={fieldClassName}
+              onChange={(event) => onChange(path, `${event.target.value} ${phoneNumber}`.trim())}>
+              {PHONE_COUNTRY_CODES.map(([code, name]) => <option key={code} value={code}>{name}</option>)}
+            </select>
+            <input id={fieldId} type="tel" value={phoneNumber} required={required} placeholder="Phone number" className={fieldClassName}
+              onChange={(event) => onChange(path, `${currentCode} ${event.target.value}`.trim())} />
+          </div>
+        </div>
+      );
+    }
+
+    if (/\b(role|job title|position)\b/.test(fieldDescriptor)) {
+      const isKnownRole = ROLE_OPTIONS.includes(String(value ?? ""));
+      return (
+        <div key={fieldId}>
+          <label htmlFor={fieldId} className="block text-xs font-medium text-gray-700 mb-1">{label} {required && "*"}</label>
+          <select id={fieldId} value={isKnownRole ? value : value ? "__custom__" : ""} required={required} className={fieldClassName}
+            onChange={(event) => onChange(path, event.target.value === "__custom__" ? "" : event.target.value)}>
+            <option value="">Choose a role or type one</option>
+            {ROLE_OPTIONS.map((role) => <option key={role} value={role}>{role}</option>)}
+            <option value="__custom__">Other — type your own</option>
+          </select>
+          {(!isKnownRole && value !== "") || value === "" ? (
+            <input aria-label={`${label} custom value`} type="text" value={isKnownRole ? "" : (value ?? "")} placeholder="Type your role" className={`${fieldClassName} mt-2`}
+              onChange={(event) => onChange(path, event.target.value)} />
+          ) : null}
+        </div>
+      );
+    }
+
+    if (/\b(qualification|course|degree)\b/.test(fieldDescriptor)) {
+      const isKnownQualification = QUALIFICATION_OPTIONS.includes(String(value ?? ""));
+      return (
+        <div key={fieldId}>
+          <label htmlFor={fieldId} className="block text-xs font-medium text-gray-700 mb-1">{label} {required && "*"}</label>
+          <select id={fieldId} value={isKnownQualification ? value : value ? "__custom__" : ""} required={required} className={fieldClassName}
+            onChange={(event) => onChange(path, event.target.value === "__custom__" ? "" : event.target.value)}>
+            <option value="">Choose a qualification or type one</option>
+            {QUALIFICATION_OPTIONS.map((qualification) => <option key={qualification} value={qualification}>{qualification}</option>)}
+            <option value="__custom__">Other — type your own</option>
+          </select>
+          {(!isKnownQualification && value !== "") || value === "" ? (
+            <input aria-label={`${label} custom value`} type="text" value={isKnownQualification ? "" : (value ?? "")} placeholder="Type your qualification" className={`${fieldClassName} mt-2`}
+              onChange={(event) => onChange(path, event.target.value)} />
+          ) : null}
+        </div>
+      );
+    }
+
+    if (/\blocation\b/.test(fieldDescriptor) && !/work location/i.test(fieldDescriptor)) {
+      const rawLocation = String(value ?? "");
+      const countryMatch = rawLocation.match(/(?:^| · )Country: ([^·]*)/);
+      const postalMatch = rawLocation.match(/(?:^| · )PIN: ([^·]*)/);
+      const addressMatch = rawLocation.match(/(?:^| · )Address: ([^·]*)/);
+      const locality = rawLocation.split(" · ")[0].replace(/^Country:.*$|^PIN:.*$|^Address:.*$/i, "");
+      const countryValue = countryMatch?.[1]?.trim() || "";
+      const postalCode = postalMatch?.[1]?.trim() || "";
+      const address = addressMatch?.[1]?.trim() || "";
+      const updateLocation = (nextLocality, nextCountry, nextPostalCode, nextAddress) => {
+        const pieces = [
+          String(nextLocality || "").trim(),
+          nextCountry ? `Country: ${String(nextCountry).trim()}` : "",
+          nextPostalCode ? `PIN: ${String(nextPostalCode).trim()}` : "",
+          nextAddress ? `Address: ${String(nextAddress).trim()}` : "",
+        ].filter(Boolean);
+        onChange(path, pieces.join(" · "));
+      };
+      return (
+        <div key={fieldId} className="md:col-span-2">
+          <label htmlFor={fieldId} className="block text-xs font-medium text-gray-700 mb-1">{label} {required && "*"}</label>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <input id={fieldId} list={`${fieldId}-suggestions`} value={locality} required={required} placeholder="City, State / Province" className={fieldClassName}
+              onChange={(event) => updateLocation(event.target.value, countryValue, postalCode, address)} />
+            <datalist id={`${fieldId}-suggestions`}><option value="New Delhi, Delhi" /><option value="Mumbai, Maharashtra" /><option value="Bengaluru, Karnataka" /><option value="Kolkata, West Bengal" /><option value="Chennai, Tamil Nadu" /><option value="Hyderabad, Telangana" /></datalist>
+            <input aria-label="Country or region" list={`${fieldId}-countries`} value={countryValue} placeholder="Choose or type country / region" className={fieldClassName}
+              onChange={(event) => updateLocation(locality, event.target.value, postalCode, address)} />
+            <datalist id={`${fieldId}-countries`}>{LOCATION_OPTIONS.filter((place) => place !== "Other").map((place) => <option key={place} value={place} />)}</datalist>
+            <input aria-label="PIN / postal code" type="text" inputMode="numeric" autoComplete="postal-code" value={postalCode} placeholder="PIN / Postal code (optional)" className={fieldClassName}
+              onChange={(event) => updateLocation(locality, countryValue, event.target.value, address)} />
+            <textarea aria-label="Full address" autoComplete="street-address" value={address} placeholder="Full address (optional)" rows={2} className={`${fieldClassName} sm:col-span-2`}
+              onChange={(event) => updateLocation(locality, countryValue, postalCode, event.target.value)} />
+          </div>
         </div>
       );
     }
