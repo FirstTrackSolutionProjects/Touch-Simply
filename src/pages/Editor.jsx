@@ -1,5 +1,6 @@
 // Touch-Simply/src/pages/Editor.jsx
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
@@ -339,7 +340,8 @@ const EDITOR_CSS = `
 .ts-form input::placeholder,
 .ts-form textarea::placeholder { color: #b4aeac; }
 .ts-form input:hover,
-.ts-form textarea:hover { border-color: #ddd3d0 !important; }
+.ts-form textarea:hover,
+.ts-form select:hover { border-color: #ddd3d0 !important; }
 .ts-form input:focus,
 .ts-form textarea:focus,
 .ts-form select:focus {
@@ -347,6 +349,28 @@ const EDITOR_CSS = `
   border-color: var(--brand) !important;
   box-shadow: 0 0 0 3px rgba(224,48,30,.15);
 }
+
+/* ---- dropdown trigger look (select + type-or-choose inputs) ---- */
+.ts-form select,
+.ts-form input[data-ts-combo] {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  padding-right: 38px;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6767' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+.ts-form input[data-ts-combo] { cursor: text; }
+.ts-form input[data-ts-combo]::-webkit-calendar-picker-indicator { display: none !important; }
+.ts-form select:focus,
+.ts-form input[data-ts-combo]:focus {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23e0301e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+}
+.ts-form select:disabled { opacity: .55; cursor: not-allowed; }
+
 /* "Entry 1 / Remove" jaise andar ke cards ko halka karo */
 .ts-form [class*="rounded"][class*="border"] {
   border-color: var(--line) !important;
@@ -374,10 +398,434 @@ const EDITOR_CSS = `
 .ts-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
 .ts-scroll::-webkit-scrollbar-thumb { background: #d9cfcb; border-radius: 8px; }
 
+/* ---- custom dropdown menu (body par portal hota hai, isliye literal colors) ---- */
+.ts-menu {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #ece7e5;
+  border-radius: 14px;
+  box-shadow: 0 22px 50px -14px rgba(20,20,20,.30), 0 4px 14px rgba(20,20,20,.08);
+  outline: none;
+  font-family: inherit;
+  animation: ts-menu-in .14s ease-out;
+}
+@keyframes ts-menu-in {
+  from { opacity: 0; transform: translateY(-4px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.ts-menu-search {
+  flex-shrink: 0;
+  padding: 8px;
+  border-bottom: 1px solid #f0e9e7;
+  background: #fdfbfa;
+}
+.ts-menu-search input {
+  width: 100%;
+  border: 1.5px solid #ece7e5;
+  border-radius: 9px;
+  padding: 7px 10px 7px 32px;
+  font-size: 13px;
+  color: #141414;
+  outline: none;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%239a9391' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><path d='m21 21-4.3-4.3'/></svg>");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+}
+.ts-menu-search input:focus { border-color: #e0301e; box-shadow: 0 0 0 3px rgba(224,48,30,.15); }
+.ts-menu-list {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: #d9cfcb transparent;
+}
+.ts-menu-list::-webkit-scrollbar { width: 8px; }
+.ts-menu-list::-webkit-scrollbar-thumb { background: #d9cfcb; border-radius: 8px; }
+.ts-menu-group {
+  padding: 10px 10px 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #9a9391;
+}
+.ts-menu-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #141414;
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: background .1s, color .1s;
+}
+.ts-menu-item[data-grouped="true"] { padding-left: 16px; }
+.ts-menu-item[data-active="true"] { background: #fdeeeb; color: #b92213; }
+.ts-menu-item[data-selected="true"] { font-weight: 600; color: #b92213; }
+.ts-menu-item[data-empty="true"] { color: #9a9391; font-style: italic; }
+.ts-menu-item[data-disabled="true"] { opacity: .4; cursor: not-allowed; }
+.ts-menu-empty { padding: 16px 12px; text-align: center; font-size: 12.5px; color: #9a9391; }
+
 @media (prefers-reduced-motion: no-preference) {
   .ts-progress-bar { transition: width .45s cubic-bezier(.2,.8,.2,1); }
 }
+@media (prefers-reduced-motion: reduce) {
+  .ts-menu { animation: none; }
+}
 `;
+
+// ─────────────────────────────────────────────
+// custom dropdown (native <select> aur <datalist> popup ko replace karta hai)
+// ─────────────────────────────────────────────
+const setNativeValue = (el, value) => {
+  const proto = el.tagName === "SELECT" ? window.HTMLSelectElement.prototype : window.HTMLInputElement.prototype;
+  const setter = Object.getOwnPropertyDescriptor(proto, "value")?.set;
+  if (setter) setter.call(el, value);
+  else el.value = value;
+};
+
+const readSelectOptions = (select) => {
+  const out = [];
+  Array.from(select.children).forEach((child) => {
+    if (child.tagName === "OPTGROUP") {
+      out.push({ kind: "group", label: child.label });
+      Array.from(child.children).forEach((o) =>
+        out.push({ kind: "opt", value: o.value, label: o.textContent.trim(), disabled: o.disabled || child.disabled })
+      );
+    } else if (child.tagName === "OPTION") {
+      out.push({ kind: "opt", value: child.value, label: child.textContent.trim(), disabled: child.disabled });
+    }
+  });
+  return out;
+};
+
+const readListOptions = (input) => {
+  const id = input.getAttribute("data-ts-list");
+  const list = id ? document.getElementById(id) : null;
+  if (!list) return [];
+  return Array.from(list.options).map((o) => ({
+    kind: "opt",
+    value: o.value,
+    label: (o.label && o.label.trim()) || o.value,
+    disabled: false,
+  }));
+};
+
+const DropdownEnhancer = ({ rootRef }) => {
+  const [menu, setMenu] = useState(null); // { el, kind: "select" | "combo", options, rect }
+  const [query, setQuery] = useState("");
+  const [active, setActive] = useState(-1);
+  const menuRef = useRef(null);
+  const menuStateRef = useRef(null);
+  const pickingRef = useRef(false);
+  const keyNavRef = useRef(false);
+  const handleKeyRef = useRef(() => {});
+  menuStateRef.current = menu;
+
+  const openMenu = useCallback((el, kind) => {
+    const options = kind === "select" ? readSelectOptions(el) : readListOptions(el);
+    if (options.length === 0) return;
+    const selectable = options.filter((o) => o.kind === "opt" && !o.disabled);
+    setQuery(kind === "combo" ? el.value : "");
+    setActive(kind === "select" ? Math.max(0, selectable.findIndex((o) => o.value === el.value)) : -1);
+    setMenu({ el, kind, options, rect: el.getBoundingClientRect() });
+  }, []);
+
+  const closeMenu = useCallback((refocus = false) => {
+    const m = menuStateRef.current;
+    setMenu(null);
+    setQuery("");
+    if (refocus && m?.el?.isConnected) m.el.focus({ preventScroll: true });
+  }, []);
+
+  // form ke andar ke saare select / datalist inputs ko pakadta hai
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return undefined;
+
+    const prepare = () => {
+      root.querySelectorAll("input[list]").forEach((input) => {
+        input.setAttribute("data-ts-list", input.getAttribute("list"));
+        input.setAttribute("data-ts-combo", "1");
+        input.setAttribute("autocomplete", "new-password"); // Chrome ka address-autofill popup band
+        input.removeAttribute("list"); // native datalist popup band
+      });
+      const m = menuStateRef.current;
+      if (m && !m.el.isConnected) setMenu(null);
+    };
+    prepare();
+    const observer = new MutationObserver(prepare);
+    observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["list"] });
+
+    const onMouseDown = (e) => {
+      const t = e.target;
+      if (t && t.tagName === "SELECT" && !t.multiple && !t.disabled) {
+        e.preventDefault(); // native popup khulne se roko
+        t.focus({ preventScroll: true });
+        if (menuStateRef.current?.el === t) closeMenu();
+        else openMenu(t, "select");
+      }
+    };
+    const onFocusIn = (e) => {
+      const t = e.target;
+      if (t?.matches?.("input[data-ts-combo]") && menuStateRef.current?.el !== t) openMenu(t, "combo");
+    };
+    const onClick = (e) => {
+      const t = e.target;
+      if (t?.matches?.("input[data-ts-combo]") && menuStateRef.current?.el !== t) openMenu(t, "combo");
+    };
+    const onInput = (e) => {
+      const t = e.target;
+      if (pickingRef.current || !t?.matches?.("input[data-ts-combo]")) return;
+      if (menuStateRef.current?.el === t) {
+        setQuery(t.value);
+        setActive(-1);
+      } else {
+        openMenu(t, "combo");
+      }
+    };
+    const onKeyDown = (e) => {
+      const t = e.target;
+      const m = menuStateRef.current;
+      if (t?.tagName === "SELECT" && !t.multiple && !t.disabled && !m && ["ArrowDown", "ArrowUp", "Enter", " "].includes(e.key)) {
+        e.preventDefault();
+        openMenu(t, "select");
+        return;
+      }
+      if (t?.matches?.("input[data-ts-combo]")) {
+        if (!m && e.key === "ArrowDown") {
+          e.preventDefault();
+          openMenu(t, "combo");
+        } else if (m && m.el === t) {
+          handleKeyRef.current(e);
+        }
+      }
+    };
+
+    root.addEventListener("mousedown", onMouseDown, true);
+    root.addEventListener("focusin", onFocusIn);
+    root.addEventListener("click", onClick);
+    root.addEventListener("input", onInput);
+    root.addEventListener("keydown", onKeyDown);
+    return () => {
+      observer.disconnect();
+      root.removeEventListener("mousedown", onMouseDown, true);
+      root.removeEventListener("focusin", onFocusIn);
+      root.removeEventListener("click", onClick);
+      root.removeEventListener("input", onInput);
+      root.removeEventListener("keydown", onKeyDown);
+    };
+  }, [rootRef, openMenu, closeMenu]);
+
+  // bahar click karne par band + scroll/resize par position update
+  useEffect(() => {
+    if (!menu) return undefined;
+    const onDown = (e) => {
+      if (menuRef.current?.contains(e.target) || menu.el === e.target) return;
+      setMenu(null);
+      setQuery("");
+    };
+    const reposition = (e) => {
+      if (e?.target instanceof Node && menuRef.current?.contains(e.target)) return;
+      setMenu((m) => (m ? { ...m, rect: m.el.getBoundingClientRect() } : m));
+    };
+    document.addEventListener("mousedown", onDown, true);
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("resize", reposition);
+    return () => {
+      document.removeEventListener("mousedown", onDown, true);
+      window.removeEventListener("scroll", reposition, true);
+      window.removeEventListener("resize", reposition);
+    };
+  }, [menu?.el]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // khulte hi selected item ko beech me laao, aur focus do
+  useEffect(() => {
+    if (!menu || !menuRef.current) return;
+    const list = menuRef.current.querySelector(".ts-menu-list");
+    const target = list?.querySelector('[data-selected="true"]');
+    if (list && target) list.scrollTop = target.offsetTop - list.clientHeight / 2 + target.clientHeight / 2;
+    if (menu.kind === "select" && !menuRef.current.querySelector(".ts-menu-search input")) {
+      menuRef.current.focus({ preventScroll: true });
+    }
+  }, [menu?.el]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // keyboard se upar-neeche jaate waqt active item dikhta rahe
+  useEffect(() => {
+    if (!keyNavRef.current || !menuRef.current) return;
+    keyNavRef.current = false;
+    const list = menuRef.current.querySelector(".ts-menu-list");
+    const item = list?.querySelector('[data-active="true"]');
+    if (!list || !item) return;
+    const top = item.offsetTop;
+    const bottom = top + item.offsetHeight;
+    if (top < list.scrollTop) list.scrollTop = top - 6;
+    else if (bottom > list.scrollTop + list.clientHeight) list.scrollTop = bottom - list.clientHeight + 6;
+  }, [active]);
+
+  // ---- visible list (search/filter ke baad) ----
+  const entries = [];
+  const selectable = [];
+  if (menu) {
+    const raw = (query || "").trim().toLowerCase();
+    const exact =
+      menu.kind === "combo" && menu.options.some((o) => o.kind === "opt" && o.value.toLowerCase() === raw);
+    const q = exact ? "" : raw;
+    let currentGroup = null;
+    let pendingGroup = null;
+    menu.options.forEach((o) => {
+      if (o.kind === "group") {
+        currentGroup = o;
+        pendingGroup = o;
+        return;
+      }
+      if (q && !o.label.toLowerCase().includes(q)) return;
+      if (pendingGroup) {
+        entries.push(pendingGroup);
+        pendingGroup = null;
+      }
+      const entry = { ...o, grouped: Boolean(currentGroup) };
+      if (!o.disabled) {
+        entry.selIdx = selectable.length;
+        selectable.push(entry);
+      }
+      entries.push(entry);
+    });
+  }
+
+  const pick = (opt) => {
+    const m = menuStateRef.current;
+    if (!m || !opt || opt.disabled) return;
+    pickingRef.current = true;
+    setNativeValue(m.el, opt.value);
+    m.el.dispatchEvent(new Event(m.kind === "select" ? "change" : "input", { bubbles: true }));
+    pickingRef.current = false;
+    setMenu(null);
+    setQuery("");
+    if (m.kind === "select") m.el.focus({ preventScroll: true });
+  };
+
+  const handleKey = (e) => {
+    if (!menu) return;
+    const n = selectable.length;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      keyNavRef.current = true;
+      setActive((a) => (n ? (a + 1) % n : -1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      keyNavRef.current = true;
+      setActive((a) => (n ? (a <= 0 ? n - 1 : a - 1) : -1));
+    } else if (e.key === "Enter") {
+      if (active >= 0 && selectable[active]) {
+        e.preventDefault();
+        pick(selectable[active]);
+      } else {
+        e.preventDefault();
+        closeMenu(menu.kind === "select");
+      }
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      closeMenu(menu.kind === "select");
+    } else if (e.key === "Tab") {
+      closeMenu(false);
+    }
+  };
+  handleKeyRef.current = handleKey;
+
+  if (!menu) return null;
+  if (menu.kind === "combo" && entries.length === 0) return null;
+
+  // ---- position ----
+  const { rect } = menu;
+  const width = Math.max(rect.width, 220);
+  const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
+  const below = window.innerHeight - rect.bottom - 14;
+  const above = rect.top - 14;
+  const openUp = below < 240 && above > below;
+  const maxHeight = Math.max(180, Math.min(360, openUp ? above : below));
+  const style = {
+    left,
+    width,
+    maxHeight,
+    ...(openUp ? { bottom: window.innerHeight - rect.top + 6 } : { top: rect.bottom + 6 }),
+  };
+  const showSearch = menu.kind === "select" && menu.options.filter((o) => o.kind === "opt").length > 8;
+  const currentValue = menu.el.value;
+
+  return createPortal(
+    <div
+      ref={menuRef}
+      role="listbox"
+      tabIndex={-1}
+      className="ts-menu"
+      style={style}
+      onKeyDown={handleKey}
+      onMouseDown={(e) => {
+        if (e.target.tagName !== "INPUT") e.preventDefault();
+      }}
+    >
+      {showSearch && (
+        <div className="ts-menu-search">
+          <input
+            autoFocus
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setActive(0);
+            }}
+            placeholder="Search..."
+            aria-label="Search options"
+          />
+        </div>
+      )}
+      <div className="ts-menu-list">
+        {entries.length === 0 && <div className="ts-menu-empty">No options found</div>}
+        {entries.map((o, i) =>
+          o.kind === "group" ? (
+            <div key={`g-${i}`} className="ts-menu-group">
+              {o.label}
+            </div>
+          ) : (
+            <button
+              key={`o-${i}`}
+              type="button"
+              role="option"
+              aria-selected={o.value === currentValue}
+              data-active={o.selIdx === active}
+              data-selected={o.value === currentValue && o.value !== ""}
+              data-empty={o.value === ""}
+              data-disabled={o.disabled ? "true" : undefined}
+              data-grouped={o.grouped ? "true" : undefined}
+              className="ts-menu-item"
+              onMouseEnter={() => {
+                if (!o.disabled) setActive(o.selIdx);
+              }}
+              onClick={() => pick(o)}
+            >
+              <span>{o.label}</span>
+              {o.value === currentValue && o.value !== "" && <Check size={15} color="#e0301e" />}
+            </button>
+          )
+        )}
+      </div>
+    </div>,
+    document.body
+  );
+};
 
 const Editor = () => {
   const navigate = useNavigate();
@@ -406,6 +854,7 @@ const Editor = () => {
   const configRef = useRef(null);
   const workRef = useRef(null);
   const bodyRef = useRef(null);
+  const formRef = useRef(null);
   configRef.current = config;
 
   // ─────────────────────────────────────────────
@@ -915,7 +1364,7 @@ const Editor = () => {
 
           {/* active section body */}
           <div ref={bodyRef} className="ts-scroll min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-5">
-            <div className="ts-form">
+            <div className="ts-form" ref={formRef}>
               {viewConfig ? (
                 <DynamicForm
                   key={activeSection?.key}
@@ -928,6 +1377,8 @@ const Editor = () => {
                 <p className="text-sm text-[#6b6767]">Loading form…</p>
               )}
             </div>
+            {/* sabhi dropdowns (select + type-or-choose) ka custom menu */}
+            <DropdownEnhancer rootRef={formRef} />
           </div>
 
           {/* step footer */}
