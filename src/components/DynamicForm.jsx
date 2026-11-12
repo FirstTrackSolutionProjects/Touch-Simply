@@ -87,7 +87,15 @@ const PHONE_COUNTRY_CODES = [
   ["+86", "China (+86)"], ["+27", "South Africa (+27)"], ["+234", "Nigeria (+234)"],
 ];
 const ROLE_OPTIONS = ["Software Engineer", "Frontend Developer", "Backend Developer", "Full Stack Developer", "Web Developer", "Mobile App Developer", "Data Analyst", "Data Scientist", "DevOps Engineer", "UI/UX Designer", "Product Manager", "Project Manager", "Business Analyst", "Marketing Specialist", "Sales Executive", "Teacher", "Accountant", "Customer Support Representative", "Intern"];
-const QUALIFICATION_OPTIONS = ["High School Diploma", "Secondary School Certificate", "Higher Secondary Certificate", "Diploma", "Bachelor of Arts (BA)", "Bachelor of Science (BSc)", "Bachelor of Commerce (BCom)", "Bachelor of Computer Applications (BCA)", "Bachelor of Technology (BTech)", "Bachelor of Engineering (BE)", "Bachelor of Business Administration (BBA)", "Master of Arts (MA)", "Master of Science (MSc)", "Master of Commerce (MCom)", "Master of Computer Applications (MCA)", "Master of Technology (MTech)", "Master of Business Administration (MBA)", "PhD", "Other"];
+const QUALIFICATION_OPTIONS = [
+  "Secondary School Certificate (SSC)", "Higher Secondary Certificate (HSC)", "High School Diploma", "GED", "ITI Certificate", "Trade Certificate",
+  "Diploma in Engineering", "Diploma in Civil Engineering", "Diploma in Computer Engineering", "Diploma in Electrical Engineering", "Diploma in Electronics Engineering", "Diploma in Mechanical Engineering", "Diploma in Nursing", "Diploma in Pharmacy", "Diploma in Education", "Advanced Diploma", "Associate Degree",
+  "Bachelor of Arts (BA)", "Bachelor of Science (BSc)", "Bachelor of Commerce (BCom)", "Bachelor of Computer Applications (BCA)", "Bachelor of Technology (BTech)", "Bachelor of Engineering (BE)", "Bachelor of Business Administration (BBA)", "Bachelor of Business Management (BBM)", "Bachelor of Management Studies (BMS)", "Bachelor of Computer Science (BCS)", "Bachelor of Information Technology (BIT)", "Bachelor of Architecture (BArch)", "Bachelor of Design (BDes)", "Bachelor of Fine Arts (BFA)", "Bachelor of Education (BEd)", "Bachelor of Law (LLB)", "Bachelor of Laws (BA LLB)", "Bachelor of Medicine and Bachelor of Surgery (MBBS)", "Bachelor of Dental Surgery (BDS)", "Bachelor of Pharmacy (BPharm)", "Bachelor of Physiotherapy (BPT)", "Bachelor of Science in Nursing (BSc Nursing)", "Bachelor of Ayurvedic Medicine and Surgery (BAMS)", "Bachelor of Homeopathic Medicine and Surgery (BHMS)", "Bachelor of Veterinary Science (BVSc)", "Bachelor of Agriculture (BSc Agriculture)", "Bachelor of Hotel Management (BHM)", "Bachelor of Social Work (BSW)", "Bachelor of Statistics (BStat)", "Bachelor of Economics (BEcon)",
+  "BTech in Computer Science and Engineering", "BTech in Information Technology", "BTech in Artificial Intelligence and Machine Learning", "BTech in Data Science", "BTech in Cybersecurity", "BTech in Software Engineering", "BTech in Electronics and Communication Engineering", "BTech in Electrical Engineering", "BTech in Electrical and Electronics Engineering", "BTech in Mechanical Engineering", "BTech in Civil Engineering", "BTech in Chemical Engineering", "BTech in Aerospace Engineering", "BTech in Biotechnology", "BTech in Biomedical Engineering", "BTech in Industrial Engineering", "BTech in Environmental Engineering", "BTech in Automobile Engineering", "BTech in Mechatronics", "BTech in Metallurgical Engineering", "BTech in Petroleum Engineering", "BTech in Mining Engineering", "BTech in Food Technology", "BTech in Agricultural Engineering",
+  "Master of Arts (MA)", "Master of Science (MSc)", "Master of Commerce (MCom)", "Master of Computer Applications (MCA)", "Master of Technology (MTech)", "Master of Engineering (ME)", "Master of Business Administration (MBA)", "Master of Business Management (MBM)", "Master of Computer Science (MCS)", "Master of Information Technology (MIT)", "Master of Architecture (MArch)", "Master of Design (MDes)", "Master of Fine Arts (MFA)", "Master of Education (MEd)", "Master of Laws (LLM)", "Master of Public Health (MPH)", "Master of Social Work (MSW)", "Master of Pharmacy (MPharm)", "Master of Public Administration (MPA)", "Master of Statistics (MStat)", "Master of Economics (MEcon)", "Master of Public Policy (MPP)",
+  "MTech in Computer Science and Engineering", "MTech in Information Technology", "MTech in Artificial Intelligence", "MTech in Data Science", "MTech in Cybersecurity", "MTech in Software Engineering", "MTech in Electronics and Communication Engineering", "MTech in Electrical Engineering", "MTech in Mechanical Engineering", "MTech in Civil Engineering", "MTech in Structural Engineering", "MTech in VLSI Design", "MTech in Biotechnology", "MTech in Chemical Engineering", "MTech in Environmental Engineering", "MTech in Robotics and Automation",
+  "PhD", "Doctor of Philosophy (PhD)", "Doctor of Medicine (MD)", "Doctor of Dental Surgery (DDS)", "Doctor of Pharmacy (PharmD)", "Postgraduate Diploma", "Postgraduate Certificate", "Professional Certification", "Other"
+];
 const LOCATION_OPTIONS = ["India", "United States", "United Kingdom", "Canada", "Australia", "New Zealand", "United Arab Emirates", "Singapore", "Germany", "France", "Japan", "Other"];
 const SKILL_GROUPS = {
   "Programming languages": ["JavaScript", "TypeScript", "Python", "Java", "C", "C++", "C#", "Go", "Rust", "PHP", "Ruby", "Swift", "Kotlin", "Dart", "R", "Scala", "Bash", "PowerShell", "SQL", "HTML", "CSS"],
@@ -102,6 +110,7 @@ const SKILL_GROUPS = {
 const SkillsPicker = ({ value, onChange, path, fieldClassName, label, required }) => {
   const [selected, setSelected] = useState("");
   const [customSkill, setCustomSkill] = useState("");
+  const [search, setSearch] = useState("");
   const skills = Array.isArray(value) ? value.map((skill) => String(skill)) : String(value || "").split(/\r?\n|,/).map((skill) => skill.trim()).filter(Boolean);
   const commit = (candidate) => {
     const skill = candidate.trim();
@@ -114,10 +123,14 @@ const SkillsPicker = ({ value, onChange, path, fieldClassName, label, required }
   return (
     <div className="md:col-span-2">
       <label className="block text-xs font-medium text-gray-700 mb-1">{label} {required && "*"}</label>
+      <input type="search" value={search} placeholder="Search skills" className={`${fieldClassName} mb-2`} onChange={(event) => { setSearch(event.target.value); setSelected(""); }} />
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_auto]">
         <select aria-label="Choose a skill" value={selected} className={fieldClassName} onChange={(event) => setSelected(event.target.value)}>
           <option value="">Choose a skill to add</option>
-          {Object.entries(SKILL_GROUPS).map(([group, options]) => <optgroup key={group} label={group}>{options.map((skill) => <option key={skill} value={skill}>{skill}</option>)}</optgroup>)}
+          {Object.entries(SKILL_GROUPS).map(([group, options]) => {
+            const matches = options.filter((skill) => skill.toLowerCase().includes(search.trim().toLowerCase()));
+            return matches.length ? <optgroup key={group} label={group}>{matches.map((skill) => <option key={skill} value={skill}>{skill}</option>)}</optgroup> : null;
+          })}
         </select>
         <button type="button" disabled={!selected} onClick={() => commit(selected)} className="rounded-lg bg-purple-100 px-4 py-2.5 text-sm font-medium text-purple-700 disabled:opacity-50">Add skill</button>
       </div>
@@ -266,20 +279,13 @@ const DynamicForm = ({
     }
 
     if (/\b(qualification|course|degree)\b/.test(fieldDescriptor)) {
-      const isKnownQualification = QUALIFICATION_OPTIONS.includes(String(value ?? ""));
       return (
         <div key={fieldId}>
           <label htmlFor={fieldId} className="block text-xs font-medium text-gray-700 mb-1">{label} {required && "*"}</label>
-          <select id={fieldId} value={isKnownQualification ? value : value ? "__custom__" : ""} required={required} className={fieldClassName}
-            onChange={(event) => onChange(path, event.target.value === "__custom__" ? "" : event.target.value)}>
-            <option value="">Choose a qualification or type one</option>
-            {QUALIFICATION_OPTIONS.map((qualification) => <option key={qualification} value={qualification}>{qualification}</option>)}
-            <option value="__custom__">Other — type your own</option>
-          </select>
-          {(!isKnownQualification && value !== "") || value === "" ? (
-            <input aria-label={`${label} custom value`} type="text" value={isKnownQualification ? "" : (value ?? "")} placeholder="Type your qualification" className={`${fieldClassName} mt-2`}
-              onChange={(event) => onChange(path, event.target.value)} />
-          ) : null}
+          <input id={fieldId} type="search" list={`${fieldId}-qualifications`} value={value ?? ""} required={required} placeholder="Search or type a qualification" className={fieldClassName}
+            onChange={(event) => onChange(path, event.target.value)} />
+          <datalist id={`${fieldId}-qualifications`}>{QUALIFICATION_OPTIONS.map((qualification) => <option key={qualification} value={qualification} />)}</datalist>
+          <p className="mt-1 text-xs text-gray-500">Search the list or enter any degree/course name.</p>
         </div>
       );
     }
