@@ -368,6 +368,27 @@ const DynamicForm = ({
       );
     }
 
+    if (/\bsummary\b/.test(fieldDescriptor)) {
+      return (
+        <div key={fieldId} className="md:col-span-2">
+          <label htmlFor={fieldId} className="block text-xs font-medium text-gray-700 mb-1">
+            {label} {required && "*"}
+          </label>
+          <textarea
+            id={fieldId}
+            value={value ?? ""}
+            required={required}
+            placeholder={placeholder || "Write a concise professional summary"}
+            rows={5}
+            maxLength={2000}
+            className={`${fieldClassName} min-h-32 resize-y leading-6`}
+            onChange={(event) => onChange(path, event.target.value)}
+          />
+          <p className="mt-1 text-xs text-gray-500">Write a few sentences about your experience, strengths, and career goals.</p>
+        </div>
+      );
+    }
+
     const dateInputKind = getDateInputKind(field);
     const isDateRange = /\bdate\s*range\b/i.test(
       [field.name, field.title, field.label, field.placeholder].filter(Boolean).join(" ")
