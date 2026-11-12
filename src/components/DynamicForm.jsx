@@ -35,6 +35,34 @@ const getNodeTitle = (node, fallback) => {
   return fallback;
 };
 
+const getDateInputKind = (field) => {
+  const descriptor = [field.name, field.title, field.label, field.placeholder]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  if (field.type === "date" || /\b(date of birth|birth date|dob)\b/.test(descriptor)) return "date";
+  if (
+    field.type === "month" ||
+    /\b(start date|end date|completion date|pass date|month\s*\/?\s*year)\b/.test(descriptor)
+  ) return "month";
+  return null;
+};
+
+const toCalendarValue = (value, kind) => {
+  if (!value) return "";
+  const text = String(value).trim();
+  const match = kind === "date"
+    ? text.match(/^(\d{4}-\d{2}-\d{2})/)
+    : text.match(/^(\d{4}-\d{2})/);
+  if (match) return match[1];
+  const parsed = new Date(text);
+  if (Number.isNaN(parsed.getTime())) return "";
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  return kind === "date" ? `${year}-${month}-${day}` : `${year}-${month}`;
+};
+
 const TRANSPARENT_CONTAINERS = new Set(["fields", "items", "subsections"]);
 const METADATA_KEYS = new Set(["optional"]);
 const HTML_INPUT_TYPES = new Set([
@@ -183,7 +211,53 @@ const DynamicForm = ({
       );
     }
 
-    const inputType = HTML_INPUT_TYPES.has(field.type) ? field.type : "text";
+    const dateInputKind = getDateInputKind(field);
+    const isDateRange = /\bdate\s*range\b/i.test(
+      [field.name, field.title, field.label, field.placeholder].filter(Boolean).join(" ")
+    );
+    if (isDateRange) {
+      const [rawStart = "", rawEnd = ""] = String(value ?? "").split(/\s*(?:--|–|—|\bto\b)\s*/i);
+      const start = toCalendarValue(rawStart, "month");
+      const end = toCalendarValue(rawEnd, "month");
+      const updateRange = (nextStart, nextEnd) => {
+        const range = nextStart || nextEnd ? `${nextStart} -- ${nextEnd}` : "";
+        onChange(path, range);
+      };
+      return (
+        <div key={fieldId} className="md:col-span-2">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            {label} {required && "*"}
+          </label>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="block text-xs text-gray-500">
+              Start month
+              <input
+                type="month"
+                aria-label={`${label} start month`}
+                value={start}
+                required={required}
+                className={`${fieldClassName} mt-1`}
+                onChange={(event) => updateRange(event.target.value, end)}
+              />
+            </label>
+            <label className="block text-xs text-gray-500">
+              End month
+              <input
+                type="month"
+                aria-label={`${label} end month`}
+                value={end}
+                required={required}
+                className={`${fieldClassName} mt-1`}
+                onChange={(event) => updateRange(start, event.target.value)}
+              />
+            </label>
+          </div>
+        </div>
+      );
+    }
+
+    const inputType = dateInputKind || (HTML_INPUT_TYPES.has(field.type) ? field.type : "text");
+    const inputValue = dateInputKind ? toCalendarValue(value, dateInputKind) : (value ?? "");
     return (
       <div key={fieldId}>
         <label
@@ -195,14 +269,14 @@ const DynamicForm = ({
         <input
           id={fieldId}
           type={inputType}
-          value={value ?? ""}
+          value={inputValue}
           required={required}
           placeholder={placeholder}
           className={fieldClassName}
           onChange={(event) => onChange(path, event.target.value)}
         />
-        {field.name === "date_of_birth" && (
-          <p className="mt-1 text-xs text-gray-500">Choose your date of birth from the calendar.</p>
+        {dateInputKind && (
+          <p className="mt-1 text-xs text-gray-500">Select {dateInputKind === "date" ? "a date" : "a month and year"} from the calendar.</p>
         )}
       </div>
     );
