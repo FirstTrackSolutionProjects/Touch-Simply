@@ -87,7 +87,7 @@ const clearConfigValues = (node) => {
   return node;
 };
 
-const fillTemplateExampleValues = (config, templateTitle = "") => {
+const fillTemplateExampleValues = (config, templateTitle = "", { clearPremiumSamples = false } = {}) => {
   const templateName = String(templateTitle || config?.template || "")
     .toLowerCase()
     .replace(/[^a-z0-9]/g, "");
@@ -153,6 +153,31 @@ const fillTemplateExampleValues = (config, templateTitle = "") => {
         ),
       ])
     );
+    if (clearPremiumSamples && templateName === "premiumcv") {
+      const fieldNames = [node.name, node.title, node.label, node.key]
+        .filter(Boolean)
+        .map((value) => String(value).toLowerCase().replace(/[^a-z0-9]/g, ""));
+      const isSkillField = fieldNames.some((name) => name.includes("skill"));
+      const isRoleField = fieldNames.some((name) => ["role", "position", "jobrole", "experiencejobtitle"].includes(name));
+      const isSummaryField = fieldNames.some((name) => name.includes("summary"));
+      if (isSkillField && Array.isArray(node.current_value)) {
+        const isUnchangedSample = JSON.stringify(node.current_value) === JSON.stringify(node.default_value);
+        if (node.current_value.length === 0 || isUnchangedSample) {
+          next.current_value = [];
+          next.default_value = [];
+        }
+        return next;
+      }
+      if ((isRoleField || isSummaryField) && typeof node.current_value === "string") {
+        const isUnchangedSample = node.current_value === node.default_value;
+        if (!node.current_value.trim() || isUnchangedSample) {
+          next.current_value = "";
+          next.default_value = "";
+          next.placeholder = isRoleField ? "Type or choose your role" : "Write a summary tailored to your target role";
+        }
+        return next;
+      }
+    }
     if (withinHeader && typeof node.current_value === "string") {
       const fieldName = [node.name, node.title, node.label, node.key]
         .filter(Boolean)
@@ -406,7 +431,7 @@ const Editor = () => {
         if (!configUrl) throw new Error("Workspace is missing a config file.");
         const cfg = await loadConfigJson(configUrl);
         if (cancelled) return;
-        setConfig(fillTemplateExampleValues(cfg, templateTitle));
+        setConfig(fillTemplateExampleValues(cfg, templateTitle, { clearPremiumSamples: true }));
         setResumeId(id);
         await fetchBalance();
       } catch (err) {
@@ -446,7 +471,7 @@ const Editor = () => {
               const cfg = await loadConfigJson(configUrl);
               if (cancelled) return;
               setResumeId(savedId);
-              setConfig(fillTemplateExampleValues(cfg, templateTitle));
+              setConfig(fillTemplateExampleValues(cfg, templateTitle, { clearPremiumSamples: true }));
               await fetchBalance();
               return;
             }
@@ -480,7 +505,7 @@ const Editor = () => {
 
         // New resumes start blank. These templates then seed their configured
         // dummy defaults into empty fields so users can see what to replace.
-        const blankCfg = fillTemplateExampleValues(clearConfigValues(cfg), templateTitle || cfg.template);
+        const blankCfg = fillTemplateExampleValues(clearConfigValues(cfg), templateTitle || cfg.template, { clearPremiumSamples: true });
         setConfig(blankCfg);
         try {
           await uploadConfigJson(resume.id, blankCfg);

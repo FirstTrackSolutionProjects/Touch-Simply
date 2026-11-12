@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -89,6 +89,46 @@ const PHONE_COUNTRY_CODES = [
 const ROLE_OPTIONS = ["Software Engineer", "Frontend Developer", "Backend Developer", "Full Stack Developer", "Web Developer", "Mobile App Developer", "Data Analyst", "Data Scientist", "DevOps Engineer", "UI/UX Designer", "Product Manager", "Project Manager", "Business Analyst", "Marketing Specialist", "Sales Executive", "Teacher", "Accountant", "Customer Support Representative", "Intern"];
 const QUALIFICATION_OPTIONS = ["High School Diploma", "Secondary School Certificate", "Higher Secondary Certificate", "Diploma", "Bachelor of Arts (BA)", "Bachelor of Science (BSc)", "Bachelor of Commerce (BCom)", "Bachelor of Computer Applications (BCA)", "Bachelor of Technology (BTech)", "Bachelor of Engineering (BE)", "Bachelor of Business Administration (BBA)", "Master of Arts (MA)", "Master of Science (MSc)", "Master of Commerce (MCom)", "Master of Computer Applications (MCA)", "Master of Technology (MTech)", "Master of Business Administration (MBA)", "PhD", "Other"];
 const LOCATION_OPTIONS = ["India", "United States", "United Kingdom", "Canada", "Australia", "New Zealand", "United Arab Emirates", "Singapore", "Germany", "France", "Japan", "Other"];
+const SKILL_GROUPS = {
+  "Programming languages": ["JavaScript", "TypeScript", "Python", "Java", "C", "C++", "C#", "Go", "Rust", "PHP", "Ruby", "Swift", "Kotlin", "Dart", "R", "Scala", "Bash", "PowerShell", "SQL", "HTML", "CSS"],
+  "Web and application development": ["React", "Angular", "Vue.js", "Svelte", "Next.js", "Nuxt.js", "Node.js", "Express.js", "NestJS", "Django", "Flask", "FastAPI", "Spring Boot", "ASP.NET Core", "Laravel", "Ruby on Rails", "Flutter", "React Native", "Android Development", "iOS Development", "REST APIs", "GraphQL", "WebSockets", "Microservices", "Responsive Design", "Accessibility (WCAG)"],
+  "Databases and data": ["MySQL", "PostgreSQL", "MongoDB", "SQLite", "Microsoft SQL Server", "Oracle Database", "Redis", "Elasticsearch", "Firebase", "DynamoDB", "Database Design", "Data Modeling", "ETL", "Data Analysis", "Data Visualization", "Pandas", "NumPy", "Apache Spark", "Power BI", "Tableau", "Excel", "Machine Learning", "Deep Learning", "Natural Language Processing", "Generative AI", "Statistics"],
+  "Cloud, DevOps and security": ["AWS", "Microsoft Azure", "Google Cloud Platform", "Docker", "Kubernetes", "Terraform", "Ansible", "Jenkins", "GitHub Actions", "CI/CD", "Linux", "Git", "GitHub", "GitLab", "Nginx", "Serverless", "Prometheus", "Grafana", "Cybersecurity", "Network Security", "OWASP", "Penetration Testing", "Identity and Access Management"],
+  "Design and product": ["Figma", "Adobe Photoshop", "Adobe Illustrator", "Adobe XD", "Sketch", "UI Design", "UX Research", "Prototyping", "Design Systems", "Wireframing", "Interaction Design", "Usability Testing", "Product Strategy", "Roadmapping", "Agile", "Scrum", "Kanban", "Jira", "Confluence", "Project Management", "Business Analysis", "Requirements Gathering"],
+  "Business, marketing and operations": ["Digital Marketing", "SEO", "Content Marketing", "Social Media Marketing", "Google Analytics", "Google Ads", "Email Marketing", "Copywriting", "Market Research", "Sales", "Lead Generation", "CRM", "Customer Success", "Customer Support", "Accounting", "Financial Analysis", "Bookkeeping", "Human Resources", "Recruitment", "Supply Chain Management", "Operations Management", "Negotiation"],
+  "Communication and professional": ["Written Communication", "Verbal Communication", "Presentation Skills", "Teamwork", "Leadership", "Problem Solving", "Critical Thinking", "Time Management", "Adaptability", "Attention to Detail", "Mentoring", "Conflict Resolution", "Decision Making", "Creativity", "Research", "Teaching", "Training", "Documentation"]
+};
+
+const SkillsPicker = ({ value, onChange, path, fieldClassName, label, required }) => {
+  const [selected, setSelected] = useState("");
+  const [customSkill, setCustomSkill] = useState("");
+  const skills = Array.isArray(value) ? value.map((skill) => String(skill)) : String(value || "").split(/\r?\n|,/).map((skill) => skill.trim()).filter(Boolean);
+  const commit = (candidate) => {
+    const skill = candidate.trim();
+    if (!skill || skills.some((item) => item.toLowerCase() === skill.toLowerCase())) return;
+    onChange(path, [...skills, skill]);
+    setSelected("");
+    setCustomSkill("");
+  };
+  const remove = (skill) => onChange(path, skills.filter((item) => item !== skill));
+  return (
+    <div className="md:col-span-2">
+      <label className="block text-xs font-medium text-gray-700 mb-1">{label} {required && "*"}</label>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_auto]">
+        <select aria-label="Choose a skill" value={selected} className={fieldClassName} onChange={(event) => setSelected(event.target.value)}>
+          <option value="">Choose a skill to add</option>
+          {Object.entries(SKILL_GROUPS).map(([group, options]) => <optgroup key={group} label={group}>{options.map((skill) => <option key={skill} value={skill}>{skill}</option>)}</optgroup>)}
+        </select>
+        <button type="button" disabled={!selected} onClick={() => commit(selected)} className="rounded-lg bg-purple-100 px-4 py-2.5 text-sm font-medium text-purple-700 disabled:opacity-50">Add skill</button>
+      </div>
+      <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-[2fr_auto]">
+        <input type="text" value={customSkill} placeholder="Or type any skill" className={fieldClassName} onChange={(event) => setCustomSkill(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); commit(customSkill); } }} />
+        <button type="button" disabled={!customSkill.trim()} onClick={() => commit(customSkill)} className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 disabled:opacity-50">Add custom</button>
+      </div>
+      {skills.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{skills.map((skill, index) => <span key={`${skill}-${index}`} className="inline-flex items-center gap-2 rounded-full bg-purple-50 px-3 py-1.5 text-xs text-purple-800">{skill}<button type="button" aria-label={`Remove ${skill}`} onClick={() => remove(skill)} className="font-bold text-purple-600">×</button></span>)}</div>}
+    </div>
+  );
+};
 
 const DynamicForm = ({
   config,
@@ -144,6 +184,10 @@ const DynamicForm = ({
           </label>
         </div>
       );
+    }
+
+    if (/\bskills?\b/.test(fieldDescriptor) && (field.type === "list" || Array.isArray(value))) {
+      return <SkillsPicker key={fieldId} value={value} onChange={onChange} path={path} fieldClassName={fieldClassName} label={label} required={required} />;
     }
 
     if (field.type === "select") {
