@@ -76,11 +76,13 @@ const clearConfigValues = (node) => {
   if (isPlain(node)) {
     const out = {};
     for (const key of Object.keys(node)) out[key] = clearConfigValues(node[key]);
-    const cv = node.current_value;
+    const cv = Object.prototype.hasOwnProperty.call(node, "current_value")
+      ? node.current_value
+      : node.default_value;
     if (typeof cv === "string") {
-      out.placeholder = node.title || node.label || node.name || "Enter value";
+      out.placeholder = node.placeholder || node.title || node.label || node.name || "Enter value";
       out.current_value = "";
-    } else if (Array.isArray(cv) && cv.every((x) => typeof x === "string")) {
+    } else if (Array.isArray(cv)) {
       out.current_value = [];
     }
     return out;
@@ -88,131 +90,20 @@ const clearConfigValues = (node) => {
   return node;
 };
 
-const fillTemplateExampleValues = (config, templateTitle = "", { clearPremiumSamples = false } = {}) => {
-  const templateName = String(templateTitle || config?.template || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-  const supportedTemplates = new Set(["cleancv", "premiumcv", "cvtemplate", "dcv", "deedy", "deedycv"]);
-  if (!supportedTemplates.has(templateName)) return config;
-
-  // CVTemplate/DCV configs contain a real-looking sample profile. Keep the
-  // editor helpful while avoiding a specific person's details in new resumes.
-  const genericHeaderValues = {
-    fullname: "Your Name",
-    name: "Your Name",
-    firstname: "Your",
-    lastname: "Name",
-    jobtitle: "Job Title",
-    title: "Job Title",
-    location: "City, State",
-    phonenumber: "Phone Number",
-    phone: "Phone Number",
-    email: "you@example.com",
-    emailaddress: "you@example.com",
-    githuburl: "https://github.com/username",
-    github: "https://github.com/username",
-    githubdisplaytext: "github.com/username",
-    githublabel: "github.com/username",
-    linkedinurl: "https://linkedin.com/in/username",
-    linkedin: "https://linkedin.com/in/username",
-    linkedindisplaytext: "linkedin.com/in/username",
-    linkedinlabel: "linkedin.com/in/username",
-    personalwebsiteurl: "https://example.com",
-    websitedisplaytext: "example.com",
-    socialprofileurl: "https://example.com/profile",
-    socialprofiledisplaytext: "example.com/profile",
-    primaryemail: "you@example.com",
-    secondaryemail: "",
-  };
-
-  const personalDetailHints = {
-    gender: "Example: Female",
-    father_name: "Enter your father's full name",
-    mother_name: "Enter your mother's full name",
-    nationality: "Example: Indian",
-    marital_status: "Example: Single",
-    place_of_birth: "City, Country",
-    address: "House number, street, city",
-    languages: "Example: Hindi, English",
-  };
-
-  const visit = (node, inHeader = false) => {
-    if (Array.isArray(node)) return node.map((item) => visit(item, inHeader));
-    if (!isPlain(node)) return node;
-
-    const nodeSection = [node.section, node.name, node.title, node.label]
-      .filter(Boolean)
-      .map((value) => String(value).toLowerCase().replace(/[^a-z0-9]/g, ""));
-    const withinHeader =
-      inHeader || nodeSection.some((name) => ["header", "personalinformation"].includes(name));
-    const next = Object.fromEntries(
-      Object.entries(node).map(([key, value]) => [
-        key,
-        visit(
-          value,
-          withinHeader || ["header", "personalinformation"].includes(key.toLowerCase().replace(/[^a-z0-9]/g, ""))
-        ),
-      ])
-    );
-    if (clearPremiumSamples && templateName === "premiumcv") {
-      const fieldNames = [node.name, node.title, node.label, node.key]
-        .filter(Boolean)
-        .map((value) => String(value).toLowerCase().replace(/[^a-z0-9]/g, ""));
-      const isSkillField = fieldNames.some((name) => name.includes("skill"));
-      const isRoleField = fieldNames.some((name) => ["role", "position", "jobrole", "experiencejobtitle"].includes(name));
-      const isSummaryField = fieldNames.some((name) => name.includes("summary"));
-      if (isSkillField && Array.isArray(node.current_value)) {
-        const isUnchangedSample = JSON.stringify(node.current_value) === JSON.stringify(node.default_value);
-        if (node.current_value.length === 0 || isUnchangedSample) {
-          next.current_value = [];
-          next.default_value = [];
-        }
-        return next;
-      }
-      if ((isRoleField || isSummaryField) && typeof node.current_value === "string") {
-        const isUnchangedSample = node.current_value === node.default_value;
-        if (!node.current_value.trim() || isUnchangedSample) {
-          next.current_value = "";
-          next.default_value = "";
-          next.placeholder = isRoleField ? "Type or choose your role" : "Write a summary tailored to your target role";
-        }
-        return next;
-      }
+const clearUntouchedDefaults = (node) => {
+  if (Array.isArray(node)) return node.map(clearUntouchedDefaults);
+  if (!isPlain(node)) return node;
+  const out = Object.fromEntries(Object.entries(node).map(([key, value]) => [key, clearUntouchedDefaults(value)]));
+  if (Object.prototype.hasOwnProperty.call(node, "current_value")) {
+    const isUnchangedDefault = JSON.stringify(node.current_value) === JSON.stringify(node.default_value);
+    if (isUnchangedDefault && typeof node.current_value === "string") {
+      out.current_value = "";
+      out.placeholder = node.placeholder || node.title || node.label || node.name || "Enter value";
+    } else if (isUnchangedDefault && Array.isArray(node.current_value)) {
+      out.current_value = [];
     }
-    if (withinHeader && typeof node.current_value === "string") {
-      const fieldName = [node.name, node.title, node.label, node.key]
-        .filter(Boolean)
-        .map((value) => String(value).toLowerCase().replace(/[^a-z0-9]/g, ""));
-      const genericValue = fieldName
-        .map((name) => genericHeaderValues[name])
-        .find((value) => value !== undefined);
-      const isUntouchedSample =
-        !node.current_value.trim() || node.current_value === node.default_value;
-      if (genericValue !== undefined && isUntouchedSample) {
-        next.current_value = genericValue;
-        next.default_value = genericValue;
-        next.placeholder = genericValue;
-        return next;
-      }
-    }
-    if (typeof node.current_value === "string" && !node.current_value.trim()) {
-      if (typeof node.default_value === "string" && node.default_value.trim()) {
-        next.current_value = node.default_value;
-      } else if (["cleancv", "premiumcv", "cvtemplate", "dcv", "deedy", "deedycv"].includes(templateName) && personalDetailHints[node.name]) {
-        next.placeholder = personalDetailHints[node.name];
-      }
-    } else if (
-      Array.isArray(node.current_value) &&
-      node.current_value.length === 0 &&
-      Array.isArray(node.default_value) &&
-      node.default_value.length > 0
-    ) {
-      next.current_value = [...node.default_value];
-    }
-    return next;
-  };
-
-  return visit(config);
+  }
+  return out;
 };
 
 const countFields = (node) => {
@@ -880,7 +771,7 @@ const Editor = () => {
         if (!configUrl) throw new Error("Workspace is missing a config file.");
         const cfg = await loadConfigJson(configUrl);
         if (cancelled) return;
-        setConfig(fillTemplateExampleValues(cfg, templateTitle, { clearPremiumSamples: true }));
+        setConfig(clearUntouchedDefaults(cfg));
         setResumeId(id);
         await fetchBalance();
       } catch (err) {
@@ -920,7 +811,7 @@ const Editor = () => {
               const cfg = await loadConfigJson(configUrl);
               if (cancelled) return;
               setResumeId(savedId);
-              setConfig(fillTemplateExampleValues(cfg, templateTitle, { clearPremiumSamples: true }));
+              setConfig(clearUntouchedDefaults(cfg));
               await fetchBalance();
               return;
             }
@@ -954,7 +845,7 @@ const Editor = () => {
 
         // New resumes start blank. These templates then seed their configured
         // dummy defaults into empty fields so users can see what to replace.
-        const blankCfg = fillTemplateExampleValues(clearConfigValues(cfg), templateTitle || cfg.template, { clearPremiumSamples: true });
+        const blankCfg = clearConfigValues(cfg);
         setConfig(blankCfg);
         try {
           await uploadConfigJson(resume.id, blankCfg);
