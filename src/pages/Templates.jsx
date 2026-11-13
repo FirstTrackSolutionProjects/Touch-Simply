@@ -14,6 +14,13 @@ const TEMPLATE_PREVIEW_BY_S3_KEY_SUFFIX = {
   "/PremiumCV": "/template-previews/PremiumCV.png",
 };
 
+const getResumeTemplateName = (template) => {
+  const source = `${template.title || ""} ${template.id || ""} ${template.s3_key || template.s3Key || ""}`.toLowerCase();
+  if (source.includes("deedy")) return "Classic CV";
+  if (source.includes("cv template") || /(?:^|[\\/_ -])cvtemplate(?:$|[\\/_ -])/.test(source)) return "Professional CV";
+  return template.title;
+};
+
 const getResumeTemplatePreview = (template) => {
   const s3Key = String(template.s3_key || template.s3Key || "").replace(/\/+$/, "");
   const matchingPreview = Object.entries(TEMPLATE_PREVIEW_BY_S3_KEY_SUFFIX)
@@ -41,7 +48,7 @@ const Templates = () => {
       try {
         const res = await getResumeTemplates();
         const list = (res.data?.templates || []).map((t) => ({
-          name: t.title,
+          name: getResumeTemplateName(t),
           key: t.id,
           ...getResumeTemplatePreview(t),
         }));
